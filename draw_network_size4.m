@@ -131,66 +131,66 @@ function [interaction, posMarker, negMarker] = ...
     if start(2) == finish(2)                        % Horizontal
         if start(1) < finish(1)                     % Right
             tri = ((1/6:1/3:1)'*2*pi)-pi/2;
-            fill(finish(1)+50*(sin(tri)-1), ...
-                 finish(2)+50*cos(tri), [0.43,0.73,0.59]);
+            if pos == 1; fill(finish(1)+50*(sin(tri)-1), ...
+                 finish(2)+50*cos(tri), [0.43,0.73,0.59]); end
             line_x = [finish(1), finish(1)];
             line_y = [finish(2)-50, finish(2)+50];
-            line(line_x, line_y, 'color', [0.93,0.35,0.35]);
+            if neg == 1; line(line_x, line_y, 'color', [0.93,0.35,0.35]); end
         elseif start(1) > finish(1)                 % Left
             tri = ((1/6:1/3:1)'*2*pi)+pi/2;
-            fill(finish(1)+50*(sin(tri)+1), ...
-                 finish(2)+50*cos(tri), [0.43,0.73,0.59]);
+            if pos == 1; fill(finish(1)+50*(sin(tri)+1), ...
+                 finish(2)+50*cos(tri), [0.43,0.73,0.59]); end
             line_x = [finish(1), finish(1)];
             line_y = [finish(2)-50, finish(2)+50];
-            line(line_x, line_y, 'color', [0.93,0.35,0.35]);
+            if neg == 1; line(line_x, line_y, 'color', [0.93,0.35,0.35]); end
         else
             error('error with line start/finish co-ordinates')
         end
     elseif start(1) == finish(1)                    % Vertical
         if start(2) < finish(2)
             tri = ((1/6:1/3:1)'*2*pi)+pi;           % Up
-            fill(finish(1)+50*sin(tri), ...
-                 finish(2)+50*(cos(tri)-1), [0.43,0.73,0.59]);
+            if pos == 1; fill(finish(1)+50*sin(tri), ...
+                 finish(2)+50*(cos(tri)-1), [0.43,0.73,0.59]); end
             line_x = [finish(1)-50, finish(1)+50];
             line_y = [finish(2), finish(2)];
-            line(line_x, line_y, 'color', [0.93,0.35,0.35]);
+            if neg == 1; line(line_x, line_y, 'color', [0.93,0.35,0.35]); end
         elseif start(2) > finish(2)
             tri = (1/3:2/3:2)'*pi;                  % Down
-            fill(finish(1)+50*sin(tri), ...
-                 finish(2)+50*(cos(tri)+1), [0.43,0.73,0.59]);
+            if pos == 1; fill(finish(1)+50*sin(tri), ...
+                 finish(2)+50*(cos(tri)+1), [0.43,0.73,0.59]); end
             line_x = [finish(1)-50, finish(1)+50];
             line_y = [finish(2), finish(2)];
-            line(line_x, line_y, 'color', [0.93,0.35,0.35]);
+            if neg == 1; line(line_x, line_y, 'color', [0.93,0.35,0.35]); end
         else error('error with line start/finish co-ordinates')
         end
     elseif (start(1) < finish(1)) && (start(2) < finish(2))
         tri = (((1/6:1/3:1)'*2*pi)-pi/12);          % Up right
-        fill(finish(1)+50*(sin(tri)-sqrt(0.5)), ...
-             finish(2)+50*(cos(tri)-sqrt(0.5)), [0.43,0.73,0.59]);
+        if pos == 1; fill(finish(1)+50*(sin(tri)-sqrt(0.5)), ...
+             finish(2)+50*(cos(tri)-sqrt(0.5)), [0.43,0.73,0.59]); end
         line_x = [finish(1)-50*sqrt(0.5), finish(1)+50*sqrt(0.5)];
         line_y = [finish(2)+50*sqrt(0.5), finish(2)-50*sqrt(0.5)];
-        line(line_x, line_y, 'color', [0.93,0.35,0.35]);
+        if neg == 1; line(line_x, line_y, 'color', [0.93,0.35,0.35]); end
     elseif (start(1) < finish(1)) && (start(2) > finish(2))
         tri = (((1/6:1/3:1)'*2*pi)+13*pi/12);       % Down right
-        fill(finish(1)+50*(sin(tri)-sqrt(0.5)), ...
-             finish(2)+50*(cos(tri)+sqrt(0.5)), [0.43,0.73,0.59]);
+        if pos == 1; fill(finish(1)+50*(sin(tri)-sqrt(0.5)), ...
+             finish(2)+50*(cos(tri)+sqrt(0.5)), [0.43,0.73,0.59]); end
         line_x = [finish(1)-50*sqrt(0.5), finish(1)+50*sqrt(0.5)];
         line_y = [finish(2)-50*sqrt(0.5), finish(2)+50*sqrt(0.5)];
-        line(line_x, line_y, 'color', [0.93,0.35,0.35]);
+        if neg == 1; line(line_x, line_y, 'color', [0.93,0.35,0.35]); end
     elseif (start(1) > finish(1)) && (start(2) < finish(2))
         tri = ((1/6:1/3:1)'*2*pi)+pi/12;            % Up left
-        fill(finish(1)+50*(sin(tri)+sqrt(0.5)), ...
-             finish(2)+50*(cos(tri)-sqrt(0.5)), [0.43,0.73,0.59]);
+        if pos == 1; fill(finish(1)+50*(sin(tri)+sqrt(0.5)), ...
+             finish(2)+50*(cos(tri)-sqrt(0.5)), [0.43,0.73,0.59]); end
         line_x = [finish(1)-50*sqrt(0.5), finish(1)+50*sqrt(0.5)];
         line_y = [finish(2)-50*sqrt(0.5), finish(2)+50*sqrt(0.5)];
-        line(line_x, line_y, 'color', [0.93,0.35,0.35]);
+        if neg == 1; line(line_x, line_y, 'color', [0.93,0.35,0.35]); end
     elseif (start(1) > finish(1)) && (start(2) > finish(2))
         tri = (((1/6:1/3:1)'*2*pi)-13*pi/12);       % Down left
-        fill(finish(1)+50*(sin(tri)+sqrt(0.5)), ...
-             finish(2)+50*(cos(tri)+sqrt(0.5)), [0.43,0.73,0.59]);
+        if pos == 1; fill(finish(1)+50*(sin(tri)+sqrt(0.5)), ...
+             finish(2)+50*(cos(tri)+sqrt(0.5)), [0.43,0.73,0.59]); end
         line_x = [finish(1)-50*sqrt(0.5), finish(1)+50*sqrt(0.5)];
         line_y = [finish(2)+50*sqrt(0.5), finish(2)-50*sqrt(0.5)];
-        line(line_x, line_y, 'color', [0.93,0.35,0.35]);
+        if neg == 1; line(line_x, line_y, 'color', [0.93,0.35,0.35]); end
     else
         error('error with line start/finish co-ordinates')
     end
