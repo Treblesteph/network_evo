@@ -20,9 +20,24 @@ popsize = 100         # Total number of networks per generation.
 states = [0, 1]
 
 type Interaction
-  path::Array{Int64}
   lag::Int64
 end
+type DeterministicInteraction
+  init::int64
+end
+type Repression < DeterministicInteraction; end
+type Activation < DeterministicInteraction; end
+type NoInteraction < DeterministicInteraction; end
+end
+type StochasticInteraction < Interaction
+  markovgen::MarkovGenerator
+end
+type StochasticActivation < StochasticInteraction; end
+type StochasticRepression < StochasticInteraction; end
+
+function next(interaction::DeterministicInteraction)
+end
+function next(interaction::StochasticInteraction)
 
 function generatePopulation(popSize, nnode, popsize)
   pathchoices::Tuple{Array{Int64}} = ([-1], [0], [1],
