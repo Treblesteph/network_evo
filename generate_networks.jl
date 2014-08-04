@@ -14,16 +14,33 @@
 #    s ->> random array of 0s and 1s
 #   -s ->> random array of 0s and -1s
 
+alltime = 4 * 24 * 60 # Total simulation time.
+popsize = 100         # Total number of networks per generation.
+# Setting up the states and transition matrix for stochastic interactions:
+states = [0, 1]
+
 type Interaction
   path::Array{Int64}
   lag::Int64
 end
 
-function generatePopulation(popSize)
-  pathchoices::Tuple{Array{Int64}} = ([-1], [0], [1], zeros(Int64, alltime),
-                                      zeros(Int64,alltime))
-  population::Array{Array{Int64}} = [zeros(Int64, nnodes) for i in 1:popsize]
+function generatePopulation(popSize, nnode, popsize)
+  pathchoices::Tuple{Array{Int64}} = ([-1], [0], [1],
+                                      generate(mgen, alltime),
+                                      generate(mgen, alltime))
+  # Randomly populating transition matrix with probabilities, where T_ij will
+  # give the probability of transitioning from state i to state j.
+  transitions::Array{Float64} = rand(length(states), length(states))
+  # Normalising columns so they sum to 1 (i.e. so they are probabilities).
+  for k = 1:length(states)
+    transitions[:,k] /= sum(transitions[:,k])
+  end
+  transitions = round(transitions, 1)
+  population::Array{Array{Array{Int64}}} = [[Int64[] for i in 1:popsize]
+                                            for j in 1:(nnode^2)]
   for n = 1:popsize
+    randselect = ceil(length(pathchoices)*rand())
     population[:,n]::Array{Int64} =
   end
+  return population
 end
