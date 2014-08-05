@@ -13,49 +13,65 @@
 #    1 ->> activation
 #    s ->> random array of 0s and 1s
 #   -s ->> random array of 0s and -1s
+include("markov.jl")
 
 alltime = 4 * 24 * 60 # Total simulation time.
 popsize = 100         # Total number of networks per generation.
-# Setting up the states and transition matrix for stochastic interactions:
-states = [0, 1]
+nnodes = 4            # Maximum network size
 
 type Interaction
-  lag::Int64
+  states::Array{Int64}
 end
-type DeterministicInteraction
-  init::int64
-end
-type Repression < DeterministicInteraction; end
-type Activation < DeterministicInteraction; end
-type NoInteraction < DeterministicInteraction; end
-end
-type StochasticInteraction < Interaction
-  markovgen::MarkovGenerator
-end
-type StochasticActivation < StochasticInteraction; end
-type StochasticRepression < StochasticInteraction; end
+repression = Interaction([-1])
+activation = Interaction([1])
+noInteraction = Interaction([0])
+stochasticAct = Interaction([0, 1])
+stochasticRep = Interaction([0, -1])
 
-function next(interaction::DeterministicInteraction)
-end
-function next(interaction::StochasticInteraction)
-
-function generatePopulation(popSize, nnode, popsize)
-  pathchoices::Tuple{Array{Int64}} = ([-1], [0], [1],
-                                      generate(mgen, alltime),
-                                      generate(mgen, alltime))
-  # Randomly populating transition matrix with probabilities, where T_ij will
-  # give the probability of transitioning from state i to state j.
-  transitions::Array{Float64} = rand(length(states), length(states))
-  # Normalising columns so they sum to 1 (i.e. so they are probabilities).
-  for k = 1:length(states)
-    transitions[:,k] /= sum(transitions[:,k])
+function create_transmat(i::Interaction)
+  # Randomly populating transition matrix with probabilities, where T_ij
+  # gives the probability of transitioning from state i to state j.
+  transmat::Array{Float64} = rand(length(i.states), length(i.states))
+  # Normalising so the columns sum to 1 (since they represent probabilities).
+  for k = 1:length(i.states)
+    transmat[:,k] /= sum(transmat[:,k])
   end
-  transitions = round(transitions, 1)
-  population::Array{Array{Array{Int64}}} = [[Int64[] for i in 1:popsize]
-                                            for j in 1:(nnode^2)]
+  transmat = round(transmat, 1)
+  return transmat
+end
+
+function create_interaction(i::Interaction)
+  transmat::Array{Float64} = create_transmat(i)
+  g = MarkovGenerator(i.states, transmat)
+  chain::Array{Int64} = generate(g, alltime)
+  lag::Array{Int64} = [convert(Int64, floor(60*rand()))]
+  return(chain, lag)
+end
+
+function create_network()
+  # Randomly select interaction type for each entry.
+  allpaths::Array{(Array{Int64},Array{Int64})} = [(Int64[],
+                                                   Int64[])
+                                                  for i in
+                                                  1:(nnodes^2)]
+  for p = 1:(nnodes^2)
+    intchoices = [repression, activation, noInteraction,
+                  stochasticAct, stochasticRep]
+    randselect = ceil(length(intchoices)*rand())
+    allpaths[p] = create_interaction(intchoices[randselect])
+  end
+  return allpaths
+end
+
+function create_population()
+  population::Array{Array{(Array{Int64},Array{Int64})}} = [[(Int64[],
+                                                            Int64[])
+                                                            for i in
+                                                            1:(nnodes^2)]
+                                                            for j in
+                                                            1:popsize]
   for n = 1:popsize
-    randselect = ceil(length(pathchoices)*rand())
-    population[:,n]::Array{Int64} =
+    population[n] = create_network()
   end
   return population
 end

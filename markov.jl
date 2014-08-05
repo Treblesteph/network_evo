@@ -28,7 +28,7 @@ end
 # Generate a sequence of states of length `len` using the
 # MarkovGenerator.
 function generate(generator::MarkovGenerator, len::Int64)
-  state::Int64 = states[ceil(rand() * length(generator.states))]
+  state::Int64 = generator.states[ceil(rand() * length(generator.states))]
   chain::Array{Int64} = zeros(Int64, len)
   for i in 1:len
     nextstate = next(generator, state)
@@ -38,11 +38,11 @@ function generate(generator::MarkovGenerator, len::Int64)
   return chain
 end
 
-# demo of use
-states = [0, 1]
-transitions = [
-  0.2 0.9;
-  0.8 0.1
-]
-m = MarkovGenerator(states, transitions)
-chain = generate(m, 50)
+# Demo of use
+# states = [0, 1]
+# transitions = [
+#  0.2 0.9;
+#  0.8 0.1
+# ]
+# m = MarkovGenerator(states, transitions)
+# chain = generate(m, 50)
