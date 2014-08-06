@@ -22,6 +22,14 @@ nnodes = 4            # Maximum network size
 type Interaction
   states::Array{Int64}
 end
+
+type Network
+  paths::Array{Array{Int64}}
+  transmats::Array{Array{Float64}}
+  lags::Array{Int64}
+  gates::Array{String}
+end
+
 repression = Interaction([-1])
 activation = Interaction([1])
 noInteraction = Interaction([0])
@@ -44,34 +52,32 @@ function create_interaction(i::Interaction)
   transmat::Array{Float64} = create_transmat(i)
   g = MarkovGenerator(i.states, transmat)
   chain::Array{Int64} = generate(g, alltime)
-  lag::Array{Int64} = [convert(Int64, floor(60*rand()))]
-  return(chain, lag)
+  lag::Int64 = convert(Int64, floor(60*rand()))
+  return(chain, lag, transmat)
 end
 
 function create_network()
   # Randomly select interaction type for each entry.
-  allpaths::Array{(Array{Int64},Array{Int64})} = [(Int64[],
-                                                   Int64[])
-                                                  for i in
-                                                  1:(nnodes^2)]
+  allpaths::Array{Array{Int64}} = [Int64[] for i in 1:(nnodes^2)]
+  lags::Array{Int64} = zeros(Int64, nnodes^2)
+  gatechoices = ("and", "or")
+  gates::Array{String} = [gatechoices[ceil(length(gatechoices)*rand())]
+                         for i in 1:nnodes]
+  transmats::Array{Array{Float64}} = [Float64[] for i in 1:(nnodes^2)]
   for p = 1:(nnodes^2)
     intchoices = [repression, activation, noInteraction,
                   stochasticAct, stochasticRep]
     randselect = ceil(length(intchoices)*rand())
-    allpaths[p] = create_interaction(intchoices[randselect])
+    (allpaths[p], lags[p], transmats[p]) = create_interaction(intchoices
+                                                              [randselect])
+    allpaths = reshape(allpaths, nnodes, nnodes).'
+    lags = reshape(lags, nnodes, nnodes).'
   end
-  return allpaths
+  network = Network(allpaths, transmats, lags, gates)
+  return network
 end
 
 function create_population()
-  population::Array{Array{(Array{Int64},Array{Int64})}} = [[(Int64[],
-                                                            Int64[])
-                                                            for i in
-                                                            1:(nnodes^2)]
-                                                            for j in
-                                                            1:popsize]
-  for n = 1:popsize
-    population[n] = create_network()
-  end
+  population::Array{Network} = [create_network() for j in 1:popsize]
   return population
 end
