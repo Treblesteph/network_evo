@@ -2,27 +2,27 @@
 # The 'choices' option should be a tuple of length ncols, containing arrays of
 # values that each column can take.
 
-ncols = 3
-choices = ([1,0], [1,0], [-1, 1, 0])
+###############################################################################
+###############################################################################
 
-nrows = prod([length(choices[k]) for k in 1:ncols])
-multimat = zeros(Int64, nrows, ncols)
-
-function fill_column(row, col)
-  n = col
-  nchoices = length(choices[n])
-  println("nchoices: $(nchoices)")
-  for k = 1:nchoices
-    while n > 1
-      partition::Int64 = row/nchoices
-      println("partition: $partition")
-      partitionrange = (1+partition*(k-1)):(partition*k)
-      println("partitionrange: $partitionrange")
-      multimat[partitionrange,n] = choices[n][k]
-      n -= 1
-      fill_column(partition, n)
+function fill_column(rows, cols)
+  partitionsize::Int64 = (length(rows))/(length(choices[cols]))
+  for j = 1:length(choices[cols])
+    c = cols
+    partitionstart::Int64 = rows[1] + partitionsize * (j - 1)
+    partitionend::Int64 = rows[1] - 1 + partitionsize * j
+    partitionrange = partitionstart:partitionend
+    multimat[partitionrange, cols] = choices[c][j]
+    c -= 1
+    if c > 0
+      fill_column(partitionrange, c)
     end
   end
 end
 
-fill_column(nrows, ncols)
+choices = ([2, 40, 74], [5, 7], [10, 11, 5, 4])
+ncols = length(choices)
+nrows = prod([length(choices[i]) for i in 1:ncols])
+multimat = zeros(Int64, nrows, ncols)
+
+fill_column(1:nrows, ncols)
