@@ -28,6 +28,7 @@ type Network
   transmats::Array{Array{Float64}}
   lags::Array{Int64}
   gates::Array{String}
+  generation::Int64
 end
 
 repression = Interaction([-1])
@@ -73,7 +74,7 @@ function create_network()
     allpaths = reshape(allpaths, nnodes, nnodes).'
     lags = reshape(lags, nnodes, nnodes).'
   end
-  network = Network(allpaths, transmats, lags, gates)
+  network = Network(allpaths, transmats, lags, gates, 1)
   return network
 end
 
