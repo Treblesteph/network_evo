@@ -16,8 +16,9 @@
 include("markov.jl")
 
 alltime = 4 * 24 * 60 # Total simulation time.
-popsize = 100         # Total number of networks per generation.
+popsize = 10          # Total number of networks per generation.
 nnodes = 4            # Maximum network size
+maxlag = 60           # Maximum lag of any interaction.
 
 type Interaction
   states::Array{Int64}
@@ -27,7 +28,7 @@ type Network
   paths::Array{Array{Int64}}
   transmats::Array{Array{Float64}}
   lags::Array{Int64}
-  gates::Array{String}
+  gates::Array{Int64} # (0 = or; 1 = and)
   generation::Int64
 end
 
@@ -53,7 +54,7 @@ function create_interaction(i::Interaction)
   transmat::Array{Float64} = create_transmat(i)
   g = MarkovGenerator(i.states, transmat)
   chain::Array{Int64} = generate(g, alltime)
-  lag::Int64 = convert(Int64, floor(60*rand()))
+  lag::Int64 = convert(Int64, floor(maxlag*rand()))
   return(chain, lag, transmat)
 end
 
@@ -61,8 +62,8 @@ function create_network()
   # Randomly select interaction type for each entry.
   allpaths::Array{Array{Int64}} = [Int64[] for i in 1:(nnodes^2)]
   lags::Array{Int64} = zeros(Int64, nnodes^2)
-  gatechoices = ("and", "or")
-  gates::Array{String} = [gatechoices[ceil(length(gatechoices)*rand())]
+  gatechoices = (0, 1)
+  gates::Array{Int64} = [gatechoices[ceil(length(gatechoices)*rand())]
                          for i in 1:nnodes]
   transmats::Array{Array{Float64}} = [Float64[] for i in 1:(nnodes^2)]
   for p = 1:(nnodes^2)
@@ -71,9 +72,9 @@ function create_network()
     randselect = ceil(length(intchoices)*rand())
     (allpaths[p], lags[p], transmats[p]) = create_interaction(intchoices
                                                               [randselect])
-    allpaths = reshape(allpaths, nnodes, nnodes).'
-    lags = reshape(lags, nnodes, nnodes).'
   end
+  allpaths = reshape(allpaths, nnodes, nnodes).'
+  lags = reshape(lags, nnodes, nnodes).'
   network = Network(allpaths, transmats, lags, gates, 1)
   return network
 end
