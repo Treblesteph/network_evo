@@ -78,38 +78,36 @@ function dynamic_simulation(net::Network)
   # Extracting network properties for ease of use.
   paths::Array{Array{Int64}} = net.paths
   lags::Array{Int64} = net.lags
-  gates::Array{String} = net.gates
-
+  gates::Array{Int64} = net.gates
   timearray::Array{Int64} = [1:alltime]
   concs::Array{Int64} = zeros(Int64, alltime, nnodes)
   concs[1, :] = convert(Array{Int64}, randbool(nnodes));
-  concs = vcat(zeros(Int64, 60, nnodes), concs)
+  concs = vcat(zeros(Int64, maxlag, nnodes), concs)
+  # Adding maxlag zeros to the beginning of path vectors.
   for i in 1:(size(paths,1)*size(paths,2))
-    p = size(paths[i]); println("path size: $p")
-    paths[i] = [zeros(Int64, 60), paths[i]]
+    history = zeros(Int64, maxlag, 1)
+    paths[i] = [history; paths[i]]
   end
-
   for nd in 1:nnodes
     for t in timearray[1:end-1] # First row is initial condition (already set).
       # Take all current and previous concentrations, all incoming paths and
       # their lags, and the gate type, to determine the next concentration.
-      genes::Array{Int64} = [concs[60+t-lag[nd, jj], jj] for jj in 1:nnodes]
-      path::Array{Int64} = [paths[nd, k][60+t-lag[nd, k]] for k in 1:nnodes]
+      genes::Array{Int64} = [concs[maxlag+t-lags[nd, jj], jj] for jj in 1:nnodes]
+      path::Array{Int64} = [paths[nd, k][maxlag+t-lags[nd, k]] for k in 1:nnodes]
       gate::Array{Int64} = [gates[nd]]
-      init::Array{Int64} = [concs[60+t, nd]]
+      init::Array{Int64} = [concs[maxlag+t, nd]]
       # Next will compare this row to the rows in decision matrix to determine
       # the next state of gene nd.
       decisionrow::Array{Int64, 1} = [genes, path, gate, init]
-      concs[61+t, nd] = next(decisionrow, decmat)
+      concs[t+maxlag+1, nd] = next(decisionrow, decmat)
     end
   end
+  return concs
 end
 
-function next(decisionrow::Array{Int64}, decisionmat::Array{Int64})
-  for row in 1:size(decisionmat, 1)
-    querymat::Array{Int64} = decisionmat[:, 1:end-1]
-    answermat::Array{Int64} = decisionmat[:, end]
-    nextval::Int64 = answermat[find(all(querymat .== decisionrow, 2))]
-  end
+function next(decisionrow::Array{Int64, 1}, decisionmat::Array{Int64, 2})
+  querymat::Array{Int64} = decisionmat[:, 1:end-1]
+  answermat::Array{Int64} = decisionmat[:, end]
+  nextval::Int64 = answermat[find(all(querymat .== decisionrow', 2))][1]
   return nextval
 end
