@@ -1,6 +1,8 @@
 # Performs a dynamic simuation for a network which is encoded by a matrix
 # of interactions (where P_ij specifies the path from node i to node j).
 
+include("multichoose.jl");
+
 function make_decision_mat(nnodes)
   genes = 1:nnodes
   paths = nnodes+1:2*nnodes
@@ -86,7 +88,7 @@ function dynamic_simulation(net::Network)
   # Adding maxlag zeros to the beginning of path vectors.
   for i in 1:(size(paths,1)*size(paths,2))
     history = zeros(Int64, maxlag, 1)
-    paths[i] = [history; paths[i]]
+    paths[i] = [history; paths[i]']
   end
   for nd in 1:nnodes
     for t in timearray[1:end-1] # First row is initial condition (already set).
