@@ -14,12 +14,6 @@
 #    s ->> random array of 0s and 1s
 #   -s ->> random array of 0s and -1s
 include("markov.jl")
-
-alltime = 4 * 24 * 60 # Total simulation time.
-popsize = 10          # Total number of networks per generation.
-nnodes = 4            # Maximum network size
-maxlag = 60           # Maximum lag of any interaction.
-
 type Interaction
   states::Array{Int64}
 end
@@ -30,6 +24,7 @@ type Network
   lags::Array{Int64}
   gates::Array{Int64} # (0 = or; 1 = and)
   generation::Int64
+  concseries::Array{Int64}
 end
 
 repression = Interaction([-1])
@@ -50,15 +45,15 @@ function create_transmat(i::Interaction)
   return transmat
 end
 
-function create_interaction(i::Interaction)
+function create_interaction(i::Interaction, allmins::Int64, maxlag::Int64)
   transmat::Array{Float64} = create_transmat(i)
   g = MarkovGenerator(i.states, transmat)
-  chain::Array{Int64} = generate(g, alltime)
+  chain::Array{Int64} = generate(g, allmins)
   lag::Int64 = convert(Int64, floor(maxlag*rand()))
   return(chain, lag, transmat)
 end
 
-function create_network()
+function create_network(allmins::Int64, nnodes::Int64, maxlag::Int64)
   # Randomly select interaction type for each entry.
   allpaths::Array{Array{Int64}} = [Int64[] for i in 1:(nnodes^2)]
   lags::Array{Int64} = zeros(Int64, nnodes^2)
@@ -71,15 +66,18 @@ function create_network()
                   stochasticAct, stochasticRep]
     randselect = ceil(length(intchoices)*rand())
     (allpaths[p], lags[p], transmats[p]) = create_interaction(intchoices
-                                                              [randselect])
+                                                              [randselect],
+                                                              allmins, maxlag)
   end
   allpaths = reshape(allpaths, nnodes, nnodes).'
   lags = reshape(lags, nnodes, nnodes).'
-  network = Network(allpaths, transmats, lags, gates, 1)
+  network = Network(allpaths, transmats, lags, gates, 1, Int64[])
   return network
 end
 
-function create_population()
-  population::Array{Network} = [create_network() for j in 1:popsize]
+function create_population(popsize::Int64, allmins::Int64, nnodes::Int64,
+                           maxlag::Int64)
+  population::Array{Network} = [create_network(allmins, nnodes,
+                                               maxlag) for j in 1:popsize]
   return population
 end

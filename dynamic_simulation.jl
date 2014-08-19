@@ -81,8 +81,8 @@ function dynamic_simulation(net::Network)
   paths::Array{Array{Int64}} = net.paths
   lags::Array{Int64} = net.lags
   gates::Array{Int64} = net.gates
-  timearray::Array{Int64} = [1:alltime]
-  concs::Array{Int64} = zeros(Int64, alltime, nnodes)
+  timearray::Array{Int64} = [1:allmins]
+  concs::Array{Int64} = zeros(Int64, allmins, nnodes)
   concs[1, :] = convert(Array{Int64}, randbool(nnodes));
   concs = vcat(zeros(Int64, maxlag, nnodes), concs)
   # Adding maxlag zeros to the beginning of path vectors.
@@ -101,13 +101,13 @@ function dynamic_simulation(net::Network)
       # Next will compare this row to the rows in decision matrix to determine
       # the next state of gene nd.
       decisionrow::Array{Int64, 1} = [genes, path, gate, init]
-      concs[t+maxlag+1, nd] = next(decisionrow, decmat)
+      concs[t+maxlag+1, nd] = nextt(decisionrow, decmat)
     end
   end
   return concs
 end
 
-function next(decisionrow::Array{Int64, 1}, decisionmat::Array{Int64, 2})
+function nextt(decisionrow::Array{Int64, 1}, decisionmat::Array{Int64, 2})
   querymat::Array{Int64} = decisionmat[:, 1:end-1]
   answermat::Array{Int64} = decisionmat[:, end]
   nextval::Int64 = answermat[find(all(querymat .== decisionrow', 2))][1]

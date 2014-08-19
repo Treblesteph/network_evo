@@ -2,6 +2,8 @@
 # It stores an array of the possible states in the chain,
 # and a transition matrix defining the probabilities
 # of moving from one state to another.
+import Base.next
+
 type MarkovGenerator
   states::Array{Int}
   transmat::Array{Float64}
