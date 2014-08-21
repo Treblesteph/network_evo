@@ -1,5 +1,9 @@
 # Contains functions for performing simulated reproduction on networks.
 
+function convert(::Type{Network}, n::Network)
+  n
+end
+
 function crossover(group)
   # Initialising an empty network to be the child.
   childnet = EvolvableNetwork()

@@ -24,7 +24,7 @@ allmins = allhours * 60
 type EvolvableNetwork <: GeneticAlgorithms.Entity
   net::Network
   fitness
-  EvolvableNetwork() = new(nothing, nothing)
+  EvolvableNetwork() = new(Network, nothing)
   EvolvableNetwork(net) = new(net, nothing)
 end
 
@@ -57,7 +57,7 @@ function group_entities(pop)
   # Kill off the five least fit networks
   pop = pop[1:end-5]
   # Stop when the top 50% of networks have optimal fitness.
-  if sum([pop[x].fitness for x in 1:(ceil(length(pop)/2))] == 0
+  if sum([pop[x].fitness for x in 1:(ceil(length(pop)/2))]) == 0
     return
   end
 
