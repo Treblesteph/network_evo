@@ -3,7 +3,7 @@ include("dynamic_simulation.jl");
 
 # Can alter these variables
 alldays = 4
-popsize = 5
+popsize = 12
 
 # Don't change these!
 nnodes = 4

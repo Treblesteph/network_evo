@@ -33,12 +33,12 @@ noInteraction = Interaction([0])
 stochasticAct = Interaction([0, 1])
 stochasticRep = Interaction([0, -1])
 
-function create_transmat(i::Interaction)
+function create_transmat(states::Array)
   # Randomly populating transition matrix with probabilities, where T_ij
   # gives the probability of transitioning from state i to state j.
-  transmat::Array{Float64} = rand(length(i.states), length(i.states))
+  transmat::Array{Float64} = rand(length(states), length(states))
   # Normalising so the columns sum to 1 (since they represent probabilities).
-  for k = 1:length(i.states)
+  for k = 1:length(states)
     transmat[:,k] /= sum(transmat[:,k])
   end
   transmat = round(transmat, 1)
@@ -46,7 +46,7 @@ function create_transmat(i::Interaction)
 end
 
 function create_interaction(i::Interaction, allmins::Int64, maxlag::Int64)
-  transmat::Array{Float64} = create_transmat(i)
+  transmat::Array{Float64} = create_transmat(i.states)
   g = MarkovGenerator(i.states, transmat)
   chain::Array{Int64} = generate(g, allmins)
   lag::Int64 = convert(Int64, floor(maxlag*rand()))
