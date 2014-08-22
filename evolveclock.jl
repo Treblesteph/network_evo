@@ -68,7 +68,7 @@ end
 
 Base.convert(::Type{Network}, T::Type{Network}) = T
 
-function crossover(group::Array)
+function crossover(group::Array{EvolvableNetwork})
   println("Performing a crossover...")
   println(typeof(group[1]))
   # Initialising an empty network to be the child.
