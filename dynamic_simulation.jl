@@ -83,7 +83,7 @@ function dynamic_simulation(net::Network)
   gates::Array{Int64} = net.gates
   timearray::Array{Int64} = [1:allmins]
   concs::Array{Int64} = zeros(Int64, allmins, nnodes)
-  concs[1, :] = convert(Array{Int64}, randbool(nnodes));
+  concs[1, :] = Base.convert(Array{Int64}, randbool(nnodes));
   concs = vcat(zeros(Int64, maxlag, nnodes), concs)
   # Adding maxlag zeros to the beginning of path vectors.
   for i in 1:(size(paths,1)*size(paths,2))

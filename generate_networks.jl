@@ -49,7 +49,7 @@ function create_interaction(i::Interaction, allmins::Int64, maxlag::Int64)
   transmat::Array{Float64} = create_transmat(i.states)
   g = MarkovGenerator(i.states, transmat)
   chain::Array{Int64} = generate(g, allmins)
-  lag::Int64 = convert(Int64, floor(maxlag*rand()))
+  lag::Int64 = Base.convert(Int64, floor(maxlag*rand()))
   return(chain, lag, transmat)
 end
 

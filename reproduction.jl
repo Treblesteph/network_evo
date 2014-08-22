@@ -1,10 +1,13 @@
+import GeneticAlgorithms
+import clockga
+
 # Contains functions for performing simulated reproduction on networks.
 
-function convert(::Type{Network}, n::Network)
-  n
-end
+Base.convert(::Type{Network}, T::Type{Network}) = T
 
 function crossover(group)
+  println("Performing a crossover...")
+  println(typeof(group))
   # Initialising an empty network to be the child.
   childnet = EvolvableNetwork()
   num_parents = length(group)
@@ -12,7 +15,7 @@ function crossover(group)
   for i in 1:length(group[1].net.paths)
     parent = (rand(Uint) % num_parents) + 1
     childnet.net.paths[i] = group[parent].net.paths[i]
-    chilenet.net.transmats[i] = group[parent].net.transmats[i]
+    childnet.net.transmats[i] = group[parent].net.transmats[i]
   end
   # Set each lag according to a random choice between parents.
   for i in 1:length(group[1].net.lags)
@@ -24,11 +27,16 @@ function crossover(group)
     parent = (rand(Uint) % num_parents) + 1
     childnet.net.gates[i] = group[parent].net.gates[i]
   end
-  childnet.net.generation = generation_num
+  childnet.net.generation = 1 + group[1].net.generation
+  #TODO: Create an array for generation, push new generation to the array
+  #      each time the network survives for a new generation. To get generation
+  #      from GeneticAlgorithms code, something like model.gen_num.
   childnet.net.concseries = []
 end
 
-function mutate(ent)
+function mutate(ent::EvolvableNetwork)
+  println("Performing a mutation...")
+  println(typeof(ent))
   # Path sign switch mutations.
   pathind = (rand(Uint) % length(ent.net.paths))
   rand(Float64) < mutatepath && mutate_path(ent.net.paths[pathind])
