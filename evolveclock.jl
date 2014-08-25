@@ -33,7 +33,6 @@ function create_entity(num)
 end
 
 function fitness(ent)
-  println(typeof(ent))
   ent.net.concseries = dynamic_simulation(ent.net)
   alltime = 1:allmins
   dawnrows = []
@@ -54,8 +53,9 @@ function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
 end
 
 function group_entities(pop)
-  # Kill off the five least fit networks
-  pop = pop[1:end-5]
+  # Kill off the 10% least fit networks
+  threshold = floor(0.1 * length(pop))
+  pop = pop[1:end-threshold]
   # Stop when the top 50% of networks have optimal fitness.
   if sum([pop[x].fitness for x in 1:(ceil(length(pop)/2))]) == 0
     return
@@ -68,9 +68,8 @@ end
 
 Base.convert(::Type{Network}, T::Type{Network}) = T
 
-function crossover(group::Array{EvolvableNetwork})
+function crossover(group::Array{Any})
   println("Performing a crossover...")
-  println(typeof(group[1]))
   # Initialising an empty network to be the child.
   child = EvolvableNetwork()
   num_parents = length(group)
@@ -95,24 +94,33 @@ function crossover(group::Array{EvolvableNetwork})
   #      each time the network survives for a new generation. To get generation
   #      from GeneticAlgorithms code, something like model.gen_num.
   child.net.concseries = []
+  child
 end
 
-function mutate(ent::EvolvableNetwork)
+function mutate(ent)
   println("Performing a mutation...")
-  println(typeof(ent))
   # Path sign switch mutations.
   pathind = (rand(Uint) % length(ent.net.paths))
-  rand(Float64) < mutatepath && mutate_path(ent.net.paths[pathind])
+  if rand(Float64) < mutatepath
+    ent.net.paths[pathind] = mutate_path(ent.net.paths[pathind])
+  end
   # Transition matrix mutations.
   tmatind = (rand(Uint) % length(ent.net.transmats))
-  rand(Float64) < mutatetmat && mutate_tmat(ent.net.transmats[tmatind],
-                                            ent.net.paths[tmatind])
+  if rand(Float64) < mutatetmat
+    (ent.net.transmats[tmatind], ent.net.paths[tmatind]) =
+      mutate_tmat(ent.net.transmats[tmatind], ent.net.paths[tmatind])
+  end
   # Lag duration mutations.
-  randlagind = (rand(Uint) % length(ent.net.lags))
-  rand(Float64) < mutatelag && mutate_lag(ent.net.lags[randlagind])
+  lagind = (rand(Uint) % length(ent.net.lags))
+  if rand(Float64) < mutatelag
+    ent.net.lags[lagind] = mutate_lag(ent.net.lags[lagind])
+  end
   # Gate type switch mutations.
-  randgateind = (rand(Uint) % length(ent.net.gates))
-  rand(Float64) < mutategate && mutate_gate(ent.net.gates[randgateind])
+  gateind = (rand(Uint) % length(ent.net.gates))
+  if rand(Float64) < mutategate
+    ent.net.gate[gateind] = mutate_gate(ent.net.gates[gateind])
+  end
+  ent
 end
 
 function mutate_path(path::Array{Int64})
@@ -123,9 +131,12 @@ function mutate_path(path::Array{Int64})
 end
 
 function mutate_tmat(transmat::Array{Float64}, path::Array{Int64})
+  #TODO: Make transition matrix mutation more sophisticated. Probably a
+  #      Markov process itself with a fixed transition function?
   transmat = create_transmat(unique(path))
   g = MarkovGenerator(unique(path), transmat)
   path = generate(g, allmins)
+  (transmat, path)
 end
 
 function mutate_lag(lag::Int64)

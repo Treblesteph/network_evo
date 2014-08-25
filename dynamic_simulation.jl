@@ -78,17 +78,18 @@ function dynamic_simulation(net::Network)
   # Generating decision matrix
   decmat = make_decision_mat(nnodes)
   # Extracting network properties for ease of use.
-  paths::Array{Array{Int64}} = net.paths
-  lags::Array{Int64} = net.lags
-  gates::Array{Int64} = net.gates
+  paths::Array{Array{Int64}} = copy(net.paths)
+  lags::Array{Int64} = copy(net.lags)
+  gates::Array{Int64} = copy(net.gates)
   timearray::Array{Int64} = [1:allmins]
   concs::Array{Int64} = zeros(Int64, allmins, nnodes)
   concs[1, :] = Base.convert(Array{Int64}, randbool(nnodes));
   concs = vcat(zeros(Int64, maxlag, nnodes), concs)
   # Adding maxlag zeros to the beginning of path vectors.
-  for i in 1:(size(paths,1)*size(paths,2))
-    history = zeros(Int64, maxlag, 1)
-    paths[i] = [history; paths[i]']
+  for i in 1:length(paths)
+    history = zeros(Int64, maxlag)
+    println("paths$i: $(size(paths[i])) history: $(size(history))")
+    paths[i] = [history paths[i]]
   end
   for nd in 1:nnodes
     for t in timearray[1:end-1] # First row is initial condition (already set).

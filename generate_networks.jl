@@ -69,7 +69,10 @@ function create_network(allmins::Int64, nnodes::Int64, maxlag::Int64)
                                                               [randselect],
                                                               allmins, maxlag)
   end
-  allpaths = reshape(allpaths, nnodes, nnodes).'
+  allpaths = transpose(reshape(allpaths, nnodes, nnodes))
+  for i in 1:length(allpaths)
+    allpaths[i] = vec(allpaths[i])
+  end
   lags = reshape(lags, nnodes, nnodes).'
   network = Network(allpaths, transmats, lags, gates, 1, Int64[])
   return network
