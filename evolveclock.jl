@@ -7,13 +7,13 @@ include("dynamic_simulation.jl");
 
 # Can alter these:
 const ALLDAYS = 4
-const POPSIZE = 5
+const POPSIZE = 16
 const DAWNWINDOW = 3
 const DUSKWINDOW = 3
-const MUTATEPATH = 0.025 # Percent of time path sign switched.
-const MUTATETMAT = 0.05  # Percent of time transition matrix mutates.
-const MUTATELAG = 0.05   # Percent of time lag duration mutates.
-const MUTATEGATE = 0.05  # Percent of time gate type switches.
+const MUTATEPATH = 0.0025 # Percent of time path sign switched.
+const MUTATETMAT = 0.005  # Percent of time transition matrix mutates.
+const MUTATELAG = 0.005   # Percent of time lag duration mutates.
+const MUTATEGATE = 0.005  # Percent of time gate type switches.
 const TMAT_STD = 0.01    # Standard deviation of truc norm rng.
 const LAG_STD = 1        # Standard deviation of truc norm rng.
 
@@ -55,20 +55,24 @@ function fitness(ent)
 end
 
 function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
+  println("calling isless method...")
   abs(lhs.fitness) > abs(rhs.fitness)
 end
 
 function group_entities(pop)
-  # Kill off the 10% least fit networks
-  threshold = floor(0.1 * length(pop))
+  # Kill off the 50% least fit networks
+  #TODO: Change this percentage to a global constant.
+  threshold = floor(0.5 * length(pop))
   pop = pop[1:end-threshold]
   # Stop when the top 50% of networks have optimal fitness.
   if sum([pop[x].fitness for x in 1:(ceil(length(pop)/2))]) == 0
     return
   end
-
-  for i in 1:length(pop)
-    produce([1, i])
+  # Keeping population that didn't get killed off.
+  produce(pop)
+  # Selecting groupings that will become parents.
+  for i in 1:threshold
+    produce([1, i+1])
   end
 end
 
@@ -106,25 +110,25 @@ end
 function mutate(ent)
   print(".")
   # Path sign switch mutations.
-  pathind = (rand(Uint) % length(ent.net.paths)) + 1
   if rand(Float64) < MUTATEPATH
+    pathind = (rand(Uint) % length(ent.net.paths)) + 1
     (ent.net.transmats[pathind], ent.net.paths[pathind]) =
       mutate_path(ent.net.paths[pathind], ent.net.transmats[pathind])
   end
   # Transition matrix mutations.
-  tmatind = (rand(Uint) % length(ent.net.transmats)) + 1
   if rand(Float64) < MUTATETMAT
+    tmatind = (rand(Uint) % length(ent.net.transmats)) + 1
     (ent.net.transmats[tmatind], ent.net.paths[tmatind]) =
       mutate_tmat(ent.net.transmats[tmatind], ent.net.paths[tmatind])
   end
   # Lag duration mutations.
-  lagind = (rand(Uint) % length(ent.net.lags)) + 1
   if rand(Float64) < MUTATELAG
+    lagind = (rand(Uint) % length(ent.net.lags)) + 1
     ent.net.lags[lagind] = mutate_lag(ent.net.lags[lagind])
   end
   # Gate type switch mutations.
-  gateind = (rand(Uint) % length(ent.net.gates)) + 1
   if rand(Float64) < MUTATEGATE
+    gateind = (rand(Uint) % length(ent.net.gates)) + 1
     ent.net.gates[gateind] = mutate_gate(ent.net.gates[gateind])
   end
   ent
