@@ -108,9 +108,7 @@ function runga(model::GAmodel, stop_after = nothing)
             break
         end
 
-        print("crossovers: ")
         crossover_population(model, groupings)
-        print(" mutations: ")
         mutate_population(model)
         println("")
         if stop_after == counter; break; end
@@ -145,17 +143,16 @@ function evaluate_population(model::GAmodel)
     print(" fitness: ")
     for i in 1:length(scores)
         fitness!(model.population[i], scores[i])
-        print("$(round(scores[i], 4)) ")
     end
     print("mean fitness: $(round(mean(scores), 4)). ")
     sort!(model.population; rev = true)
+    print("Highest fitnesses: $([e.fitness for e in model.population[1:5]])")
 end
 
 function crossover_population(model::GAmodel, groupings)
     old_pop = model.population
 
     model.population = groupings[1]
-    println([e.fitness for e in model.population])
     groupings = groupings[2:end]
     sizehint(model.population, length(old_pop))
 
