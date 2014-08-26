@@ -1,5 +1,6 @@
 module clockga
 import GeneticAlgorithms
+using Distributions
 
 include("generate_networks.jl");
 include("dynamic_simulation.jl");
@@ -14,7 +15,7 @@ const MUTATETMAT = 0.05  # Percent of time transition matrix mutates.
 const MUTATELAG = 0.05   # Percent of time lag duration mutates.
 const MUTATEGATE = 0.05  # Percent of time gate type switches.
 const TMAT_STD = 0.01    # Standard deviation of truc norm rng.
-const LAG_STD = 0.01     # Standard deviation of truc norm rng.
+const LAG_STD = 1        # Standard deviation of truc norm rng.
 
 # Don't change these unless altering framework.
 const NNODES = 4
@@ -172,8 +173,8 @@ function mutate_tmat(transmat::Array{Float64}, path::Array{Int64})
   #TODO: The way this is programmed currently means that a 2x2 transition
   #      matrix is required (i.e. only two states). This should be generalised.
   if length(unique(path)) > 1 # Only works for stochastic interactions.
-    transmat[1, 1] = cts_neighbr(transmat[1, 1], TMAT_STD)
-    transmat[1, 2] = cts_neighbr(transmat[1, 2], TMAT_STD)
+    transmat[1, 1] = cts_neighbr(transmat[1, 1], TMAT_STD, 0, 1)
+    transmat[1, 2] = cts_neighbr(transmat[1, 2], TMAT_STD, 0, 1)
     transmat[2, 1] = 1 - transmat[1, 1]
     transmat[2, 2] = 1 - transmat[1, 2]
     g = MarkovGenerator(unique(path), transmat)
@@ -183,11 +184,11 @@ function mutate_tmat(transmat::Array{Float64}, path::Array{Int64})
 end
 
 function mutate_lag(lag::Int64)
-  lag = cts_neighbr(lag, LAG_STD, 0, MAXLAG)
+  lag = round(cts_neighbr(lag, LAG_STD, 0, MAXLAG))
 end
 
-function cts_neighbr(val::Float64, stdev::Float64, upbound, lowbound)
-  tnorm = Truncated(Normal(val, Float64), lowbound, upbound)
+function cts_neighbr(val::Number, stdev::Number, lower::Number, upper::Number)
+  tnorm = Truncated(Normal(val, stdev), lower, upper)
   newval = rand(tnorm)
 end
 
