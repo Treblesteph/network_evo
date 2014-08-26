@@ -7,9 +7,9 @@ include("dynamic_simulation.jl");
 # Can alter these:
 const ALLDAYS = 4
 const POPSIZE = 5
-const DAWNWINDOW = 3 * 60
-const DUSKWINDOW = 3 * 60
-const MUTATEPATH = 0.05  # Percent of time path sign switched.
+const DAWNWINDOW = 3
+const DUSKWINDOW = 3
+const MUTATEPATH = 0.025 # Percent of time path sign switched.
 const MUTATETMAT = 0.05  # Percent of time transition matrix mutates.
 const MUTATELAG = 0.05   # Percent of time lag duration mutates.
 const MUTATEGATE = 0.05  # Percent of time gate type switches.
@@ -105,7 +105,8 @@ function mutate(ent)
   # Path sign switch mutations.
   pathind = (rand(Uint) % length(ent.net.paths)) + 1
   if rand(Float64) < MUTATEPATH
-    ent.net.paths[pathind] = mutate_path(ent.net.paths[pathind])
+    (ent.net.transmats[pathind], ent.net.paths[pathind]) =
+      mutate_path(ent.net.paths[pathind], ent.net.transmats[pathind])
   end
   # Transition matrix mutations.
   tmatind = (rand(Uint) % length(ent.net.transmats)) + 1
@@ -126,16 +127,44 @@ function mutate(ent)
   ent
 end
 
-function mutate_path(path::Array{Int64})
-  # Mutation causes the path to switch
-  # either activator >> repressor
-  # or repressor >> activator
-  path = -path
+function mutate_path(path::Array{Int64}, transmat::Array{Float64})
+  # Mutation causes the path to switch according to following options:
+  # activator >> repressor
+  # activator >> no interaction
+  # repressor >> activator
+  # repressor >> no interaction
+  # no interaction >> activator
+  # no interaction >> stochastic activator
+  # no interaction >> repressor
+  # no interaction >> stochastic repressor
+  if sum(unique(path)) != 1         # Activation or repression
+    randselect = rand()
+    if randselect <= 0.5
+      path = -path
+    elseif randselect <= 1
+      path = zeros(Int64, ALLMINS)
+    end
+  elseif sum(unique(path)) == 0     # No interaction
+    randselect = rand()
+    if randselect <= 0.25
+      path = ones(Int64, ALLMINS)
+    elseif randselect <= 0.5
+      transmat = [0.5 0.5; 0.5 0.5]
+      g = MarkovGenerator([0, 1], transmat)
+      path = generate(g, ALLMINS)
+    elseif randselect <= 0.75
+      path = -1 * ones(Int64, ALLMINS)
+    elseif randselect <= 1
+      transmat = [0.5 0.5; 0.5 0.5]
+      g = MarkovGenerator([0, -1], transmat)
+      path = generate(g, ALLMINS)
+    end
+  end
+  (transmat, path)
 end
 
 function mutate_tmat(transmat::Array{Float64}, path::Array{Int64})
-  #TODO: Make transition matrix mutation more sophisticated. Probably a
-  #      Markov process itself with a fixed transition function?
+
   transmat = create_transmat(unique(path))
   g = MarkovGenerator(unique(path), transmat)
   path = generate(g, ALLMINS)
