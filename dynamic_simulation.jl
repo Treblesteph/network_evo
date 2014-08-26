@@ -77,6 +77,13 @@ end
 function dynamic_simulation(net::Network)
   # Generating decision matrix
   decmat = make_decision_mat(NNODES)
+  decdict = Dict{Array{Int64}, Int64}()
+  for r in 1:size(decmat, 1)
+    row = decmat[r, :]
+    key = row[1:end-1]
+    value = row[end]
+    decdict[key] = value
+  end
   # Extracting network properties for ease of use.
   paths::Array{Array{Int64}} = copy(net.paths)
   lags::Array{Int64} = copy(net.lags)
@@ -101,15 +108,8 @@ function dynamic_simulation(net::Network)
       # Next will compare this row to the rows in decision matrix to determine
       # the next state of gene nd.
       decisionrow::Array{Int64, 1} = [genes, path, gate, init]
-      concs[t+MAXLAG+1, nd] = nextt(decisionrow, decmat)
+      concs[t+MAXLAG+1, nd] = decdict[decisionrow]
     end
   end
   concs = concs[MAXLAG+1:end, :]
-end
-
-function nextt(decisionrow::Array{Int64, 1}, decisionmat::Array{Int64, 2})
-  querymat::Array{Int64} = decisionmat[:, 1:end-1]
-  answermat::Array{Int64} = decisionmat[:, end]
-  nextval::Int64 = answermat[find(all(querymat .== decisionrow', 2))][1]
-  return nextval
 end
