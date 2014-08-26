@@ -18,7 +18,7 @@ export  Entity,
 
 abstract Entity
 
-isless(lhs::Entity, rhs::Entity) = lhs.fitness < rhs.fitness
+isless(lhs::Entity, rhs::Entity) = lhs.fitness > rhs.fitness
 
 fitness!(ent, fitness_score) = ent.fitness = fitness_score
 
@@ -81,18 +81,18 @@ generation_num(model::GAmodel = _g_model) = model.gen_num
 population(model::GAmodel = _g_model) = model.population
 
 
-function runga(mdl::Module; initial_pop_size = 128)
+function runga(mdl::Module; initial_pop_size = 128, stop_after = nothing)
     model = GAmodel()
     model.ga = mdl
     model.initial_pop_size = initial_pop_size
 
-    runga(model)
+    runga(model, stop_after)
 end
 
-function runga(model::GAmodel)
+function runga(model::GAmodel, stop_after = nothing)
     reset_model(model)
     create_initial_population(model)
-
+    counter = 1
     while true
         print("generation $(model.gen_num). ")
         evaluate_population(model)
@@ -113,6 +113,8 @@ function runga(model::GAmodel)
         print(" mutations: ")
         mutate_population(model)
         println("")
+        if stop_after == counter; break; end
+        counter += 1
     end
 
     model
@@ -152,7 +154,9 @@ end
 function crossover_population(model::GAmodel, groupings)
     old_pop = model.population
 
-    model.population = Any[]
+    model.population = groupings[1]
+    println([e.fitness for e in model.population])
+    groupings = groupings[2:end]
     sizehint(model.population, length(old_pop))
 
     model.pop_data = EntityData[]
