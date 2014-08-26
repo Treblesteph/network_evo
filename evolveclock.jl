@@ -7,15 +7,15 @@ include("dynamic_simulation.jl");
 
 # Can alter these:
 const ALLDAYS = 4
-const POPSIZE = 16
+const POPSIZE = 100
 const DAWNWINDOW = 3
 const DUSKWINDOW = 3
-const MUTATEPATH = 0.0025 # Percent of time path sign switched.
-const MUTATETMAT = 0.005  # Percent of time transition matrix mutates.
-const MUTATELAG = 0.005   # Percent of time lag duration mutates.
-const MUTATEGATE = 0.005  # Percent of time gate type switches.
-const TMAT_STD = 0.01    # Standard deviation of truc norm rng.
-const LAG_STD = 1        # Standard deviation of truc norm rng.
+const MUTATEPATH = 0.05  # Percent of time path sign switched.
+const MUTATETMAT = 0.1   # Percent of time transition matrix mutates.
+const MUTATELAG = 0.1    # Percent of time lag duration mutates.
+const MUTATEGATE = 0.1   # Percent of time gate type switches.
+const TMAT_STD = 0.1     # Standard deviation of truc norm rng.
+const LAG_STD = 10       # Standard deviation of truc norm rng.
 
 # Don't change these unless altering framework.
 const NNODES = 4
@@ -65,7 +65,7 @@ function group_entities(pop)
   threshold = floor(0.5 * length(pop))
   pop = pop[1:end-threshold]
   # Stop when the top 50% of networks have optimal fitness.
-  if sum([pop[x].fitness for x in 1:(ceil(length(pop)/2))]) == 0
+  if sum([pop[x].fitness for x in 1:(ceil(length(pop)/2))]) < 0.00001
     return
   end
   # Keeping population that didn't get killed off.
@@ -79,7 +79,6 @@ end
 Base.convert(::Type{Network}, T::Type{Network}) = T
 
 function crossover(group::Array{Any})
-  print("x")
   # Initialising an empty network to be the child.
   child = EvolvableNetwork()
   num_parents = length(group)
@@ -108,7 +107,6 @@ function crossover(group::Array{Any})
 end
 
 function mutate(ent)
-  print(".")
   # Path sign switch mutations.
   if rand(Float64) < MUTATEPATH
     pathind = (rand(Uint) % length(ent.net.paths)) + 1
