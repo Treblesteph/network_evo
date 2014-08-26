@@ -3,18 +3,18 @@ include("dynamic_simulation.jl");
 
 # Can alter these variables
 alldays = 4
-popsize = 12
+POPSIZE = 12
 
 # Don't change these!
-nnodes = 4
-maxlag = 60
-allhours = alldays * 24
-allmins = allhours * 60
+NNODES = 4
+MAXLAG = 60
+ALLHOURS = alldays * 24
+ALLMINS = ALLHOURS * 60
 
-population = create_population(popsize, allmins, nnodes, maxlag)
-concseries = [zeros(Int64, allmins, nnodes) for i in 1:popsize]
+population = create_population(POPSIZE, ALLMINS, NNODES, MAXLAG)
+concseries = [zeros(Int64, ALLMINS, NNODES) for i in 1:POPSIZE]
 
-for net in 1:popsize
-  println("Running simulation number $net of $popsize")
+for net in 1:POPSIZE
+  println("Running simulation number $net of $POPSIZE")
   concseries[net] = dynamic_simulation(population[net])
 end

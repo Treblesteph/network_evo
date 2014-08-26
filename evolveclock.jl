@@ -5,47 +5,50 @@ include("generate_networks.jl");
 include("dynamic_simulation.jl");
 
 # Can alter these:
-alldays = 4
-popsize = 5
-dawnwindow = 3 * 60
-duskwindow = 3 * 60
-mutatepath = 0.05  # Percent of time path sign switched.
-mutatetmat = 0.05  # Percent of time transition matrix mutates.
-mutatelag = 0.05   # Percent of time lag duration mutates.
-mutategate = 0.05  # Percent of time gate type switches.
+const ALLDAYS = 4
+const POPSIZE = 5
+const DAWNWINDOW = 3 * 60
+const DUSKWINDOW = 3 * 60
+const MUTATEPATH = 0.05  # Percent of time path sign switched.
+const MUTATETMAT = 0.05  # Percent of time transition matrix mutates.
+const MUTATELAG = 0.05   # Percent of time lag duration mutates.
+const MUTATEGATE = 0.05  # Percent of time gate type switches.
 
 # Don't change these unless altering framework.
-nnodes = 4
-maxlag = 60*24
-allhours = alldays * 24
-allmins = allhours * 60
+const NNODES = 4
+const MAXLAG = 60*24
+const ALLHOURS = ALLDAYS * 24
+const ALLMINS = ALLHOURS * 60
 
 type EvolvableNetwork <: GeneticAlgorithms.Entity
   net::Network
   fitness
-  EvolvableNetwork() = new(create_network(allmins, nnodes, maxlag), nothing)
+  EvolvableNetwork() = new(create_network(ALLMINS, NNODES, MAXLAG), nothing)
   EvolvableNetwork(net) = new(net, nothing)
 end
 
 function create_entity(num)
-  netw = create_network(allmins, nnodes, maxlag)
+  netw = create_network(ALLMINS, NNODES, MAXLAG)
   EvolvableNetwork(netw)
 end
 
 function fitness(ent)
   ent.net.concseries = dynamic_simulation(ent.net)
-  alltime = 1:allmins
+  alltime = 1:ALLMINS
   dawnrows = []
   duskrows = []
-  for t = 1:alldays
-    dawnrows = [dawnrows, (1+60*24*(t-1)):(1+60*(3+24*(t-1)))]
-    duskrows = [duskrows, (1+60*(12+24*(t-1))):(1+60*(15+24*(t-1)))]
+  for t = 1:ALLDAYS
+    dawnrows = [dawnrows, (1+60*24*(t-1)):(1+60*(DAWNWINDOW+24*(t-1)))]
+    duskrows = [duskrows, (1+60*(12+24*(t-1))):(1+60*(12+DUSKWINDOW+24*(t-1)))]
   end
   maxfitness = length(dawnrows) + length(duskrows)
   # Optimal fitness is 0 (so score is actually cost function).
+  # gene 1 on at dawn and gene 2 on at dusk
   score = maxfitness -
-          sum(ent.net.concseries[dawnrows, 1]) + # gene 1 on at dawn
-          sum(ent.net.concseries[duskrows, 2])   # gene 2 on at dusk
+          (sum(ent.net.concseries[dawnrows, 1])) /
+          (0.01 + sum(ent.net.concseries[:, 1])) +
+          (sum(ent.net.concseries[duskrows, 2])) /
+          (0.01 + sum(ent.net.concseries[:, 2]))
 end
 
 function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
@@ -69,7 +72,7 @@ end
 Base.convert(::Type{Network}, T::Type{Network}) = T
 
 function crossover(group::Array{Any})
-  println("Performing a crossover...")
+  print("x")
   # Initialising an empty network to be the child.
   child = EvolvableNetwork()
   num_parents = length(group)
@@ -98,27 +101,27 @@ function crossover(group::Array{Any})
 end
 
 function mutate(ent)
-  println("Performing a mutation...")
+  print(".")
   # Path sign switch mutations.
-  pathind = (rand(Uint) % length(ent.net.paths))
-  if rand(Float64) < mutatepath
+  pathind = (rand(Uint) % length(ent.net.paths)) + 1
+  if rand(Float64) < MUTATEPATH
     ent.net.paths[pathind] = mutate_path(ent.net.paths[pathind])
   end
   # Transition matrix mutations.
-  tmatind = (rand(Uint) % length(ent.net.transmats))
-  if rand(Float64) < mutatetmat
+  tmatind = (rand(Uint) % length(ent.net.transmats)) + 1
+  if rand(Float64) < MUTATETMAT
     (ent.net.transmats[tmatind], ent.net.paths[tmatind]) =
       mutate_tmat(ent.net.transmats[tmatind], ent.net.paths[tmatind])
   end
   # Lag duration mutations.
-  lagind = (rand(Uint) % length(ent.net.lags))
-  if rand(Float64) < mutatelag
+  lagind = (rand(Uint) % length(ent.net.lags)) + 1
+  if rand(Float64) < MUTATELAG
     ent.net.lags[lagind] = mutate_lag(ent.net.lags[lagind])
   end
   # Gate type switch mutations.
-  gateind = (rand(Uint) % length(ent.net.gates))
-  if rand(Float64) < mutategate
-    ent.net.gate[gateind] = mutate_gate(ent.net.gates[gateind])
+  gateind = (rand(Uint) % length(ent.net.gates)) + 1
+  if rand(Float64) < MUTATEGATE
+    ent.net.gates[gateind] = mutate_gate(ent.net.gates[gateind])
   end
   ent
 end
@@ -135,16 +138,16 @@ function mutate_tmat(transmat::Array{Float64}, path::Array{Int64})
   #      Markov process itself with a fixed transition function?
   transmat = create_transmat(unique(path))
   g = MarkovGenerator(unique(path), transmat)
-  path = generate(g, allmins)
+  path = generate(g, ALLMINS)
   (transmat, path)
 end
 
 function mutate_lag(lag::Int64)
   # Lag can change to anything within a two hour interval.
   laginterval = [lag-60:lag+60]
-  lagselector = (rand(Uint) % length(laginterval))
-  # Lag must not exceed maxlag value.
-  lag = min(laginterval[lagselector], maxlag)
+  lagselector = (rand(Uint) % length(laginterval)) + 1
+  # Lag must not exceed MAXLAG value.
+  lag = min(laginterval[lagselector], MAXLAG)
   # Lag cannot be less than zero.
   lag = max(0, laginterval[lagselector])
 end

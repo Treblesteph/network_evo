@@ -3,13 +3,13 @@
 
 include("multichoose.jl");
 
-function make_decision_mat(nnodes)
-  genes = 1:nnodes
-  paths = nnodes+1:2*nnodes
-  gates = 1+2*nnodes
-  inits = 2+2*nnodes
-  genechoices::Array{Array{Int64}} = [[0, 1] for i in 1:nnodes]
-  pathchoices::Array{Array{Int64}} = [[0, 1, -1] for i in 1:nnodes]
+function make_decision_mat(NNODES)
+  genes = 1:NNODES
+  paths = NNODES+1:2*NNODES
+  gates = 1+2*NNODES
+  inits = 2+2*NNODES
+  genechoices::Array{Array{Int64}} = [[0, 1] for i in 1:NNODES]
+  pathchoices::Array{Array{Int64}} = [[0, 1, -1] for i in 1:NNODES]
   gatechoices::Array{Array{Int64}} = Array[[0, 1]] # 0 = or; 1 = and.
   initchoices::Array{Array{Int64}} = Array[[0, 1]]
   allchoices::Array{Array{Int64}} = [genechoices, pathchoices,
@@ -76,33 +76,32 @@ end
 
 function dynamic_simulation(net::Network)
   # Generating decision matrix
-  decmat = make_decision_mat(nnodes)
+  decmat = make_decision_mat(NNODES)
   # Extracting network properties for ease of use.
   paths::Array{Array{Int64}} = copy(net.paths)
   lags::Array{Int64} = copy(net.lags)
   gates::Array{Int64} = copy(net.gates)
-  timearray::Array{Int64} = [1:allmins]
-  concs::Array{Int64} = zeros(Int64, allmins, nnodes)
-  concs[1, :] = Base.convert(Array{Int64}, randbool(nnodes));
-  concs = vcat(zeros(Int64, maxlag, nnodes), concs)
-  # Adding maxlag zeros to the beginning of path vectors.
+  timearray::Array{Int64} = [1:ALLMINS]
+  concs::Array{Int64} = zeros(Int64, ALLMINS, NNODES)
+  concs[1, :] = Base.convert(Array{Int64}, randbool(NNODES));
+  concs = vcat(zeros(Int64, MAXLAG, NNODES), concs)
+  # Adding MAXLAG zeros to the beginning of path vectors.
   for i in 1:length(paths)
-    history = zeros(Int64, maxlag)
-    println("paths$i: $(size(paths[i])) history: $(size(history))")
-    paths[i] = [history paths[i]]
+    history = zeros(Int64, MAXLAG)
+    paths[i] = [history, paths[i]]
   end
-  for nd in 1:nnodes
+  for nd in 1:NNODES
     for t in timearray[1:end-1] # First row is initial condition (already set).
       # Take all current and previous concentrations, all incoming paths and
       # their lags, and the gate type, to determine the next concentration.
-      genes::Array{Int64} = [concs[maxlag+t-lags[nd, jj], jj] for jj in 1:nnodes]
-      path::Array{Int64} = [paths[nd, k][maxlag+t-lags[nd, k]] for k in 1:nnodes]
+      genes::Array{Int64} = [concs[MAXLAG+t-lags[nd, jj], jj] for jj in 1:NNODES]
+      path::Array{Int64} = [paths[nd, k][MAXLAG+t-lags[nd, k]] for k in 1:NNODES]
       gate::Array{Int64} = [gates[nd]]
-      init::Array{Int64} = [concs[maxlag+t, nd]]
+      init::Array{Int64} = [concs[MAXLAG+t, nd]]
       # Next will compare this row to the rows in decision matrix to determine
       # the next state of gene nd.
       decisionrow::Array{Int64, 1} = [genes, path, gate, init]
-      concs[t+maxlag+1, nd] = nextt(decisionrow, decmat)
+      concs[t+MAXLAG+1, nd] = nextt(decisionrow, decmat)
     end
   end
   return concs

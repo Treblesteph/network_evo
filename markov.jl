@@ -32,7 +32,6 @@ end
 function generate(generator::MarkovGenerator, len::Int64)
   state::Int64 = generator.states[ceil(rand() * length(generator.states))]
   chain::Array{Int64} = zeros(Int64, len)
-  println(size(chain))
   for i in 1:len
     nextstate = next(generator, state)
     chain[i] = nextstate

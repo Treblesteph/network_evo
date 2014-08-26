@@ -94,6 +94,7 @@ function runga(model::GAmodel)
     create_initial_population(model)
 
     while true
+        print("generation $(model.gen_num). ")
         evaluate_population(model)
 
         grouper = @task model.ga.group_entities(model.population)
@@ -107,8 +108,11 @@ function runga(model::GAmodel)
             break
         end
 
+        print("crossovers: ")
         crossover_population(model, groupings)
+        print(" mutations: ")
         mutate_population(model)
+        println("")
     end
 
     model
@@ -136,10 +140,12 @@ end
 
 function evaluate_population(model::GAmodel)
     scores = pmap(model.ga.fitness, model.population)
+    print(" fitness: ")
     for i in 1:length(scores)
         fitness!(model.population[i], scores[i])
+        print("$(round(scores[i], 4)) ")
     end
-
+    print("mean fitness: $(round(mean(scores), 4)). ")
     sort!(model.population; rev = true)
 end
 
@@ -153,12 +159,10 @@ function crossover_population(model::GAmodel, groupings)
     sizehint(model.pop_data, length(old_pop))
 
     model.gen_num += 1
-
     for group in groupings
         parents = { old_pop[i] for i in group }
         entity = model.ga.crossover(parents)
 
-        println("crossover entity: $(typeof(entity))")
         push!(model.population, entity)
         push!(model.pop_data, EntityData(model.ga.crossover(parents), model.gen_num))
     end
@@ -166,7 +170,6 @@ end
 
 function mutate_population(model::GAmodel)
     for entity in model.population
-        println(typeof(entity))
         model.ga.mutate(entity)
     end
 end
