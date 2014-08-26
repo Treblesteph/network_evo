@@ -104,7 +104,7 @@ function dynamic_simulation(net::Network)
       concs[t+MAXLAG+1, nd] = nextt(decisionrow, decmat)
     end
   end
-  return concs
+  concs = concs[MAXLAG+1:end, :]
 end
 
 function nextt(decisionrow::Array{Int64, 1}, decisionmat::Array{Int64, 2})
