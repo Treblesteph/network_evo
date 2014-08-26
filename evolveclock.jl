@@ -13,6 +13,8 @@ const MUTATEPATH = 0.025 # Percent of time path sign switched.
 const MUTATETMAT = 0.05  # Percent of time transition matrix mutates.
 const MUTATELAG = 0.05   # Percent of time lag duration mutates.
 const MUTATEGATE = 0.05  # Percent of time gate type switches.
+const TMAT_STD = 0.01    # Standard deviation of truc norm rng.
+const LAG_STD = 0.01     # Standard deviation of truc norm rng.
 
 # Don't change these unless altering framework.
 const NNODES = 4
@@ -137,6 +139,8 @@ function mutate_path(path::Array{Int64}, transmat::Array{Float64})
   # no interaction >> stochastic activator
   # no interaction >> repressor
   # no interaction >> stochastic repressor
+  # If a stochastic interaction is introduced, its transition matrix starts
+  # with 50%/50% probabilities.
   if sum(unique(path)) != 1         # Activation or repression
     randselect = rand()
     if randselect <= 0.5
@@ -164,21 +168,27 @@ function mutate_path(path::Array{Int64}, transmat::Array{Float64})
 end
 
 function mutate_tmat(transmat::Array{Float64}, path::Array{Int64})
-
-  transmat = create_transmat(unique(path))
-  g = MarkovGenerator(unique(path), transmat)
-  path = generate(g, ALLMINS)
+  # Generate new value from truncated normal distribution
+  #TODO: The way this is programmed currently means that a 2x2 transition
+  #      matrix is required (i.e. only two states). This should be generalised.
+  if length(unique(path)) > 1 # Only works for stochastic interactions.
+    transmat[1, 1] = cts_neighbr(transmat[1, 1], TMAT_STD)
+    transmat[1, 2] = cts_neighbr(transmat[1, 2], TMAT_STD)
+    transmat[2, 1] = 1 - transmat[1, 1]
+    transmat[2, 2] = 1 - transmat[1, 2]
+    g = MarkovGenerator(unique(path), transmat)
+    path = generate(g, ALLMINS)
+  end
   (transmat, path)
 end
 
 function mutate_lag(lag::Int64)
-  # Lag can change to anything within a two hour interval.
-  laginterval = [lag-60:lag+60]
-  lagselector = (rand(Uint) % length(laginterval)) + 1
-  # Lag must not exceed MAXLAG value.
-  lag = min(laginterval[lagselector], MAXLAG)
-  # Lag cannot be less than zero.
-  lag = max(0, laginterval[lagselector])
+  lag = cts_neighbr(lag, LAG_STD, 0, MAXLAG)
+end
+
+function cts_neighbr(val::Float64, stdev::Float64, upbound, lowbound)
+  tnorm = Truncated(Normal(val, Float64), lowbound, upbound)
+  newval = rand(tnorm)
 end
 
 function mutate_gate(gate::Int64)
