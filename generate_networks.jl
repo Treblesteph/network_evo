@@ -46,10 +46,20 @@ function create_transmat(states::Array)
 end
 
 function create_interaction(i::Interaction, ALLMINS::Int64, MAXLAG::Int64)
-  
-  transmat::Array{Float64} = create_transmat(i.states)
-  g = MarkovGenerator(i.states, transmat)
-  chain::Array{Int64} = generate(g, ALLMINS)
+  if i == repression
+    chain = -1 * ones(Int64, ALLMINS)
+    transmat = [1 0; 0 1]
+  elseif i == activation
+    chain = ones(Int64, ALLMINS)
+    transmat = [1 0; 0 1]
+  elseif i == noInteraction
+    chain = zeros(Int64, ALLMINS)
+    transmat = [1 0; 0 1]
+  else
+    transmat::Array{Float64} = create_transmat(i.states)
+    g = MarkovGenerator(i.states, transmat)
+    chain = generate(g, ALLMINS)
+  end
   lag::Int64 = Base.convert(Int64, floor(MAXLAG*rand()))
   return(chain, lag, transmat)
 end
