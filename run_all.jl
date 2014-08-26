@@ -3,7 +3,7 @@ include("dynamic_simulation.jl");
 
 # Can alter these variables
 alldays = 4
-POPSIZE = 12
+POPSIZE = 1
 
 # Don't change these!
 NNODES = 4
@@ -16,5 +16,8 @@ concseries = [zeros(Int64, ALLMINS, NNODES) for i in 1:POPSIZE]
 
 for net in 1:POPSIZE
   println("Running simulation number $net of $POPSIZE")
-  concseries[net] = dynamic_simulation(population[net])
+  dynamic_simulation(population[net])
+  @profile dynamic_simulation(population[net])
 end
+
+Profile.print()
