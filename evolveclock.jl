@@ -44,14 +44,14 @@ function fitness(ent)
     dawnrows = [dawnrows, (1+60*24*(t-1)):(1+60*(DAWNWINDOW+24*(t-1)))]
     duskrows = [duskrows, (1+60*(12+24*(t-1))):(1+60*(12+DUSKWINDOW+24*(t-1)))]
   end
-  maxfitness = length(dawnrows) + length(duskrows)
+  maxfitness = 1
   # Optimal fitness is 0 (so score is actually cost function).
   # gene 1 on at dawn and gene 2 on at dusk
-  score = maxfitness -
-          (sum(ent.net.concseries[dawnrows, 1])) /
+  score = maxfitness - 0.5 *
+          ((sum(ent.net.concseries[dawnrows, 1])) /
           (0.01 + sum(ent.net.concseries[:, 1])) +
           (sum(ent.net.concseries[duskrows, 2])) /
-          (0.01 + sum(ent.net.concseries[:, 2]))
+          (0.01 + sum(ent.net.concseries[:, 2])))
 end
 
 function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
