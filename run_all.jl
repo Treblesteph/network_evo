@@ -7,8 +7,8 @@ POPSIZE = 1
 
 # Don't change these!
 NNODES = 4
-MAXLAG = 60
-ALLHOURS = alldays * 24
+MAXLAG = 60 * 24
+ALLHOURS = ALLDAYS * 24
 ALLMINS = ALLHOURS * 60
 
 population = create_population(POPSIZE, ALLMINS, NNODES, MAXLAG)
