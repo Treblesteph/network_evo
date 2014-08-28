@@ -15,7 +15,7 @@
 #   -s ->> random array of 0s and -1s
 include("markov.jl")
 include("dynamic_simulation.jl")
-import clockga
+require("evolveclock.jl")
 type Interaction
   states::Array{Int64}
 end
