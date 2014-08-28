@@ -14,6 +14,8 @@
 #    s ->> random array of 0s and 1s
 #   -s ->> random array of 0s and -1s
 include("markov.jl")
+include("dynamic_simulation.jl")
+import clockga
 type Interaction
   states::Array{Int64}
 end
@@ -84,9 +86,21 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64)
   for i in 1:length(allpaths)
     allpaths[i] = vec(allpaths[i])
   end
-  lags = reshape(lags, NNODES, NNODES).'
+  lags = transpose(reshape(lags, NNODES, NNODES))
   network = Network(allpaths, transmats, lags, gates, 1, Int64[])
   return network
+end
+
+function generate_fit_network(ALLMINS::Int64, NNODES::Int64,
+                              MAXLAG::Int64, selectfrom::Int64)
+# Generates an array of networks and chooses the fittest one.
+  select_pop::Array{Network} = [create_network(ALLMINS, NNODES,
+                                               MAXLAG) for j in 1:selectfrom]
+  fitnessval::Array{Float64} = ones(Float64, selectfrom)
+  for g in 1:selectfrom
+    fitnessval[g] = fitness(select_pop[g])
+  end
+  fitnet::Network = select_pop[fitnessval .== apply(min, fitnessval)][1]
 end
 
 function create_population(POPSIZE::Int64, ALLMINS::Int64, NNODES::Int64,
