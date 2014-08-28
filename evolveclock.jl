@@ -10,6 +10,14 @@ const ALLDAYS = 4
 const POPSIZE = 100
 const DAWNWINDOW = 3
 const DUSKWINDOW = 3
+DAWNROWS = []; DAWNS = zeros(ALLDAYS, DAWNWINDOW * 60)
+DUSKROWS = []; DUSKS = zeros(ALLDAYS, DUSKWINDOW * 60)
+for t = 1:ALLDAYS
+  DAWNS[t, :] = (1+60*24*(t-1)):(1+60*(DAWNWINDOW+24*(t-1)))
+  DUSKS[t, :] = (1+60*(12+24*(t-1))):(1+60*(12+DUSKWINDOW+24*(t-1)))
+  DAWNROWS = [DAWNROWS, DAWNS[t]]
+  DUSKROWS = [DUSKROWS, DUSKS[t]]
+end
 const MUTATEPATH = 0.05  # Percent of time path sign switched.
 const MUTATETMAT = 0.1   # Percent of time transition matrix mutates.
 const MUTATELAG = 0.1    # Percent of time lag duration mutates.
@@ -35,26 +43,44 @@ function create_entity(num)
   EvolvableNetwork(netw)
 end
 
-function fitness(ent)
+function fitness(ent::EvolvableNetwork)
   fitness(ent.net)
 end
 
 function fitness(net::Network)
   net.concseries = dynamic_simulation(net)
-  dawnrows = []
-  duskrows = []
-  for t = 1:ALLDAYS
-    dawnrows = [dawnrows, (1+60*24*(t-1)):(1+60*(DAWNWINDOW+24*(t-1)))]
-    duskrows = [duskrows, (1+60*(12+24*(t-1))):(1+60*(12+DUSKWINDOW+24*(t-1)))]
-  end
   maxfitness = 1
   # Optimal fitness is 0 (so score is actually cost function).
   # gene 1 on at dawn and gene 2 on at dusk
   score = maxfitness - 0.5 *
-          ((sum(net.concseries[dawnrows, 1])) /
+          ((sum(net.concseries[DAWNROWS, 1])) /
           (0.001 + sum(net.concseries[:, 1])) +
-          (sum(net.concseries[duskrows, 2])) /
+          (sum(net.concseries[DUSKROWS, 2])) /
           (0.001 + sum(net.concseries[:, 2])))
+end
+
+function newfitness(net::Network)
+  net.concseries = dynamic_simulation(net)
+  gene1 = concseries[:, 1]; gene2 = concseries[:, 2]
+  fitnessG1 = 1; fitnessG2 = 1
+  # If gene 1 or 2 is always off, fitnessG1 or fitnessG2 is 1 (respectively).
+  if sum(gene1) != 0
+    dailyfitG1 = zeros(ALLDAYS)
+    for d in 1:ALLDAYS
+      day = (1 + (d - 1) * 24 * 60):(d * 24 * 60)
+      dailyfitG1[d] = sum(gene1[DAWNS[d, :]]) / sum(gene1[day])
+    end
+    fitnessG1 = mean(dailyfitG1)
+  end
+  if sum(gene2) != 0
+    dailyfitG2 = zeros(ALLDAYS)
+    for d in 1:ALLDAYS
+      day = (1 + (d - 1) * 24 * 60):(d * 24 * 60)
+      dailyfitG2[d] = sum(gene2[DUSKS[d, :]]) / sum(gene2[day])
+    end
+    fitnessG2 = mean(dailyfitG2)
+  end
+  score = (fitnessG1 + fitnessG2) / 2
 end
 
 function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
