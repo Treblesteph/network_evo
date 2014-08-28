@@ -1,5 +1,4 @@
-require("evolveclock.jl")
-
+include("clock_evo_globals.jl")
 using Gadfly
 using DataFrames
 using Cairo
@@ -20,10 +19,10 @@ function plot_with_dawn_dusk(concseries::Array{Int64})
   dawnshading[DAWNROWS] = 1
   duskshading = zeros(ALLMINS)
   duskshading[DUSKROWS] = 1
-  plot(layer(x = [1:size(concseries, 1)], y = concseries[:, 1], Geom.line),
-       layer(x = [1:size(concseries, 1)], y = concseries[:, 2], Geom.line),
-       layer(x = [1:size(concseries, 1)], y = concseries[:, 3], Geom.line),
-       layer(x = [1:size(concseries, 1)], y = concseries[:, 4], Geom.line),
-       layer(x = [1:size(concseries, 1)], y = dawnshading, Geom.bar),
-       layer(x = [1:size(concseries, 1)], y = duskshading, Geom.bar))
+  plot(layer(x = [1:size(concseries, 1)]/60, y = concseries[:, 1], Geom.line),
+       layer(x = [1:size(concseries, 1)]/60, y = concseries[:, 2], Geom.line),
+       layer(x = [1:size(concseries, 1)]/60, y = concseries[:, 3], Geom.line),
+       layer(x = [1:size(concseries, 1)]/60, y = concseries[:, 4], Geom.line),
+       layer(x = [1:size(concseries, 1)]/60, y = dawnshading, Geom.bar),
+       layer(x = [1:size(concseries, 1)]/60, y = duskshading, Geom.bar))
 end
