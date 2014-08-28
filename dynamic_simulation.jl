@@ -74,7 +74,7 @@ function decision_array(scenariomat, genes, paths, gates, inits)
   return decisionarray
 end
 
-function dynamic_simulation(net::Network)
+function dynamic_simulation(net)
   # Generating decision matrix
   decmat = make_decision_mat(NNODES)
   decdict = Dict{Array{Int64}, Int64}()
@@ -90,7 +90,7 @@ function dynamic_simulation(net::Network)
   gates::Array{Int64} = copy(net.gates)
   timearray::Array{Int64} = [1:ALLMINS]
   concs::Array{Int64} = zeros(Int64, ALLMINS, NNODES)
-  concs[1, :] = Base.convert(Array{Int64}, randbool(NNODES));
+  concs[1, :] = ones(NNODES);
   concs = vcat(zeros(Int64, MAXLAG, NNODES), concs)
   # Adding MAXLAG zeros to the beginning of path vectors.
   for i in 1:length(paths)
