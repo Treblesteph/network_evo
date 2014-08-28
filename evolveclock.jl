@@ -13,9 +13,9 @@ const DUSKWINDOW = 3
 const MUTATEPATH = 0.05  # Percent of time path sign switched.
 const MUTATETMAT = 0.1   # Percent of time transition matrix mutates.
 const MUTATELAG = 0.1    # Percent of time lag duration mutates.
-const MUTATEGATE = 0.1   # Percent of time gate type switches.
+const MUTATEGATE = 0.09  # Percent of time gate type switches.
 const TMAT_STD = 0.1     # Standard deviation of truc norm rng.
-const LAG_STD = 10       # Standard deviation of truc norm rng.
+const LAG_STD = 8        # Standard deviation of truc norm rng.
 
 # Don't change these unless altering framework.
 const NNODES = 4
@@ -31,13 +31,16 @@ type EvolvableNetwork <: GeneticAlgorithms.Entity
 end
 
 function create_entity(num)
-  netw = create_network(ALLMINS, NNODES, MAXLAG)
+  netw = generate_fit_network(ALLMINS, NNODES, MAXLAG, 100)
   EvolvableNetwork(netw)
 end
 
 function fitness(ent)
-  ent.net.concseries = dynamic_simulation(ent.net)
-  alltime = 1:ALLMINS
+  fitness(ent.net)
+end
+
+function fitness(net::Network)
+  net.concseries = dynamic_simulation(net)
   dawnrows = []
   duskrows = []
   for t = 1:ALLDAYS
@@ -48,10 +51,10 @@ function fitness(ent)
   # Optimal fitness is 0 (so score is actually cost function).
   # gene 1 on at dawn and gene 2 on at dusk
   score = maxfitness - 0.5 *
-          ((sum(ent.net.concseries[dawnrows, 1])) /
-          (0.01 + sum(ent.net.concseries[:, 1])) +
-          (sum(ent.net.concseries[duskrows, 2])) /
-          (0.01 + sum(ent.net.concseries[:, 2])))
+          ((sum(net.concseries[dawnrows, 1])) /
+          (0.001 + sum(net.concseries[:, 1])) +
+          (sum(net.concseries[duskrows, 2])) /
+          (0.001 + sum(net.concseries[:, 2])))
 end
 
 function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
@@ -72,7 +75,8 @@ function group_entities(pop)
   produce(pop)
   # Selecting groupings that will become parents.
   for i in 1:threshold
-    produce([1, i+1])
+    ind = round(rand(Truncated(Exponential(), 1, length(pop)), 2))
+    produce([ind[1], ind[2]])
   end
 end
 
