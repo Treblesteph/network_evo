@@ -1,10 +1,9 @@
 # Performs a dynamic simuation for a network which is encoded by a matrix
 # of interactions (where P_ij specifies the path from node i to node j).
-
 include("multichoose.jl");
 
 function make_decision_mat(NNODES)
-  genes = 1:NNODES
+  genes = 1.NNODES
   paths = NNODES+1:2*NNODES
   gates = 1+2*NNODES
   inits = 2+2*NNODES
@@ -74,7 +73,7 @@ function decision_array(scenariomat, genes, paths, gates, inits)
   return decisionarray
 end
 
-function dynamic_simulation(net)
+function dynamic_simulation(net, NNODES, ALLMINS, MAXLAG)
   # Generating decision matrix
   decmat = make_decision_mat(NNODES)
   decdict = Dict{Array{Int64}, Int64}()

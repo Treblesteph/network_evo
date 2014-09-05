@@ -7,7 +7,7 @@
 
 # Setting up the interaction type, consisting of a path from one gene to
 # another, and its associated lag. Lags are any real number between 0 and
-# MAXLAG, paths are set as follows:
+# GeneticAlgorithms.MAXLAG, paths are set as follows:
 #   -1 ->> repression
 #    0 ->> no interaction
 #    1 ->> activation
@@ -15,7 +15,8 @@
 #   -s ->> random array of 0s and -1s
 include("markov.jl")
 include("dynamic_simulation.jl")
-include("clock_evo_globals.jl")
+import GeneticAlgorithms
+import clockga
 
 type Interaction
   states::Array{Int64}
@@ -74,13 +75,13 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64)
   gatechoices = (0, 1)
   gates::Array{Int64} = [gatechoices[ceil(length(gatechoices)*rand())]
                          for i in 1:NNODES]
-  transmats::Array{Array{Float64}} = [Float64[] for i in 1:(NNODES^2)]
+  transmats::Array{Array{Float64}} = [Float64[] for i in
+                                      1:(NNODES^2)]
   for p = 1:(NNODES^2)
     intchoices = [repression, activation, noInteraction,
                   stochasticAct, stochasticRep]
     randselect = ceil(length(intchoices)*rand())
-    (allpaths[p], lags[p], transmats[p]) = create_interaction(intchoices
-                                                              [randselect],
+    (allpaths[p], lags[p], transmats[p]) = create_interaction(intchoices[randselect],
                                                               ALLMINS, MAXLAG)
   end
   allpaths = transpose(reshape(allpaths, NNODES, NNODES))
@@ -92,8 +93,8 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64)
   return network
 end
 
-function generate_fit_network(ALLMINS::Int64, NNODES::Int64,
-                              MAXLAG::Int64, selectfrom::Int64)
+function generate_fit_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
+                              selectfrom::Int64)
 # Generates an array of networks and chooses the fittest one.
   select_pop::Array{Network} = [create_network(ALLMINS, NNODES,
                                                MAXLAG) for j in 1:selectfrom]
@@ -104,9 +105,9 @@ function generate_fit_network(ALLMINS::Int64, NNODES::Int64,
   fitnet::Network = select_pop[fitnessval .== apply(min, fitnessval)][1]
 end
 
-function create_population(POPSIZE::Int64, ALLMINS::Int64, NNODES::Int64,
-                           MAXLAG::Int64)
-  population::Array{Network} = [create_network(ALLMINS, NNODES,
-                                               MAXLAG) for j in 1:POPSIZE]
+function create_population(POPSIZE::Int64, ALLMINS::Int64,
+                           NNODES::Int64, MAXLAG::Int64)
+  population::Array{Network} = [create_network(ALLMINS, NNODES, MAXLAG)
+                                for j in 1:POPSIZE]
   return population
 end

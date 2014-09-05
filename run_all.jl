@@ -16,8 +16,8 @@ concseries = [zeros(Int64, ALLMINS, NNODES) for i in 1:POPSIZE]
 
 for net in 1:POPSIZE
   println("Running simulation number $net of $POPSIZE")
-  dynamic_simulation(population[net])
-  @profile dynamic_simulation(population[net])
+  dynamic_simulation(population[net], NNODES, ALLMINS, MAXLAG)
+  @profile dynamic_simulation(population[net], NNODES, ALLMINS, MAXLAG)
 end
 
 Profile.print()

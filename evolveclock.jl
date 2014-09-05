@@ -4,17 +4,32 @@ using Distributions
 
 include("generate_networks.jl");
 include("dynamic_simulation.jl");
-include("clock_evo_globals.jl")
+
+# Can alter these:
+const DAWNWINDOW = 3
+const DUSKWINDOW = 3
+DAWNROWS = []; DAWNS = zeros(GeneticAlgorithms.ALLDAYS, DAWNWINDOW * 60)
+DUSKROWS = []; DUSKS = zeros(GeneticAlgorithms.ALLDAYS, DUSKWINDOW * 60)
+for t = 1:GeneticAlgorithms.ALLDAYS
+  DAWNS[t, :] = (1+60*24*(t-1)):(60*(DAWNWINDOW+24*(t-1)))
+  DUSKS[t, :] = (1+60*(12+24*(t-1))):(60*(12+DUSKWINDOW+24*(t-1)))
+  DAWNROWS = [DAWNROWS, transpose(DAWNS[t, :])]
+  DUSKROWS = [DUSKROWS, transpose(DUSKS[t, :])]
+end
 
 type EvolvableNetwork <: GeneticAlgorithms.Entity
   net::Network
   fitness
-  EvolvableNetwork() = new(create_network(ALLMINS, NNODES, MAXLAG), nothing)
+  EvolvableNetwork() = new(create_network(GeneticAlgorithms.ALLMINS,
+                                          GeneticAlgorithms.NNODES,
+                                          GeneticAlgorithms.MAXLAG), nothing)
   EvolvableNetwork(net) = new(net, nothing)
 end
 
 function create_entity(num)
-  netw = generate_fit_network(ALLMINS, NNODES, MAXLAG, 100)
+  netw = generate_fit_network(GeneticAlgorithms.ALLMINS,
+                              GeneticAlgorithms.NNODES,
+                              GeneticAlgorithms.MAXLAG, 100)
   EvolvableNetwork(netw)
 end
 
@@ -22,8 +37,10 @@ function fitness(ent::EvolvableNetwork)
   fitness(ent.net)
 end
 
-function fitness(net::Network)
-  net.concseries = dynamic_simulation(net)
+function oldfitness(net::Network)
+  net.concseries = dynamic_simulation(net, GeneticAlgorithms.NNODES,
+                                      GeneticAlgorithms.ALLMINS,
+                                      GeneticAlgorithms.MAXLAG)
   maxfitness = 1
   # Optimal fitness is 0 (so score is actually cost function).
   # gene 1 on at dawn and gene 2 on at dusk
@@ -34,22 +51,24 @@ function fitness(net::Network)
           (0.001 + sum(net.concseries[:, 2])))
 end
 
-function newfitness(net::Network)
-  net.concseries = dynamic_simulation(net)
-  gene1 = concseries[:, 1]; gene2 = concseries[:, 2]
+function fitness(net::Network)
+  net.concseries = dynamic_simulation(net, GeneticAlgorithms.NNODES,
+                                      GeneticAlgorithms.ALLMINS,
+                                      GeneticAlgorithms.MAXLAG)
+  gene1 = net.concseries[:, 1]; gene2 = net.concseries[:, 2]
   fitnessG1 = 1; fitnessG2 = 1
   # If gene 1 or 2 is always off, fitnessG1 or fitnessG2 is 1 (respectively).
   if sum(gene1) != 0
-    dailyfitG1 = zeros(ALLDAYS)
-    for d in 1:ALLDAYS
+    dailyfitG1 = zeros(GeneticAlgorithms.ALLDAYS)
+    for d in 1:GeneticAlgorithms.ALLDAYS
       day = (1 + (d - 1) * 24 * 60):(d * 24 * 60)
       dailyfitG1[d] = sum(gene1[DAWNS[d, :]]) / sum(gene1[day])
     end
     fitnessG1 = mean(dailyfitG1)
   end
   if sum(gene2) != 0
-    dailyfitG2 = zeros(ALLDAYS)
-    for d in 1:ALLDAYS
+    dailyfitG2 = zeros(GeneticAlgorithms.ALLDAYS)
+    for d in 1:GeneticAlgorithms.ALLDAYS
       day = (1 + (d - 1) * 24 * 60):(d * 24 * 60)
       dailyfitG2[d] = sum(gene2[DUSKS[d, :]]) / sum(gene2[day])
     end
@@ -113,24 +132,24 @@ end
 
 function mutate(ent)
   # Path sign switch mutations.
-  if rand(Float64) < MUTATEPATH
+  if rand(Float64) < GeneticAlgorithms.MUTATEPATH
     pathind = (rand(Uint) % length(ent.net.paths)) + 1
     (ent.net.transmats[pathind], ent.net.paths[pathind]) =
       mutate_path(ent.net.paths[pathind], ent.net.transmats[pathind])
   end
   # Transition matrix mutations.
-  if rand(Float64) < MUTATETMAT
+  if rand(Float64) < GeneticAlgorithms.MUTATETMAT
     tmatind = (rand(Uint) % length(ent.net.transmats)) + 1
     (ent.net.transmats[tmatind], ent.net.paths[tmatind]) =
       mutate_tmat(ent.net.transmats[tmatind], ent.net.paths[tmatind])
   end
   # Lag duration mutations.
-  if rand(Float64) < MUTATELAG
+  if rand(Float64) < GeneticAlgorithms.MUTATELAG
     lagind = (rand(Uint) % length(ent.net.lags)) + 1
     ent.net.lags[lagind] = mutate_lag(ent.net.lags[lagind])
   end
   # Gate type switch mutations.
-  if rand(Float64) < MUTATEGATE
+  if rand(Float64) < GeneticAlgorithms.MUTATEGATE
     gateind = (rand(Uint) % length(ent.net.gates)) + 1
     ent.net.gates[gateind] = mutate_gate(ent.net.gates[gateind])
   end
@@ -154,22 +173,22 @@ function mutate_path(path::Array{Int64}, transmat::Array{Float64})
     if randselect <= 0.5
       path = -path
     elseif randselect <= 1
-      path = zeros(Int64, ALLMINS)
+      path = zeros(Int64, GeneticAlgorithms.ALLMINS)
     end
   elseif sum(unique(path)) == 0     # No interaction
     randselect = rand()
     if randselect <= 0.25
-      path = ones(Int64, ALLMINS)
+      path = ones(Int64, GeneticAlgorithms.ALLMINS)
     elseif randselect <= 0.5
       transmat = [0.5 0.5; 0.5 0.5]
       g = MarkovGenerator([0, 1], transmat)
-      path = generate(g, ALLMINS)
+      path = generate(g, GeneticAlgorithms.ALLMINS)
     elseif randselect <= 0.75
-      path = -1 * ones(Int64, ALLMINS)
+      path = -1 * ones(Int64, GeneticAlgorithms.ALLMINS)
     elseif randselect <= 1
       transmat = [0.5 0.5; 0.5 0.5]
       g = MarkovGenerator([0, -1], transmat)
-      path = generate(g, ALLMINS)
+      path = generate(g, GeneticAlgorithms.ALLMINS)
     end
   end
   (transmat, path)
@@ -180,18 +199,19 @@ function mutate_tmat(transmat::Array{Float64}, path::Array{Int64})
   #TODO: The way this is programmed currently means that a 2x2 transition
   #      matrix is required (i.e. only two states). This should be generalised.
   if length(unique(path)) > 1 # Only works for stochastic interactions.
-    transmat[1, 1] = cts_neighbr(transmat[1, 1], TMAT_STD, 0, 1)
-    transmat[1, 2] = cts_neighbr(transmat[1, 2], TMAT_STD, 0, 1)
+    transmat[1, 1] = cts_neighbr(transmat[1, 1], GeneticAlgorithms.TMAT_STD, 0, 1)
+    transmat[1, 2] = cts_neighbr(transmat[1, 2], GeneticAlgorithms.TMAT_STD, 0, 1)
     transmat[2, 1] = 1 - transmat[1, 1]
     transmat[2, 2] = 1 - transmat[1, 2]
     g = MarkovGenerator(unique(path), transmat)
-    path = generate(g, ALLMINS)
+    path = generate(g, GeneticAlgorithms.ALLMINS)
   end
   (transmat, path)
 end
 
 function mutate_lag(lag::Int64)
-  lag = round(cts_neighbr(lag, LAG_STD, 0, MAXLAG))
+  lag = round(cts_neighbr(lag, GeneticAlgorithms.LAG_STD, 0,
+                          GeneticAlgorithms.MAXLAG))
 end
 
 function cts_neighbr(val::Number, stdev::Number, lower::Number, upper::Number)
