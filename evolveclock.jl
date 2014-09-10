@@ -37,7 +37,7 @@ function fitness(ent::EvolvableNetwork)
   fitness(ent.net)
 end
 
-function oldfitness(net::Network)
+function fitness_1(net::Network)
   net.concseries = dynamic_simulation(net, GeneticAlgorithms.NNODES,
                                       GeneticAlgorithms.ALLMINS,
                                       GeneticAlgorithms.MAXLAG)
@@ -51,9 +51,9 @@ function oldfitness(net::Network)
           (0.001 + sum(net.concseries[:, 2])))
 end
 
-function fitness(net::Network)
+function fitness_2(net::Network)
   net.concseries = dynamic_simulation(net, GeneticAlgorithms.NNODES,
-                                      GeneticAlgorithms.ALLMINS,
+                                      GeneticAlgorithms.ALLDAYS,
                                       GeneticAlgorithms.MAXLAG)
   gene1 = net.concseries[:, 1]; gene2 = net.concseries[:, 2]
   fitnessG1 = 1; fitnessG2 = 1
@@ -75,6 +75,48 @@ function fitness(net::Network)
     fitnessG2 = mean(dailyfitG2)
   end
   score = (fitnessG1 + fitnessG2) / 2
+end
+
+function fitness(net::Network)
+  net.concseries = dynamic_simulation(net, GeneticAlgorithms.NNODES,
+                                      GeneticAlgorithms.ALLMINS,
+                                      GeneticAlgorithms.ALLDAYS
+                                      GeneticAlgorithms.MAXLAG)
+  gene1 = net.concseries[:, 1]
+  gene2 = net.concseries[:, 2]
+
+
+  fitnessG1::Array{Float64} = zeros(GeneticAlgorithms.ALLDAYS)
+  fitnessG2::Array{Float64} = zeros(GeneticAlgorithms.ALLDAYS)
+
+  dawnFitness::Array{Float64} = zeros(GeneticAlgorithms.ALLDAYS)
+  notDawnFitness::Array{Float64} = zeros(GeneticAlgorithms.ALLDAYS)
+  duskFitness::Array{Float64} = zeros(GeneticAlgorithms.ALLDAYS)
+  notDuskFitness::Array{Float64} = zeros(GeneticAlgorithms.ALLDAYS)
+
+  # First working out the fitness for each day.
+  for d in 1:GeneticAlgorithms.ALLDAYS
+    dawnFitness[d] = sum(gene1[DAWNS[d, :]]) / length(DAWNS[d, :])
+    notDawnFitness[d] = sum(gene1[(1 + DAWNS[d, end]):(d * 24 * 60)]) /
+                        length((1 + DAWNS[d, end]):(d * 24 * 6))
+    duskFitness[d] = sum(gene2[DUSKS[d, :]]) / length(DUSKS[d, :])
+    notDuskFitness[d] = sum(gene2[1:(DUSKS[d, 1] - 1)]) /
+                        length(1:(DUSKS[d, 1] - 1))
+
+    fitnessG1[d] = (dawnFitness[d] + notDawnFitness[d]) / 2
+    fitnessG2[d] = (duskFitness[d] + notDuskFitness[d]) / 2
+
+  end
+  # Next order the daily fitnesses, and weight so that the least fit day
+  # contributes most to the fitness.
+  sort!(fitnessG1)
+  sort!(fitnessG2)
+  weightings::Array{Int64} = [[weightings], 10^k for k in 0:ALLDAYS-1]
+  fitnessG1 .*= weightings
+  fitnessG2 .*= weightings
+
+  score = mean([fitnessG1, fitnessG2])
+
 end
 
 function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
