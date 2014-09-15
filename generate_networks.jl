@@ -81,6 +81,8 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64)
     intchoices = [repression, activation, noInteraction,
                   stochasticAct, stochasticRep]
     randselect = ceil(length(intchoices)*rand())
+    #TODO: Random paths need to be re-generated each generation (for each
+    #      dynanic simulation).
     (allpaths[p], lags[p], transmats[p]) = create_interaction(intchoices[randselect],
                                                               ALLMINS, MAXLAG)
   end
