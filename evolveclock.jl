@@ -80,7 +80,6 @@ end
 function fitness(net::Network)
   net.concseries = dynamic_simulation(net, GeneticAlgorithms.NNODES,
                                       GeneticAlgorithms.ALLMINS,
-                                      GeneticAlgorithms.ALLDAYS
                                       GeneticAlgorithms.MAXLAG)
   gene1 = net.concseries[:, 1]
   gene2 = net.concseries[:, 2]
@@ -97,26 +96,30 @@ function fitness(net::Network)
   # First working out the fitness for each day.
   for d in 1:GeneticAlgorithms.ALLDAYS
     dawnFitness[d] = sum(gene1[DAWNS[d, :]]) / length(DAWNS[d, :])
-    notDawnFitness[d] = sum(gene1[(1 + DAWNS[d, end]):(d * 24 * 60)]) /
-                        length((1 + DAWNS[d, end]):(d * 24 * 6))
+    notDawnFitness[d] = 1 - (sum(gene1[(1 + DAWNS[d, end]):(d * 24 * 60)]) /
+                        length((1 + DAWNS[d, end]):(d * 24 * 60)))
     duskFitness[d] = sum(gene2[DUSKS[d, :]]) / length(DUSKS[d, :])
-    notDuskFitness[d] = sum(gene2[1:(DUSKS[d, 1] - 1)]) /
-                        length(1:(DUSKS[d, 1] - 1))
-
+    notDuskFitness[d] = 1 - (sum(gene2[1 + (d - 1) * 24 * 60:(DUSKS[d, 1] - 1)]) /
+                        length(1 + (d - 1) * 24 * 60:(DUSKS[d, 1] - 1)))
     fitnessG1[d] = (dawnFitness[d] + notDawnFitness[d]) / 2
     fitnessG2[d] = (duskFitness[d] + notDuskFitness[d]) / 2
-
   end
   # Next order the daily fitnesses, and weight so that the least fit day
   # contributes most to the fitness.
-  sort!(fitnessG1)
-  sort!(fitnessG2)
-  weightings::Array{Int64} = [[weightings], 10^k for k in 0:ALLDAYS-1]
-  fitnessG1 .*= weightings
-  fitnessG2 .*= weightings
+  sort!(fitnessG1; rev = true)
+  sort!(fitnessG2; rev = true)
+  # Remember that currently, a low number is a poor fitness.
+  allG1fitness::Array{Float64} = []
+  allG2fitness::Array{Float64} = []
+  for d in 1:GeneticAlgorithms.ALLDAYS
+    thisG1fitness = repmat([fitnessG1[d]], 2^d, 1)
+    thisG2fitness = repmat([fitnessG2[d]], 2^d, 1)
+    allG1fitness = [allG1fitness, thisG1fitness]
+    allG2fitness = [allG2fitness, thisG2fitness]
+  end
 
-  score = mean([fitnessG1, fitnessG2])
-
+  score = 1 - mean([allG1fitness, allG2fitness])
+  return score
 end
 
 function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
