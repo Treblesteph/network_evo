@@ -29,7 +29,7 @@ end
 function create_entity(num)
   netw = generate_fit_network(GeneticAlgorithms.ALLMINS,
                               GeneticAlgorithms.NNODES,
-                              GeneticAlgorithms.MAXLAG, 100)
+                              GeneticAlgorithms.MAXLAG, 50)
   EvolvableNetwork(netw)
 end
 
@@ -77,6 +77,8 @@ function fitness_2(net::Network)
   score = (fitnessG1 + fitnessG2) / 2
 end
 
+#TODO: Add in another fitness function including a light pattern.
+
 function fitness(net::Network)
   net.concseries = dynamic_simulation(net, GeneticAlgorithms.NNODES,
                                       GeneticAlgorithms.ALLMINS,
@@ -119,7 +121,6 @@ function fitness(net::Network)
   end
 
   score = 1 - mean([allG1fitness, allG2fitness])
-  return score
 end
 
 function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
@@ -128,9 +129,9 @@ function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
 end
 
 function group_entities(pop)
-  # Kill off the 50% least fit networks
+  # Kill off the 350% least fit networks
   #TODO: Change this percentage to a global constant.
-  threshold = floor(0.5 * length(pop))
+  threshold = floor(0.35 * length(pop))
   pop = pop[1:end-threshold]
   # Stop when the top 50% of networks have optimal fitness.
   if sum([pop[x].fitness for x in 1:(ceil(length(pop)/2))]) < 0.00001
@@ -140,7 +141,10 @@ function group_entities(pop)
   produce(pop)
   # Selecting groupings that will become parents.
   for i in 1:threshold
-    ind = round(rand(Truncated(Exponential(), 1, length(pop)), 2))
+    #TODO: Something less stong than an exponential distribution to reduce
+    #      the chance of getting stuck in a local minimum. Carl and James
+    #      used 1/sqrt(rank).
+    ind = round(rand(Truncated(Exponential(2), 1, length(pop)), 2))
     produce([ind[1], ind[2]])
   end
 end
@@ -215,20 +219,20 @@ function mutate_path(path::Array{Int64}, transmat::Array{Float64})
   # with 50%/50% probabilities.
   if sum(unique(path)) != 1         # Activation or repression
     randselect = rand()
-    if randselect <= 0.5
+    if randselect <= 0.75
       path = -path
     elseif randselect <= 1
       path = zeros(Int64, GeneticAlgorithms.ALLMINS)
     end
   elseif sum(unique(path)) == 0     # No interaction
     randselect = rand()
-    if randselect <= 0.25
+    if randselect <= 0.4
       path = ones(Int64, GeneticAlgorithms.ALLMINS)
     elseif randselect <= 0.5
       transmat = [0.5 0.5; 0.5 0.5]
       g = MarkovGenerator([0, 1], transmat)
       path = generate(g, GeneticAlgorithms.ALLMINS)
-    elseif randselect <= 0.75
+    elseif randselect <= 0.9
       path = -1 * ones(Int64, GeneticAlgorithms.ALLMINS)
     elseif randselect <= 1
       transmat = [0.5 0.5; 0.5 0.5]
