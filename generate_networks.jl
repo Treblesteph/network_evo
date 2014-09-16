@@ -68,6 +68,11 @@ function create_interaction(i::Interaction, ALLMINS::Int64, MAXLAG::Int64)
   return(chain, lag, transmat)
 end
 
+#TODO: Add in the capacity to respond to an environmental input for each gene.
+
+#TODO: Add in extrinsic noise: a stochastic process that is common to a
+#      (sub)set of genes in the network.
+
 function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64)
   # Randomly select interaction type for each entry.
   allpaths::Array{Array{Int64}} = [Int64[] for i in 1:(NNODES^2)]
