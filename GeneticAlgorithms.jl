@@ -18,16 +18,23 @@ export  Entity,
 
 const ALLDAYS = 4
 const POPSIZE = 100
-const MUTATEPATH = 0.1   # Percent of time path sign switched.
-const MUTATETMAT = 0.15  # Percent of time transition matrix mutates.
-const MUTATELAG = 0.15   # Percent of time lag duration mutates.
-const MUTATEGATE = 0.15  # Percent of time gate type switches.
-const TMAT_STD = 0.15    # Standard deviation of truc norm rng.
-const LAG_STD = 20       # Standard deviation of truc norm rng.
+
+const MUTATEPATH = 0.15  # Percent of time path sign switched.
+const MUTATETMAT = 0.2   # Percent of time transition matrix mutates.
+const MUTATELAG = 0.4    # Percent of time lag duration mutates.
+const MUTATEGATE = 0.2   # Percent of time gate type switches.
+const TMAT_STD = 0.2     # Standard deviation of truc norm rng.
+const LAG_STD = 40       # Standard deviation of truc norm rng.
 
 # Don't change these unless altering framework.
 const NNODES = 4
 const MAXLAG = 60*24
+#TODO: Should there also be a MINLAG? Can transcription and translation be
+#      effectively instantaneous? If not, what should the MINLAG be?
+#      Bionumbers? This would mean that the relationship between response time
+#      (MINLAG), and frequency of environmental switching can be analysed.
+#      Meaning we can ask when non-sensing systems become preferable to sensing
+#      systems.
 const ALLHOURS = ALLDAYS * 24
 const ALLMINS = ALLHOURS * 60
 
