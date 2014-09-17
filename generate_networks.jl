@@ -97,6 +97,7 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64)
   end
   lags = transpose(reshape(lags, NNODES, NNODES))
   network = Network(allpaths, transmats, lags, gates, 1, Int64[])
+  network.concseries = dynamic_simulation(network, NNODES, ALLMINS, MAXLAG)
   return network
 end
 
