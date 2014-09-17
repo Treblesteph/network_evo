@@ -37,55 +37,11 @@ function fitness(ent::EvolvableNetwork)
   fitness(ent.net)
 end
 
-function fitness_1(net::Network)
-  net.concseries = dynamic_simulation(net, GeneticAlgorithms.NNODES,
-                                      GeneticAlgorithms.ALLMINS,
-                                      GeneticAlgorithms.MAXLAG)
-  maxfitness = 1
-  # Optimal fitness is 0 (so score is actually cost function).
-  # gene 1 on at dawn and gene 2 on at dusk
-  score = maxfitness - 0.5 *
-          ((sum(net.concseries[DAWNROWS, 1])) /
-          (0.001 + sum(net.concseries[:, 1])) +
-          (sum(net.concseries[DUSKROWS, 2])) /
-          (0.001 + sum(net.concseries[:, 2])))
-end
-
-function fitness_2(net::Network)
-  net.concseries = dynamic_simulation(net, GeneticAlgorithms.NNODES,
-                                      GeneticAlgorithms.ALLDAYS,
-                                      GeneticAlgorithms.MAXLAG)
-  gene1 = net.concseries[:, 1]; gene2 = net.concseries[:, 2]
-  fitnessG1 = 1; fitnessG2 = 1
-  # If gene 1 or 2 is always off, fitnessG1 or fitnessG2 is 1 (respectively).
-  if sum(gene1) != 0
-    dailyfitG1 = zeros(GeneticAlgorithms.ALLDAYS)
-    for d in 1:GeneticAlgorithms.ALLDAYS
-      day = (1 + (d - 1) * 24 * 60):(d * 24 * 60)
-      dailyfitG1[d] = sum(gene1[DAWNS[d, :]]) / sum(gene1[day])
-    end
-    fitnessG1 = mean(dailyfitG1)
-  end
-  if sum(gene2) != 0
-    dailyfitG2 = zeros(GeneticAlgorithms.ALLDAYS)
-    for d in 1:GeneticAlgorithms.ALLDAYS
-      day = (1 + (d - 1) * 24 * 60):(d * 24 * 60)
-      dailyfitG2[d] = sum(gene2[DUSKS[d, :]]) / sum(gene2[day])
-    end
-    fitnessG2 = mean(dailyfitG2)
-  end
-  score = (fitnessG1 + fitnessG2) / 2
-end
-
 #TODO: Add in another fitness function including a light pattern.
 
 function fitness(net::Network)
-  net.concseries = dynamic_simulation(net, GeneticAlgorithms.NNODES,
-                                      GeneticAlgorithms.ALLMINS,
-                                      GeneticAlgorithms.MAXLAG)
   gene1 = net.concseries[:, 1]
   gene2 = net.concseries[:, 2]
-
 
   fitnessG1::Array{Float64} = zeros(GeneticAlgorithms.ALLDAYS)
   fitnessG2::Array{Float64} = zeros(GeneticAlgorithms.ALLDAYS)
@@ -129,7 +85,7 @@ function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
 end
 
 function group_entities(pop)
-  # Kill off the 350% least fit networks
+  # Kill off the 35% least fit networks
   #TODO: Change this percentage to a global constant.
   threshold = floor(0.35 * length(pop))
   pop = pop[1:end-threshold]
@@ -175,7 +131,10 @@ function crossover(group::Array{Any})
   #TODO: Create an array for generation, push new generation to the array
   #      each time the network survives for a new generation. To get generation
   #      from GeneticAlgorithms code, something like model.gen_num.
-  child.net.concseries = []
+  child.net.concseries = dynamic_simulation(child.net,
+                                            GeneticAlgorithms.NNODES,
+                                            GeneticAlgorithms.ALLMINS,
+                                            GeneticAlgorithms.MAXLAG)
   child
 end
 
