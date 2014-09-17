@@ -2,7 +2,7 @@ require("evolveclock.jl")
 include("GeneticAlgorithms.jl")
 using GeneticAlgorithms.runga
 using HDF5, JLD
-model = runga(clockga; initial_pop_size = 100, stop_after = 8000)
+model = runga(clockga; initial_pop_size = 100, stop_after = 2000)
 now = strftime("%F_%H_%M", time())
 concs1 = model.population[1].net.concseries
 concs2 = model.population[2].net.concseries
