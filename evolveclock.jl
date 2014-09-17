@@ -85,9 +85,9 @@ function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
 end
 
 function group_entities(pop)
-  # Kill off the 35% least fit networks
+  # Kill off the 15% least fit networks
   #TODO: Change this percentage to a global constant.
-  threshold = floor(0.35 * length(pop))
+  threshold = floor(0.15 * length(pop))
   pop = pop[1:end-threshold]
   # Stop when the top 50% of networks have optimal fitness.
   if sum([pop[x].fitness for x in 1:(ceil(length(pop)/2))]) < 0.00001
