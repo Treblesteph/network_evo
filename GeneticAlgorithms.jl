@@ -19,11 +19,11 @@ export  Entity,
 const ALLDAYS = 4
 const POPSIZE = 100
 
-const MUTATEPATH = 0.15  # Percent of time path sign switched.
-const MUTATETMAT = 0.2   # Percent of time transition matrix mutates.
-const MUTATELAG = 0.4    # Percent of time lag duration mutates.
-const MUTATEGATE = 0.2   # Percent of time gate type switches.
-const TMAT_STD = 0.2     # Standard deviation of truc norm rng.
+const MUTATEPATH = 0.1  # Percent of time path sign switched.
+const MUTATETMAT = 0.15   # Percent of time transition matrix mutates.
+const MUTATELAG = 0.15    # Percent of time lag duration mutates.
+const MUTATEGATE = 0.07   # Percent of time gate type switches.
+const TMAT_STD = 0.12     # Standard deviation of truc norm rng.
 const LAG_STD = 40       # Standard deviation of truc norm rng.
 
 # Don't change these unless altering framework.
@@ -132,10 +132,11 @@ function runga(model::GAmodel, stop_after = nothing)
             break
         end
 
+        if stop_after == counter; break; end
+
         crossover_population(model, groupings)
         mutate_population(model)
         println("")
-        if stop_after == counter; break; end
         counter += 1
     end
 
