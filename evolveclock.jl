@@ -5,16 +5,21 @@ using Distributions
 include("generate_networks.jl");
 include("dynamic_simulation.jl");
 
-# Can alter these:
-const DAWNWINDOW = 3
-const DUSKWINDOW = 3
-DAWNROWS = []; DAWNS = zeros(GeneticAlgorithms.ALLDAYS, DAWNWINDOW * 60)
-DUSKROWS = []; DUSKS = zeros(GeneticAlgorithms.ALLDAYS, DUSKWINDOW * 60)
-for t = 1:GeneticAlgorithms.ALLDAYS
-  DAWNS[t, :] = (1+60*24*(t-1)):(60*(DAWNWINDOW+24*(t-1)))
-  DUSKS[t, :] = (1+60*(12+24*(t-1))):(60*(12+DUSKWINDOW+24*(t-1)))
-  DAWNROWS = [DAWNROWS, transpose(DAWNS[t, :])]
-  DUSKROWS = [DUSKROWS, transpose(DUSKS[t, :])]
+# Fitness parameters (can alter these):
+const DAWNWINDOW = 3 # Hours
+const DUSKWINDOW = 3 # Hours
+const DAYTIME = 12   # Hours
+#--------------------------------------
+DAYS = zeros(GeneticAlgorithms.ALLDAYS, DAYTIME * 60)
+NIGHTS = zeros(GeneticAlgorithms.ALLDAYS, NIGHTTIME * 60)
+DAWNS = zeros(GeneticAlgorithms.ALLDAYS, DAWNWINDOW * 60)
+DUSKS = zeros(GeneticAlgorithms.ALLDAYS, DUSKWINDOW * 60)
+
+for t = 1:GeneticAlgorithms.ALLDAYS # Converting to arrays of minutes.
+  DAYS[t, :] = (1 + 60 * 24 * (t - 1)):(60 * (DAYTIME + 24 * (t - 1)))
+  DAWNS[t, :] = (1 + 60 * 24 * (t - 1)):(60 * (DAWNWINDOW + 24 * (t - 1)))
+  DUSKS[t, :] = (1 + 60 * (12 - DUSKWINDOW + 24 * (t - 1))):
+                (60 * (12 + 24 * (t - 1)))
 end
 
 type EvolvableNetwork <: GeneticAlgorithms.Entity
