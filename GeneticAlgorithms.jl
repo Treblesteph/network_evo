@@ -19,12 +19,12 @@ export  Entity,
 const ALLDAYS = 4
 const POPSIZE = 100
 
-const MUTATEPATH = 0.1  # Percent of time path sign switched.
+const MUTATEPATH = 0.1    # Percent of time path sign switched.
 const MUTATETMAT = 0.15   # Percent of time transition matrix mutates.
 const MUTATELAG = 0.15    # Percent of time lag duration mutates.
 const MUTATEGATE = 0.07   # Percent of time gate type switches.
 const TMAT_STD = 0.12     # Standard deviation of truc norm rng.
-const LAG_STD = 40       # Standard deviation of truc norm rng.
+const LAG_STD = 100       # Standard deviation of truc norm rng.
 
 # Don't change these unless altering framework.
 const NNODES = 4
@@ -155,11 +155,12 @@ function reset_model(model::GAmodel)
 end
 
 function create_initial_population(model::GAmodel)
+  entities = pmap(model.ga.create_entity, 1:model.initial_pop_size)
     for i = 1:model.initial_pop_size
-        entity = model.ga.create_entity(i)
-
-        push!(model.population, entity)
-        push!(model.pop_data, EntityData(entity, model.gen_num))
+      push!(model.population, entities[i])
+      #TODO: Now the creation is outside of the loop (and in a pmap), does
+      #      the model.gen_num still work??!
+      push!(model.pop_data, EntityData(entities[i], model.gen_num))
     end
 end
 
