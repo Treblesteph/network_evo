@@ -122,6 +122,11 @@ function crossover(group::Array{Any})
     child.net.paths[i] = group[parent].net.paths[i]
     child.net.transmats[i] = group[parent].net.transmats[i]
   end
+  # Set each environmental input according to a random choice between parents.
+  for i in 1:length(group[1].net.inputs)
+    parent = (rand(Uint) % num_parents) + 1
+    child.net.inputs[i] = group[parent].net.inputs[i]
+  end
   # Set each lag according to a random choice between parents.
   for i in 1:length(group[1].net.lags)
     parent = (rand(Uint) % num_parents) + 1
@@ -140,6 +145,8 @@ function crossover(group::Array{Any})
                                             GeneticAlgorithms.NNODES,
                                             GeneticAlgorithms.ALLMINS,
                                             GeneticAlgorithms.MAXLAG)
+  #TODO: This is very slow - can it be parallelised at the population level
+  #      crossover?
   child
 end
 
@@ -155,6 +162,11 @@ function mutate(ent)
     tmatind = (rand(Uint) % length(ent.net.transmats)) + 1
     (ent.net.transmats[tmatind], ent.net.paths[tmatind]) =
       mutate_tmat(ent.net.transmats[tmatind], ent.net.paths[tmatind])
+  end
+  # Environmental input mutations
+  if rand(Float64) < GeneticAlgorithms.MUTATEINPUT
+    inputind = (rand(Uint) % length(ent.net.inputs)) + 1
+    ent.net.inputs[inputind] = mutate_input(ent.net.inputs[inputind])
   end
   # Lag duration mutations.
   if rand(Float64) < GeneticAlgorithms.MUTATELAG
@@ -222,6 +234,10 @@ function mutate_tmat(transmat::Array{Float64}, path::Array{Int64})
   (transmat, path)
 end
 
+function mutate_input(input::Int64)
+  input = mod(input + 1, 2) # This will switch 0 >> 1 or 1 >> 0
+end
+
 function mutate_lag(lag::Int64)
   lag = round(cts_neighbr(lag, GeneticAlgorithms.LAG_STD, 0,
                           GeneticAlgorithms.MAXLAG))
@@ -236,7 +252,7 @@ function mutate_gate(gate::Int64)
   # Mutation causes gate to switch (0 = or; 1 = and)
   # either or >> and
   # or and >> or
-  gate = mod(gate+1, 2)
+  gate = mod(gate + 1, 2) # This will switch 0 >> 1 or 1 >> 0
 end
 
 
