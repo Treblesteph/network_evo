@@ -25,8 +25,9 @@ end
 type Network
   paths::Array{Array{Int64}}
   transmats::Array{Array{Float64}}
+  inputs::Array{Int64} # Is gene activated by environment (bool.)?
   lags::Array{Int64}
-  gates::Array{Int64} # (0 = or; 1 = and)
+  gates::Array{Int64}  # (0 = or; 1 = and)
   generation::Int64
   concseries::Array{Int64}
 end
@@ -96,7 +97,9 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64)
     allpaths[i] = vec(allpaths[i])
   end
   lags = transpose(reshape(lags, NNODES, NNODES))
-  network = Network(allpaths, transmats, lags, gates, 1, Int64[])
+  randselect = ceil(length(NNODES)*rand())
+  inputs = [round(rand()) for i in 1:NNODES]
+  network = Network(allpaths, transmats, inputs, lags, gates, 1, Int64[])
   network.concseries = dynamic_simulation(network, NNODES, ALLMINS, MAXLAG)
   return network
 end
