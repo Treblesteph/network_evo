@@ -21,7 +21,7 @@ const POPSIZE = 100
 
 const MUTATEPATH = 0.1    # Percent of time path sign switched.
 const MUTATETMAT = 0.15   # Percent of time transition matrix mutates.
-const MUTATEINPUT = 0.15  # Percent of time environmental input mutates.
+const MUTATEENVPATH = 0.15# Percent of time environmental path mutates.
 const MUTATELAG = 0.15    # Percent of time lag duration mutates.
 const MUTATEGATE = 0.07   # Percent of time gate type switches.
 const TMAT_STD = 0.12     # Standard deviation of truc norm rng.
