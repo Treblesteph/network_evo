@@ -11,7 +11,6 @@ const DUSKWINDOW = 3 # Hours
 const DAYTIME = 12   # Hours
 #--------------------------------------
 DAYS = zeros(GeneticAlgorithms.ALLDAYS, DAYTIME * 60)
-NIGHTS = zeros(GeneticAlgorithms.ALLDAYS, NIGHTTIME * 60)
 DAWNS = zeros(GeneticAlgorithms.ALLDAYS, DAWNWINDOW * 60)
 DUSKS = zeros(GeneticAlgorithms.ALLDAYS, DUSKWINDOW * 60)
 
@@ -27,22 +26,21 @@ type EvolvableNetwork <: GeneticAlgorithms.Entity
   fitness
   EvolvableNetwork() = new(create_network(GeneticAlgorithms.ALLMINS,
                                           GeneticAlgorithms.NNODES,
-                                          GeneticAlgorithms.MAXLAG), nothing)
+                                          GeneticAlgorithms.MAXLAG,
+                                          DAYS), nothing)
   EvolvableNetwork(net) = new(net, nothing)
 end
 
 function create_entity(num)
   netw = generate_fit_network(GeneticAlgorithms.ALLMINS,
                               GeneticAlgorithms.NNODES,
-                              GeneticAlgorithms.MAXLAG, 50)
+                              GeneticAlgorithms.MAXLAG, 50, DAYS)
   EvolvableNetwork(netw)
 end
 
 function fitness(ent::EvolvableNetwork)
   fitness(ent.net)
 end
-
-#TODO: Add in another fitness function including a light pattern.
 
 function fitness(net::Network)
   gene1 = net.concseries[:, 1]
@@ -144,7 +142,8 @@ function crossover(group::Array{Any})
   child.net.concseries = dynamic_simulation(child.net,
                                             GeneticAlgorithms.NNODES,
                                             GeneticAlgorithms.ALLMINS,
-                                            GeneticAlgorithms.MAXLAG)
+                                            GeneticAlgorithms.MAXLAG,
+                                            DAYS)
   #TODO: This is very slow - can it be parallelised at the population level
   #      crossover?
   child
