@@ -10,15 +10,14 @@ const DAWNWINDOW = 3 # Hours
 const DUSKWINDOW = 3 # Hours
 const DAYTIME = 12   # Hours
 #--------------------------------------
-DAYS = zeros(GeneticAlgorithms.ALLDAYS, DAYTIME * 60)
-DAWNS = zeros(GeneticAlgorithms.ALLDAYS, DAWNWINDOW * 60)
-DUSKS = zeros(GeneticAlgorithms.ALLDAYS, DUSKWINDOW * 60)
+DAYS = zeros(Int64, GeneticAlgorithms.ALLDAYS, DAYTIME * 60)
+DAWNS = zeros(Int64, GeneticAlgorithms.ALLDAYS, DAWNWINDOW * 60)
+DUSKS = zeros(Int64, GeneticAlgorithms.ALLDAYS, DUSKWINDOW * 60)
 
 for t = 1:GeneticAlgorithms.ALLDAYS # Converting to arrays of minutes.
   DAYS[t, :] = (1 + 60 * 24 * (t - 1)):(60 * (DAYTIME + 24 * (t - 1)))
   DAWNS[t, :] = (1 + 60 * 24 * (t - 1)):(60 * (DAWNWINDOW + 24 * (t - 1)))
-  DUSKS[t, :] = (1 + 60 * (12 - DUSKWINDOW + 24 * (t - 1))):
-                (60 * (12 + 24 * (t - 1)))
+  DUSKS[t, :] = (1+60*(12-DUSKWINDOW+24*(t-1))):(60*(12+24*(t-1)))
 end
 
 type EvolvableNetwork <: GeneticAlgorithms.Entity
@@ -120,10 +119,10 @@ function crossover(group::Array{Any})
     child.net.paths[i] = group[parent].net.paths[i]
     child.net.transmats[i] = group[parent].net.transmats[i]
   end
-  # Set each environmental input according to a random choice between parents.
-  for i in 1:length(group[1].net.inputs)
+  # Set each environmental path according to a random choice between parents.
+  for i in 1:length(group[1].net.envpath)
     parent = (rand(Uint) % num_parents) + 1
-    child.net.inputs[i] = group[parent].net.inputs[i]
+    child.net.envpath[i] = group[parent].net.envpath[i]
   end
   # Set each lag according to a random choice between parents.
   for i in 1:length(group[1].net.lags)
@@ -162,10 +161,10 @@ function mutate(ent)
     (ent.net.transmats[tmatind], ent.net.paths[tmatind]) =
       mutate_tmat(ent.net.transmats[tmatind], ent.net.paths[tmatind])
   end
-  # Environmental input mutations
-  if rand(Float64) < GeneticAlgorithms.MUTATEINPUT
-    inputind = (rand(Uint) % length(ent.net.inputs)) + 1
-    ent.net.inputs[inputind] = mutate_input(ent.net.inputs[inputind])
+  # Environmental path mutations
+  if rand(Float64) < GeneticAlgorithms.MUTATEENVPATH
+    envpathind = (rand(Uint) % length(ent.net.envpath)) + 1
+    ent.net.envpath[envpathind] = mutate_envpath(ent.net.envpath[envpathind])
   end
   # Lag duration mutations.
   if rand(Float64) < GeneticAlgorithms.MUTATELAG
@@ -233,8 +232,8 @@ function mutate_tmat(transmat::Array{Float64}, path::Array{Int64})
   (transmat, path)
 end
 
-function mutate_input(input::Int64)
-  input = mod(input + 1, 2) # This will switch 0 >> 1 or 1 >> 0
+function mutate_envpath(envpath::Int64)
+  envpath = mod(envpath + 1, 2) # This will switch 0 >> 1 or 1 >> 0
 end
 
 function mutate_lag(lag::Int64)
