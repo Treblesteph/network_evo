@@ -74,7 +74,8 @@ end
 #TODO: Add in extrinsic noise: a stochastic process that is common to a
 #      (sub)set of genes in the network.
 
-function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64)
+function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
+                        ENVIRON::Array{Int64})
   # Randomly select interaction type for each entry.
   allpaths::Array{Array{Int64}} = [Int64[] for i in 1:(NNODES^2)]
   lags::Array{Int64} = zeros(Int64, NNODES^2)
@@ -100,15 +101,17 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64)
   randselect = ceil(length(NNODES)*rand())
   inputs = [round(rand()) for i in 1:NNODES]
   network = Network(allpaths, transmats, inputs, lags, gates, 1, Int64[])
-  network.concseries = dynamic_simulation(network, NNODES, ALLMINS, MAXLAG)
+  network.concseries = dynamic_simulation(network, NNODES, ALLMINS, MAXLAG,
+                                          ENVIRON)
   return network
 end
 
 function generate_fit_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
-                              selectfrom::Int64)
+                              selectfrom::Int64, ENVIRON{Array{Int64}})
 # Generates an array of networks and chooses the fittest one.
   select_pop::Array{Network} = [create_network(ALLMINS, NNODES,
-                                               MAXLAG) for j in 1:selectfrom]
+                                               MAXLAG,
+                                               ENVIRON) for j in 1:selectfrom]
   fitnessval::Array{Float64} = ones(Float64, selectfrom)
   for g in 1:selectfrom
     fitnessval[g] = fitness(select_pop[g])
@@ -118,7 +121,8 @@ end
 
 function create_population(POPSIZE::Int64, ALLMINS::Int64,
                            NNODES::Int64, MAXLAG::Int64)
-  population::Array{Network} = [create_network(ALLMINS, NNODES, MAXLAG)
+  population::Array{Network} = [create_network(ALLMINS, NNODES,
+                                               MAXLAG, ENVIRON)
                                 for j in 1:POPSIZE]
   return population
 end
