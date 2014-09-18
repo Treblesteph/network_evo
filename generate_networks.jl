@@ -25,7 +25,7 @@ end
 type Network
   paths::Array{Array{Int64}}
   transmats::Array{Array{Float64}}
-  inputs::Array{Int64} # Is gene activated by environment (bool.)?
+  envpath::Array{Int64} # Is gene activated by environment (bool.)?
   lags::Array{Int64}
   gates::Array{Int64}  # (0 = or; 1 = and)
   generation::Int64
@@ -69,13 +69,11 @@ function create_interaction(i::Interaction, ALLMINS::Int64, MAXLAG::Int64)
   return(chain, lag, transmat)
 end
 
-#TODO: Add in the capacity to respond to an environmental input for each gene.
-
 #TODO: Add in extrinsic noise: a stochastic process that is common to a
 #      (sub)set of genes in the network.
 
 function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
-                        ENVIRON::Array{Int64})
+                        ENVIRON)
   # Randomly select interaction type for each entry.
   allpaths::Array{Array{Int64}} = [Int64[] for i in 1:(NNODES^2)]
   lags::Array{Int64} = zeros(Int64, NNODES^2)
@@ -99,18 +97,17 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
   end
   lags = transpose(reshape(lags, NNODES, NNODES))
   randselect = ceil(length(NNODES)*rand())
-  inputs = [round(rand()) for i in 1:NNODES]
-  network = Network(allpaths, transmats, inputs, lags, gates, 1, Int64[])
+  envpaths = [round(rand()) for i in 1:NNODES]
+  network = Network(allpaths, transmats, envpaths, lags, gates, 1, Int64[])
   network.concseries = dynamic_simulation(network, NNODES, ALLMINS, MAXLAG,
                                           ENVIRON)
   return network
 end
 
 function generate_fit_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
-                              selectfrom::Int64, ENVIRON{Array{Int64}})
+                              selectfrom::Int64, ENVIRON)
 # Generates an array of networks and chooses the fittest one.
-  select_pop::Array{Network} = [create_network(ALLMINS, NNODES,
-                                               MAXLAG,
+  select_pop::Array{Network} = [create_network(ALLMINS, NNODES, MAXLAG,
                                                ENVIRON) for j in 1:selectfrom]
   fitnessval::Array{Float64} = ones(Float64, selectfrom)
   for g in 1:selectfrom
@@ -119,8 +116,8 @@ function generate_fit_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
   fitnet::Network = select_pop[fitnessval .== apply(min, fitnessval)][1]
 end
 
-function create_population(POPSIZE::Int64, ALLMINS::Int64,
-                           NNODES::Int64, MAXLAG::Int64)
+function create_population(POPSIZE::Int64, ALLMINS::Int64, NNODES::Int64,
+                           MAXLAG::Int64, ENVIRON)
   population::Array{Network} = [create_network(ALLMINS, NNODES,
                                                MAXLAG, ENVIRON)
                                 for j in 1:POPSIZE]
