@@ -30,7 +30,14 @@ function make_decision_mat(NNODES)
                                                   paths_i, input_i,
                                                   envpath_i, gate_i, init_i)
   decisionmat::Array{Int64, 2} = hcat(scenariomat, decisionarray)
-  return decisionmat
+  decdict = Dict{Array{Int64}, Int64}()
+  for r in 1:size(decisionmat, 1)
+    row = decisionmat[r, :]
+    key = row[1:end-1]
+    value = row[end]
+    decdict[key] = value
+  end
+  return decdict
 end
 
 function decision_array(scenariomat, genes_i, paths_i, input_i,
@@ -103,18 +110,7 @@ function decision_array(scenariomat, genes_i, paths_i, input_i,
   return decisionarray
 end
 
-function dynamic_simulation(net, NNODES, ALLMINS, MAXLAG, ENVIRON)
-  # Generating decision matrix
-  #TODO: This only really needs to be made once, currently it is remade each
-  #      time a dynamic simulation is run.
-  decmat = make_decision_mat(NNODES)
-  decdict = Dict{Array{Int64}, Int64}()
-  for r in 1:size(decmat, 1)
-    row = decmat[r, :]
-    key = row[1:end-1]
-    value = row[end]
-    decdict[key] = value
-  end
+function dynamic_simulation(net, NNODES, ALLMINS, MAXLAG, ENVIRON, dec_hash)
   # Making an array of length ALLMINS which indicates whether the environmental
   # signal is on or off.
   environ_signal::Array{Int64} = zeros(Int64, ALLMINS)
@@ -139,14 +135,15 @@ function dynamic_simulation(net, NNODES, ALLMINS, MAXLAG, ENVIRON)
       # their lags, and the gate type, to determine the next concentration.
       genes::Array{Int64} = [concs[MAXLAG+t-lags[nd, jj], jj] for jj in 1:NNODES]
       path::Array{Int64} = [paths[nd, k][MAXLAG+t-lags[nd, k]] for k in 1:NNODES]
-      gate::Array{Int64} = [gates[nd]]
       envpath::Array{Int64} = [envpaths[nd]]
+      envinput::Array{Int64} = [environ_signal[t]]
+      gate::Array{Int64} = [gates[nd]]
       init::Array{Int64} = [concs[MAXLAG+t, nd]]
       # Next will compare this row to the rows in decision matrix to determine
       # the next state of gene nd.
-      decisionrow::Array{Int64, 1} = [genes, path, environ_signal[t], envpath,
+      decisionrow::Array{Int64, 1} = [genes, path, envpath, envinput,
                                       gate, init]
-      concs[t+MAXLAG+1, nd] = decdict[decisionrow]
+      concs[t+MAXLAG+1, nd] = dec_hash[decisionrow]
     end
   end
   concs = concs[MAXLAG+1:end, :]
