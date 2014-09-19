@@ -41,6 +41,9 @@ function fitness(ent::EvolvableNetwork)
   fitness(ent.net)
 end
 
+#TODO: Make an additional fitness cost to clustering (niching), so that
+#      the population remains more diverse.
+
 function fitness(net::Network)
   gene1 = net.concseries[:, 1]
   gene2 = net.concseries[:, 2]
@@ -108,6 +111,10 @@ function group_entities(pop)
 end
 
 Base.convert(::Type{Network}, T::Type{Network}) = T
+
+#TODO: Make a more sophisticated crossover function that sets a switchpoint
+#      number, and makes crossovers of multiple element blocks (rather than
+#      each individual trait).
 
 function crossover(group::Array{Any})
   # Initialising an empty network to be the child.
