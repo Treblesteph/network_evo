@@ -31,10 +31,11 @@ type EvolvableNetwork <: GeneticAlgorithms.Entity
 end
 
 function create_entity(num)
-  netw = generate_fit_network(GeneticAlgorithms.ALLMINS,
-                              GeneticAlgorithms.NNODES,
-                              GeneticAlgorithms.MAXLAG, 50, DAYS)
-  EvolvableNetwork(netw)
+  # netw = generate_fit_network(GeneticAlgorithms.ALLMINS,
+  #                             GeneticAlgorithms.NNODES,
+  #                             GeneticAlgorithms.MAXLAG, 50, DAYS)
+   netw = create_troein_1D(GeneticAlgorithms.ALLMINS, DAYS)
+   EvolvableNetwork(netw)
 end
 
 function fitness(ent::EvolvableNetwork)
