@@ -99,8 +99,38 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
   randselect = ceil(length(NNODES)*rand())
   envpaths = [round(rand()) for i in 1:NNODES]
   network = Network(allpaths, transmats, envpaths, lags, gates, 1, Int64[])
-  network.concseries = dynamic_simulation(network, NNODES, ALLMINS, MAXLAG,
-                                          ENVIRON)
+  network.concseries = dynamic_simulation(network, NNODES, ALLMINS,
+                                          MAXLAG, ENVIRON,
+                                          GeneticAlgorithms.decisionhash)
+  return network
+end
+
+function create_troein_1D(ALLMINS::Int64, ENVIRON)
+  # Creating a boolean representation of the network shown in figure 1D of
+  # Troein, Locke et al., 2009.
+  # Activation from gene 3 to 4 (lag 2.61hr)
+  # Repression from gene 3 to 1 (lag 2.61hr)
+  # Repression from gene 4 to 2 (lag 14hr)
+  # Light sensing in genes 1, 2, & 3
+  # All gates set as "or"
+  paths::Array{Array{Int64}} = [[zeros(Int64, ALLMINS)] for i in 1:16]
+  paths[1][9] -= 1; paths[1][12] += 1; paths[1][15] -= 1;
+  transmats::Array{Array{Float64}} = [[1 0; 0 1] for i in 1:16]
+  envpath::Array{Int64} = [1, 1, 1, 0]
+  lags::Array{Int64} = zeros(Int64, 16)
+  lags[9] = 157; lags[12] = 157; lags[15] = 840;
+  gates::Array{Int64} = zeros(Int64, 4)
+  generation::Int64 = 1
+  paths = transpose(reshape(paths, 4, 4))
+  for i in 1:length(paths)
+    paths[i] = vec(paths[i])
+  end
+  lags = transpose(reshape(lags, 4, 4))
+  network = Network(paths, transmats, envpath, lags,
+                    gates, generation, Int64[])
+  network.concseries = dynamic_simulation(network, 4, ALLMINS,
+                                          60*24, ENVIRON,
+                                          GeneticAlgorithms.decisionhash)
   return network
 end
 
