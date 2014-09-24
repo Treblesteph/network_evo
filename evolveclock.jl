@@ -119,42 +119,53 @@ Base.convert(::Type{Network}, T::Type{Network}) = T
 
 function crossover(group::Array{Any})
   # Initialising an empty network to be the child.
-  child = EvolvableNetwork()
   num_parents = length(group)
   # Set each path according to a random choice between parents.
+  childpaths::Array{Array{Int64}} = [Int64[] for i in 1:(GeneticAlgorithms.NNODES^2)]
+  childtmats::Array{Array{Float64}} = [Float64[] for i in 1:16]
   for i in 1:length(group[1].net.paths)
     parent = (rand(Uint) % num_parents) + 1
-    child.net.paths[i] = group[parent].net.paths[i]
-    child.net.transmats[i] = group[parent].net.transmats[i]
+    childpaths[i] = group[parent].net.paths[i]
+    childtmats[i] = group[parent].net.transmats[i]
   end
   # Set each environmental path according to a random choice between parents.
+  childenvpath::Array{Int64} = zeros(Int64, GeneticAlgorithms.NNODES)
   for i in 1:length(group[1].net.envpath)
     parent = (rand(Uint) % num_parents) + 1
-    child.net.envpath[i] = group[parent].net.envpath[i]
+    childenvpath[i] = group[parent].net.envpath[i]
   end
   # Set each lag according to a random choice between parents.
+  childlags::Array{Int64} = zeros(Int64, GeneticAlgorithms.NNODES^2)
   for i in 1:length(group[1].net.lags)
     parent = (rand(Uint) % num_parents) + 1
-    child.net.lags[i] = group[parent].net.lags[i]
+    childlags[i] = group[parent].net.lags[i]
   end
   # Set each gate according to a random choice between parents.
+  childgates::Array{Int64} = zeros(Int64, GeneticAlgorithms.NNODES)
   for i in 1:length(group[1].net.gates)
     parent = (rand(Uint) % num_parents) + 1
-    child.net.gates[i] = group[parent].net.gates[i]
+    childgates[i] = group[parent].net.gates[i]
   end
-  child.net.generation = 1 + group[1].net.generation
+  childgen = 1 + group[1].net.generation
+  childpaths = transpose(reshape(childpaths, GeneticAlgorithms.NNODES,
+                                 GeneticAlgorithms.NNODES))
+  for i in 1:length(childpaths)
+    childpaths[i] = vec(childpaths[i])
+  end
+  childlags = transpose(reshape(childlags, GeneticAlgorithms.NNODES,
+                                GeneticAlgorithms.NNODES))
   #TODO: Create an array for generation, push new generation to the array
   #      each time the network survives for a new generation. To get generation
   #      from GeneticAlgorithms code, something like model.gen_num.
-  child.net.concseries = dynamic_simulation(child.net,
-                                            GeneticAlgorithms.NNODES,
-                                            GeneticAlgorithms.ALLMINS,
-                                            GeneticAlgorithms.MAXLAG,
-                                            DAYS,
-                                            GeneticAlgorithms.decisionhash)
+  childnet = Network(childpaths, childtmats, childenvpath, childlags,
+                     childgates, childgen)
+  childnet.concseries = dynamic_simulation(childnet, GeneticAlgorithms.NNODES,
+                                           GeneticAlgorithms.ALLMINS,
+                                           GeneticAlgorithms.MAXLAG, DAYS,
+                                           GeneticAlgorithms.decisionhash)
   #TODO: This is very slow - can it be parallelised at the population level
   #      crossover?
-  child
+  child = EvolvableNetwork(childnet)
 end
 
 function mutate(ent)
@@ -200,22 +211,24 @@ function mutate_path(path::Array{Int64}, transmat::Array{Float64})
   # no interaction >> stochastic repressor
   # If a stochastic interaction is introduced, its transition matrix starts
   # with 50%/50% probabilities.
-  if sum(unique(path)) != 1         # Activation or repression
+  if sum(unique(path)) != 0
+  # Activation or repression - stochastic or not
     randselect = rand()
-    if randselect <= 0.75
+    if randselect <= 0.5
       path = -path
     elseif randselect <= 1
       path = zeros(Int64, GeneticAlgorithms.ALLMINS)
     end
-  elseif sum(unique(path)) == 0     # No interaction
+  elseif sum(unique(path)) == 0
+  # No interaction
     randselect = rand()
-    if randselect <= 0.4
+    if randselect <= 0.25
       path = ones(Int64, GeneticAlgorithms.ALLMINS)
     elseif randselect <= 0.5
       transmat = [0.5 0.5; 0.5 0.5]
       g = MarkovGenerator([0, 1], transmat)
       path = generate(g, GeneticAlgorithms.ALLMINS)
-    elseif randselect <= 0.9
+    elseif randselect <= 0.75
       path = -1 * ones(Int64, GeneticAlgorithms.ALLMINS)
     elseif randselect <= 1
       transmat = [0.5 0.5; 0.5 0.5]
