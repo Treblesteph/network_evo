@@ -32,6 +32,17 @@ type Network
   concseries::Array{Int64}
 end
 
+# Setting method for defining network with no concentration series.
+function Network(paths::Array{Array{Int64}},
+                 transmats::Array{Array{Float64}},
+                 envpath::Array{Int64},
+                 lags::Array{Int64},
+                 gates::Array{Int64},
+                 generation::Int64)
+  Network(paths, transmats, envpath, lags, gates, generation, [])
+end
+
+
 repression = Interaction([-1])
 activation = Interaction([1])
 noInteraction = Interaction([0])
@@ -114,7 +125,7 @@ function create_troein_1D(ALLMINS::Int64, ENVIRON)
   # Light sensing in genes 1, 2, & 3
   # All gates set as "or"
   paths::Array{Array{Int64}} = [[zeros(Int64, ALLMINS)] for i in 1:16]
-  paths[1][9] -= 1; paths[1][12] += 1; paths[1][15] -= 1;
+  paths[9] -= 1; paths[12] += 1; paths[15] -= 1;
   transmats::Array{Array{Float64}} = [[1 0; 0 1] for i in 1:16]
   envpath::Array{Int64} = [1, 1, 1, 0]
   lags::Array{Int64} = zeros(Int64, 16)
