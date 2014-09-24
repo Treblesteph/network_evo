@@ -21,10 +21,14 @@ export  Entity,
 const ALLDAYS = 4
 const POPSIZE = 100
 
+#TODO: Maybe these mutation rates need to be higher, since a lot of the time,
+#      the things being mutated will not be used, for example, mutating a lag
+#      can happen when the interaction is set to zero.
+
 const MUTATEPATH = 0.01     # Percent of time path sign switched.
 const MUTATETMAT = 0.01     # Percent of time transition matrix mutates.
 const MUTATEENVPATH = 0.01  # Percent of time environmental path mutates.
-const MUTATELAG = 0.05      # Percent of time lag duration mutates.
+const MUTATELAG = 0.15      # Percent of time lag duration mutates.
 const MUTATEGATE = 0.01     # Percent of time gate type switches.
 const TMAT_STD = 0.1        # Standard deviation of truc norm rng.
 const LAG_STD = 60          # Standard deviation of truc norm rng.
@@ -69,6 +73,7 @@ end
 type GAmodel
     initial_pop_size::Int
     gen_num::Int
+    all_fitnesses
 
     population::Array
     pop_data::Array{EntityData}
@@ -78,7 +83,8 @@ type GAmodel
 
     ga
 
-    GAmodel() = new(0, 1, Any[], EntityData[], EntityData[], MersenneTwister(time_ns()), nothing)
+    GAmodel() = new(0, 1, Float64[], Any[], EntityData[], EntityData[],
+                    MersenneTwister(time_ns()), nothing)
 end
 
 global _g_model
@@ -124,6 +130,7 @@ end
 function runga(model::GAmodel, stop_after = nothing)
     reset_model(model)
     create_initial_population(model)
+    model.all_fitnesses = zeros(Float64, stop_after)
     counter = 1
     while true
         print("generation $(model.gen_num). ")
@@ -178,6 +185,7 @@ function evaluate_population(model::GAmodel)
     for i in 1:length(scores)
         fitness!(model.population[i], scores[i])
     end
+    model.all_fitnesses[model.gen_num] = round(mean(scores), 2)
     print("mean fitness: $(round(mean(scores), 4)). ")
     sort!(model.population; rev = true)
     print("Highest fitnesses: $([e.fitness for e in model.population[1:5]])")
