@@ -1,8 +1,12 @@
 # Generates a table with all combinations of elements from each choice.
-# The 'choices' option should be a tuple of arrays containing values that
-# each column can take.
+# The 'choices' option should be an array of arrays containing values that
+# each column can take. If uniqueelts is 1 then the combination only
+# uses unique entries for each column.
 
-function multichoose(choices::Array{Array{Int64}})
+function multichoose(choices::Array{Array{Int64}}, uniqueelts::Int64)
+  if uniqueelts == 1
+    choices = [[unique(choices[i])] for i in 1:length(choices)]
+  end
   ncols::Int64 = length(choices)
   nrows::Int64 = prod([length(choices[i]) for i in 1:ncols])
   multimat::Array{Int64} = zeros(Int64, nrows, ncols)
