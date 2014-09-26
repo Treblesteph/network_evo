@@ -118,6 +118,7 @@ Base.convert(::Type{Network}, T::Type{Network}) = T
 #      each individual trait).
 
 function crossover(group::Array{Any})
+  print("x")
   # Initialising an empty network to be the child.
   num_parents = length(group)
   # Set each path according to a random choice between parents.
@@ -169,6 +170,7 @@ function crossover(group::Array{Any})
 end
 
 function mutate(ent)
+  print(".")
   # Path sign switch mutations.
   if rand(Float64) < GeneticAlgorithms.MUTATEPATH
     pathind = (rand(Uint) % length(ent.net.paths)) + 1
@@ -211,6 +213,7 @@ function mutate_path(path::Array{Int64}, transmat::Array{Float64})
   # no interaction >> stochastic repressor
   # If a stochastic interaction is introduced, its transition matrix starts
   # with 50%/50% probabilities.
+  print("p")
   if sum(unique(path)) != 0
   # Activation or repression - stochastic or not
     randselect = rand()
@@ -240,6 +243,7 @@ function mutate_path(path::Array{Int64}, transmat::Array{Float64})
 end
 
 function mutate_tmat(transmat::Array{Float64}, path::Array{Int64})
+  print("t")
   # Generate new value from truncated normal distribution
   #TODO: The way this is programmed currently means that a 2x2 transition
   #      matrix is required (i.e. only two states). This should be generalised.
@@ -255,10 +259,12 @@ function mutate_tmat(transmat::Array{Float64}, path::Array{Int64})
 end
 
 function mutate_envpath(envpath::Int64)
+  print("e")
   envpath = mod(envpath + 1, 2) # This will switch 0 >> 1 or 1 >> 0
 end
 
 function mutate_lag(lag::Int64)
+  print("l")
   lag = round(cts_neighbr(lag, GeneticAlgorithms.LAG_STD, 0,
                           GeneticAlgorithms.MAXLAG))
 end
@@ -269,6 +275,7 @@ function cts_neighbr(val::Number, stdev::Number, lower::Number, upper::Number)
 end
 
 function mutate_gate(gate::Int64)
+  print("g")
   # Mutation causes gate to switch (0 = or; 1 = and)
   # either or >> and
   # or and >> or
