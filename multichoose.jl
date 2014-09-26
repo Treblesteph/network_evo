@@ -36,7 +36,7 @@ function call_multi()
   x3::Array{Int64} = [1, 0]
   x4::Array{Int64} = [0, 1, -1]
   x::Array{Array{Int64}} = Array[x1, x2, x3, x4]
-  multichoose(x)
+  multichoose(x, 0)
 end
 
 call_multi()
