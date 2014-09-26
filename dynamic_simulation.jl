@@ -23,7 +23,7 @@ function make_decision_mat(NNODES)
                                      envpathchoices, gatechoices, initchoices]
   # Scenariomat is all combinations of genes, gene paths, inputs, environment
   # paths, gates, and initial conditions - i.e. all possible scenarios.
-  scenariomat::Array{Int64, 2} = multichoose(allchoices)
+  scenariomat::Array{Int64, 2} = multichoose(allchoices, 0)
   # Decision array will become the last column of decision matrix, it is the
   # column determining the state at time t + 1 based on the scenariomat.
   decisionarray::Array{Int64, 1} = decision_array(scenariomat, genes_i,
