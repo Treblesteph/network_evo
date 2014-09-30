@@ -116,6 +116,17 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
   return network
 end
 
+# Adding a method for create_network that uses globals so needs fewer
+# input arguments :)
+
+function create_network(ind::Number)
+
+  create_network(GeneticAlgorithms.ALLMINS, GeneticAlgorithms.NNODES,
+                 GeneticAlgorithms.MAXLAG, clockga.DAYS)
+
+end
+
+
 function create_troein_1D(ALLMINS::Int64, ENVIRON)
   # Creating a boolean representation of the network shown in figure 1D of
   # Troein, Locke et al., 2009.
