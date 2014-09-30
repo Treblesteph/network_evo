@@ -25,10 +25,10 @@ const POPSIZE = 100
 #      the things being mutated will not be used, for example, mutating a lag
 #      can happen when the interaction is set to zero.
 
-const MUTATEPATH = 0.02     # Percent of time path type switched.
-const MUTATETMAT = 0.05     # Percent of time transition matrix mutates.
-const MUTATEENVPATH = 0.05  # Percent of time environmental path mutates.
-const MUTATELAG = 0.5       # Percent of time lag duration mutates.
+const MUTATEPATH = 0.01     # Percent of time path type switched.
+const MUTATETMAT = 0.02     # Percent of time transition matrix mutates.
+const MUTATEENVPATH = 0.02  # Percent of time environmental path mutates.
+const MUTATELAG = 0.1       # Percent of time lag duration mutates.
 const MUTATEGATE = 0.01     # Percent of time gate type switches.
 const TMAT_STD = 0.5        # Standard deviation of truc norm rng.
 const LAG_STD = 100         # Standard deviation of truc norm rng.
@@ -173,8 +173,6 @@ function create_initial_population(model::GAmodel)
     for i = 1:model.initial_pop_size
       entity = model.ga.create_entity(i)
       push!(model.population, entity)
-      #TODO: Now the creation is outside of the loop (and in a pmap), does
-      #      the model.gen_num still work??!
       push!(model.pop_data, EntityData(entity, model.gen_num))
     end
 end
@@ -186,9 +184,9 @@ function evaluate_population(model::GAmodel)
         fitness!(model.population[i], scores[i])
     end
     model.all_fitnesses[model.gen_num] = round(mean(scores), 2)
-    print("mean fitness: $(round(mean(scores), 4)). ")
+    print("mean fitness: $(round(mean(scores), 2)). ")
     sort!(model.population; rev = true)
-    print("Highest fitnesses: $([e.fitness for e in model.population[1:5]])")
+    print("Best fitnesses: $([e.fitness for e in model.population[1:5]])")
 end
 
 function crossover_population(model::GAmodel, groupings)
@@ -200,7 +198,6 @@ function crossover_population(model::GAmodel, groupings)
 
     model.pop_data = EntityData[]
     sizehint(model.pop_data, length(old_pop))
-
     model.gen_num += 1
     for group in groupings
         parents = { old_pop[i] for i in group }
