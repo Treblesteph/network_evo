@@ -31,11 +31,11 @@ type EvolvableNetwork <: GeneticAlgorithms.Entity
 end
 
 function create_entity(num)
-  # netw = generate_fit_network(GeneticAlgorithms.ALLMINS,
-  #                             GeneticAlgorithms.NNODES,
-  #                             GeneticAlgorithms.MAXLAG, 50, DAYS)
-   netw = create_troein_1D(GeneticAlgorithms.ALLMINS, DAYS)
-   EvolvableNetwork(netw)
+  netw = generate_fit_network(GeneticAlgorithms.ALLMINS,
+                               GeneticAlgorithms.NNODES,
+                               GeneticAlgorithms.MAXLAG, 50, DAYS)
+  # netw = create_troein_1D(GeneticAlgorithms.ALLMINS, DAYS)
+  EvolvableNetwork(netw)
 end
 
 function fitness(ent::EvolvableNetwork)
@@ -198,6 +198,10 @@ function mutate(ent)
     gateind = (rand(Uint) % length(ent.net.gates)) + 1
     ent.net.gates[gateind] = mutate_gate(ent.net.gates[gateind])
   end
+  ent.net.concseries = dynamic_simulation(ent.net, GeneticAlgorithms.NNODES,
+                                           GeneticAlgorithms.ALLMINS,
+                                           GeneticAlgorithms.MAXLAG, DAYS,
+                                           GeneticAlgorithms.decisionhash)
   ent
 end
 
