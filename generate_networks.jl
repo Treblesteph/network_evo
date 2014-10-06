@@ -128,7 +128,7 @@ function create_determ_net(ALLMINS::Int64,NNODES::Int64, MAXLAG::Int64,
   for p = 1:(NNODES^2)
     intchoices = [repression, activation, noInteraction]
     randselect = ceil(length(intchoices)*rand())
-    
+
     (allpaths[p], lags[p], transmats[p]) = create_interaction(intchoices[randselect],
                                                               ALLMINS, MAXLAG)
   end
@@ -187,10 +187,15 @@ function create_troein_1D(ALLMINS::Int64, ENVIRON)
 end
 
 function generate_fit_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
-                              selectfrom::Int64, ENVIRON)
+                              selectfrom::Int64, ENVIRON, determ_stoch)
 # Generates an array of networks and chooses the fittest one.
-  select_pop::Array{Network} = [create_network(ALLMINS, NNODES, MAXLAG,
-                                               ENVIRON) for j in 1:selectfrom]
+  if determ_stoch == 1
+    select_pop::Array{Network} = [create_network(ALLMINS, NNODES, MAXLAG,
+                                          ENVIRON) for j in 1:selectfrom]
+  elseif determ_stoch == 0
+    select_pop::Array{Network} = [create_determ_net(ALLMINS, NNODES, MAXLAG,
+                                          ENVIRON) for j in 1:selectfrom]
+  end
   fitnessval::Array{Float64} = ones(Float64, selectfrom)
   for g in 1:selectfrom
     fitnessval[g] = fitness(select_pop[g])
