@@ -25,13 +25,13 @@ const POPSIZE = 100
 #      the things being mutated will not be used, for example, mutating a lag
 #      can happen when the interaction is set to zero.
 
-const MUTATEPATH = 0.01     # Percent of time path type switched.
-const MUTATETMAT = 0.02     # Percent of time transition matrix mutates.
-const MUTATEENVPATH = 0.02  # Percent of time environmental path mutates.
-const MUTATELAG = 0.1       # Percent of time lag duration mutates.
-const MUTATEGATE = 0.01     # Percent of time gate type switches.
-const TMAT_STD = 0.5        # Standard deviation of truc norm rng.
-const LAG_STD = 100         # Standard deviation of truc norm rng.
+const MUTATEPATH = 0.02     # Percent of time path type switched.
+const MUTATETMAT = 0.04     # Percent of time transition matrix mutates.
+const MUTATEENVPATH = 0.04  # Percent of time environmental path mutates.
+const MUTATELAG = 0.2       # Percent of time lag duration mutates.
+const MUTATEGATE = 0.02     # Percent of time gate type switches.
+const TMAT_STD = 0.1        # Standard deviation of truc norm rng.
+const LAG_STD = 200         # Standard deviation of truc norm rng.
 
 # Don't change these unless altering framework.
 const NNODES = 4
@@ -206,8 +206,7 @@ function crossover_population(model::GAmodel, groupings)
 
     for i in 1:length(entities)
         push!(model.population, entities[i])
-        push!(model.pop_data, EntityData(model.ga.crossover(parents[i]),
-                                         model.gen_num))
+        push!(model.pop_data, EntityData(entities[i], model.gen_num))
     end
 end
 
