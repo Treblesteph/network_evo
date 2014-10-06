@@ -5,6 +5,7 @@ using Cairo
 
 require("evolveclock.jl")
 require("generate_networks.jl")
+using clockga.fitness
 
 NNETS = 100
 
