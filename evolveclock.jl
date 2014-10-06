@@ -164,8 +164,6 @@ function crossover(group::Array{Any})
                                            GeneticAlgorithms.ALLMINS,
                                            GeneticAlgorithms.MAXLAG, DAYS,
                                            GeneticAlgorithms.decisionhash)
-  #TODO: This is very slow - can it be parallelised at the population level
-  #      crossover?
   child = EvolvableNetwork(childnet)
 end
 
@@ -174,8 +172,7 @@ function mutate(ent)
   # Path sign switch mutations.
   if rand(Float64) < GeneticAlgorithms.MUTATEPATH
     pathind = (rand(Uint) % length(ent.net.paths)) + 1
-    (ent.net.transmats[pathind], ent.net.paths[pathind]) =
-      mutate_path(ent.net.paths[pathind], ent.net.transmats[pathind])
+    ent.net.paths[pathind] = mutate_path(ent.net.paths[pathind])
   end
   # Transition matrix mutations.
   # --- off in non-stochastic simulations.
@@ -201,18 +198,14 @@ function mutate(ent)
   ent
 end
 
-function mutate_path(path::Array{Int64}, transmat::Array{Float64})
+function mutate_path(path::Array{Int64})
   # Mutation causes the path to switch according to following options:
   # activator >> repressor
   # activator >> no interaction
   # repressor >> activator
   # repressor >> no interaction
   # no interaction >> activator
-  # no interaction >> stochastic activator
   # no interaction >> repressor
-  # no interaction >> stochastic repressor
-  # If a stochastic interaction is introduced, its transition matrix starts
-  # with 50%/50% probabilities.
   print("p")
   if sum(unique(path)) != 0
   # Activation or repression - stochastic or not
@@ -225,21 +218,13 @@ function mutate_path(path::Array{Int64}, transmat::Array{Float64})
   elseif sum(unique(path)) == 0
   # No interaction
     randselect = rand()
-    if randselect <= 0.25
+    if randselect <= 0.5
       path = ones(Int64, GeneticAlgorithms.ALLMINS)
-    elseif randselect <= 0.5
-      transmat = [0.5 0.5; 0.5 0.5]
-      g = MarkovGenerator([0, 1], transmat)
-      path = generate(g, GeneticAlgorithms.ALLMINS)
-    elseif randselect <= 0.75
-      path = -1 * ones(Int64, GeneticAlgorithms.ALLMINS)
     elseif randselect <= 1
-      transmat = [0.5 0.5; 0.5 0.5]
-      g = MarkovGenerator([0, -1], transmat)
-      path = generate(g, GeneticAlgorithms.ALLMINS)
+      path = -1 * ones(Int64, GeneticAlgorithms.ALLMINS)
     end
   end
-  (transmat, path)
+  path
 end
 
 function mutate_envpath(envpath::Int64)
