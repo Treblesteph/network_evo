@@ -76,8 +76,8 @@ function fitness(net::Network)
   allG1fitness::Array{Float64} = []
   allG2fitness::Array{Float64} = []
   for d in 1:GeneticAlgorithms.ALLDAYS
-    thisG1fitness = repmat([fitnessG1[d]], 2*d, 1)
-    thisG2fitness = repmat([fitnessG2[d]], 2*d, 1)
+    thisG1fitness = repmat([fitnessG1[d]], 5*d, 1)
+    thisG2fitness = repmat([fitnessG2[d]], 5*d, 1)
     allG1fitness = [allG1fitness, thisG1fitness]
     allG2fitness = [allG2fitness, thisG2fitness]
   end
