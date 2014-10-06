@@ -116,6 +116,36 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
   return network
 end
 
+function create_determ_net(ALLMINS::Int64,NNODES::Int64, MAXLAG::Int64,
+                           ENVIRON)
+  allpaths::Array{Array{Int64}} = [Int64[] for i in 1:(NNODES^2)]
+  lags::Array{Int64} = zeros(Int64, NNODES^2)
+  gatechoices = (0, 1)
+  gates::Array{Int64} = [gatechoices[ceil(length(gatechoices)*rand())]
+                         for i in 1:NNODES]
+  transmats::Array{Array{Float64}} = [Float64[] for i in
+                                      1:(NNODES^2)]
+  for p = 1:(NNODES^2)
+    intchoices = [repression, activation, noInteraction]
+    randselect = ceil(length(intchoices)*rand())
+    
+    (allpaths[p], lags[p], transmats[p]) = create_interaction(intchoices[randselect],
+                                                              ALLMINS, MAXLAG)
+  end
+  allpaths = transpose(reshape(allpaths, NNODES, NNODES))
+  for i in 1:length(allpaths)
+    allpaths[i] = vec(allpaths[i])
+  end
+  lags = transpose(reshape(lags, NNODES, NNODES))
+  randselect = ceil(length(NNODES)*rand())
+  envpaths = [round(rand()) for i in 1:NNODES]
+  network = Network(allpaths, transmats, envpaths, lags, gates, 1, Int64[])
+  network.concseries = dynamic_simulation(network, NNODES, ALLMINS,
+                                          MAXLAG, ENVIRON,
+                                          GeneticAlgorithms.decisionhash)
+  return network
+end
+
 # Adding a method for create_network that uses globals so needs fewer
 # input arguments :)
 
