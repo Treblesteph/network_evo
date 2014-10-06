@@ -31,9 +31,9 @@ type EvolvableNetwork <: GeneticAlgorithms.Entity
 end
 
 function create_entity(num)
-  netw = create_determ_net(GeneticAlgorithms.ALLMINS,
+  netw = generate_fit_network(GeneticAlgorithms.ALLMINS,
                            GeneticAlgorithms.NNODES,
-                           GeneticAlgorithms.MAXLAG, DAYS)
+                           GeneticAlgorithms.MAXLAG, 50, DAYS, 0)
   # netw = create_troein_1D(GeneticAlgorithms.ALLMINS, DAYS)
   EvolvableNetwork(netw)
 end
