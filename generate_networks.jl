@@ -42,6 +42,24 @@ function Network(paths::Array{Array{Int64}},
   Network(paths, transmats, envpath, lags, gates, generation, [])
 end
 
+function Network(ALLMINS::Int64, interactions::Array{Interaction},
+                 envpaths::Array{Int64}, lags::Array{Int64},
+                 gates::Array{Int64}, envsignal::Array{Int64})
+  NNODES::Int64 = length(gates)
+  paths::Array{Array{Int64}} = [Int64[] for i in 1:(NNODES^2)]
+  transmats::Array{Array{Float64}} = [Float64[] for i in 1:(NNODES^2)]
+  for j in 1:(NNODES^2)
+    (paths[j], transmats[j]) = create_interaction(interactions[j], ALLMINS)
+  end
+end
+
+function reshapepaths!(paths::Array{Array{Int64}})
+  NNODES = sqrt(length(paths))
+  paths = transpose(reshape(paths, NNODES, NNODES))
+  for i in 1:length(paths)
+    paths[i] = vec(paths[i])
+  end
+end
 
 repression = Interaction([-1])
 activation = Interaction([1])
@@ -61,7 +79,7 @@ function create_transmat(states::Array)
   return transmat
 end
 
-function create_interaction(i::Interaction, ALLMINS::Int64, MAXLAG::Int64)
+function create_interaction(i::Interaction, ALLMINS::Int64)
   if i == repression
     chain = -1 * ones(Int64, ALLMINS)
     transmat = [1 0; 0 1]
@@ -76,12 +94,13 @@ function create_interaction(i::Interaction, ALLMINS::Int64, MAXLAG::Int64)
     g = MarkovGenerator(i.states, transmat)
     chain = generate(g, ALLMINS)
   end
-  lag::Int64 = Base.convert(Int64, floor(MAXLAG*rand()))
-  return(chain, lag, transmat)
+  return(chain, transmat)
 end
 
 #TODO: Add in extrinsic noise: a stochastic process that is common to a
 #      (sub)set of genes in the network.
+
+function create_network()
 
 function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
                         ENVIRON)
@@ -99,13 +118,11 @@ function create_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
     randselect = ceil(length(intchoices)*rand())
     #TODO: Random paths need to be re-generated each generation (for each
     #      dynanic simulation).
-    (allpaths[p], lags[p], transmats[p]) = create_interaction(intchoices[randselect],
-                                                              ALLMINS, MAXLAG)
+    lags[p]::Int64 = Base.convert(Int64, floor(MAXLAG*rand()))
+    (allpaths[p], transmats[p]) = create_interaction(intchoices[randselect],
+                                                     ALLMINS)
   end
-  allpaths = transpose(reshape(allpaths, NNODES, NNODES))
-  for i in 1:length(allpaths)
-    allpaths[i] = vec(allpaths[i])
-  end
+  allpaths = reshapepaths(allpaths)
   lags = transpose(reshape(lags, NNODES, NNODES))
   randselect = ceil(length(NNODES)*rand())
   envpaths = [round(rand()) for i in 1:NNODES]
@@ -128,9 +145,9 @@ function create_determ_net(ALLMINS::Int64,NNODES::Int64, MAXLAG::Int64,
   for p = 1:(NNODES^2)
     intchoices = [repression, activation, noInteraction]
     randselect = ceil(length(intchoices)*rand())
-
-    (allpaths[p], lags[p], transmats[p]) = create_interaction(intchoices[randselect],
-                                                              ALLMINS, MAXLAG)
+    lags[p]::Int64 = Base.convert(Int64, floor(MAXLAG*rand()))
+    (allpaths[p] transmats[p]) = create_interaction(intchoices[randselect],
+                                                    ALLMINS)
   end
   allpaths = transpose(reshape(allpaths, NNODES, NNODES))
   for i in 1:length(allpaths)
@@ -193,8 +210,8 @@ function generate_fit_network(ALLMINS::Int64, NNODES::Int64, MAXLAG::Int64,
     select_pop::Array{Network} = [create_network(ALLMINS, NNODES, MAXLAG,
                                           ENVIRON) for j in 1:selectfrom]
   elseif determ_stoch == 0
-    select_pop::Array{Network} = [create_determ_net(ALLMINS, NNODES, MAXLAG,
-                                          ENVIRON) for j in 1:selectfrom]
+    select_pop = [create_determ_net(ALLMINS, NNODES, MAXLAG,
+                                    ENVIRON) for j in 1:selectfrom]
   end
   fitnessval::Array{Float64} = ones(Float64, selectfrom)
   for g in 1:selectfrom
