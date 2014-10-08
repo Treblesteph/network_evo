@@ -26,12 +26,12 @@ const POPSIZE = 100
 #      can happen when the interaction is set to zero.
 
 const MUTATEPATH = 0.02     # Percent of time path type switched.
-const MUTATETMAT = 0.04     # Percent of time transition matrix mutates.
+const MUTATETMAT = 0.00     # Percent of time transition matrix mutates.
 const MUTATEENVPATH = 0.04  # Percent of time environmental path mutates.
-const MUTATELAG = 0.2       # Percent of time lag duration mutates.
+const MUTATELAG = 0.95      # Percent of time lag duration mutates.
 const MUTATEGATE = 0.02     # Percent of time gate type switches.
-const TMAT_STD = 0.1        # Standard deviation of truc norm rng.
-const LAG_STD = 200         # Standard deviation of truc norm rng.
+const TMAT_STD = 0          # Standard deviation of truc norm rng.
+const LAG_STD = 60          # Standard deviation of truc norm rng.
 
 # Don't change these unless altering framework.
 const NNODES = 4
