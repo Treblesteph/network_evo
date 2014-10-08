@@ -122,7 +122,7 @@ function dynamic_simulation(net, NNODES, ALLMINS, MAXLAG, ENVIRON, dec_hash)
   gates::Array{Int64} = copy(net.gates)
   timearray::Array{Int64} = [1:ALLMINS]
   concs::Array{Int64} = zeros(Int64, ALLMINS, NNODES)
-  concs[1, :] = ones(Int64, NNODES)
+  concs[1, :] = zeros(Int64, NNODES)
   concs = vcat(zeros(Int64, MAXLAG, NNODES), concs)
   # Adding MAXLAG zeros to the beginning of path vectors.
   for i in 1:length(paths)
