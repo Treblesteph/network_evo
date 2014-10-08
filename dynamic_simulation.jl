@@ -2,19 +2,19 @@
 # of interactions (where P_ij specifies the path from node i to node j).
 include("multichoose.jl");
 
-function make_decision_mat(NNODES)
+function make_decision_mat(nnodes::Int64)
 # This function makes a matrix containing all of the possible scenarios for
 # time t (columns 1:end-1), and their resultant effect on the initial condition
 # i.e. giving the state at time t + 1 in the last column.
-  genes_i = 1:NNODES            # Column indices for gene values.
-  paths_i = 1+NNODES:2*NNODES   # Column indices for path values.
-  input_i = 1+2*NNODES          # Column index for environmental input.
-  envpath_i = 2+2*NNODES        # Column index for environmental path.
-  gate_i = 3+2*NNODES           # Column index for logic gate.
-  init_i = 4+2*NNODES           # Column index for initial value.
+  genes_i = 1:nnodes            # Column indices for gene values.
+  paths_i = 1+nnodes:2*nnodes   # Column indices for path values.
+  input_i = 1+2*nnodes          # Column index for environmental input.
+  envpath_i = 2+2*nnodes        # Column index for environmental path.
+  gate_i = 3+2*nnodes           # Column index for logic gate.
+  init_i = 4+2*nnodes           # Column index for initial value.
   # Range of values that each column can take.
-  genechoices::Array{Array{Int64}} = [[0, 1] for i in 1:NNODES]
-  pathchoices::Array{Array{Int64}} = [[0, 1, -1] for i in 1:NNODES]
+  genechoices::Array{Array{Int64}} = [[0, 1] for i in 1:nnodes]
+  pathchoices::Array{Array{Int64}} = [[0, 1, -1] for i in 1:nnodes]
   inputchoices::Array{Array{Int64}} = Array[[0, 1]]
   envpathchoices::Array{Array{Int64}} = Array[[0, 1]]
   gatechoices::Array{Array{Int64}} = Array[[0, 1]] # 0 = or; 1 = and.
@@ -40,7 +40,7 @@ function make_decision_mat(NNODES)
   return decdict
 end
 
-function decision_array(scenariomat, genes_i, paths_i, input_i,
+function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
                         envpath_i, gate_i, init_i)
   decisionarray::Array{Int64, 1} = zeros(Int64, size(scenariomat, 1))
   for d in 1:length(decisionarray)
@@ -110,41 +110,43 @@ function decision_array(scenariomat, genes_i, paths_i, input_i,
   return decisionarray
 end
 
-function dynamic_simulation(net, NNODES, ALLMINS, MAXLAG, ENVIRON, dec_hash)
-  # Making an array of length ALLMINS which indicates whether the environmental
+function dynamic_simulation(net::Network, nnode::Int64, allmins::Int64,
+                            maxlag::Int64, envsignal::Array{Int64},
+                            dec_hash::Dict)
+  # Making an array of length allmins which indicates whether the environmental
   # signal is on or off.
-  environ_signal::Array{Int64} = zeros(Int64, ALLMINS)
-  environ_signal[ENVIRON] = 1
+  environ_signal::Array{Int64} = zeros(Int64, allmins)
+  environ_signal[envsignal] = 1
   # Extracting network properties for ease of use.
   paths::Array{Array{Int64}} = copy(net.paths)
   envpaths::Array{Int64} = copy(net.envpath)
   lags::Array{Int64} = copy(net.lags)
   gates::Array{Int64} = copy(net.gates)
-  timearray::Array{Int64} = [1:ALLMINS]
-  concs::Array{Int64} = zeros(Int64, ALLMINS, NNODES)
-  concs[1, :] = zeros(Int64, NNODES)
-  concs = vcat(zeros(Int64, MAXLAG, NNODES), concs)
-  # Adding MAXLAG zeros to the beginning of path vectors.
+  timearray::Array{Int64} = [1:allmins]
+  concs::Array{Int64} = zeros(Int64, allmins, nnode)
+  concs[1, :] = zeros(Int64, nnode)
+  concs = vcat(zeros(Int64, maxlag, nnode), concs)
+  # Adding maxlag zeros to the beginning of path vectors.
   for i in 1:length(paths)
-    history = zeros(Int64, MAXLAG)
+    history = zeros(Int64, maxlag)
     paths[i] = [history, paths[i]]
   end
-  for nd in 1:NNODES
+  for nd in 1:nnode
     for t in timearray[1:end-1] # First row is initial condition (already set).
       # Take all current and previous concentrations, all incoming paths and
       # their lags, and the gate type, to determine the next concentration.
-      genes::Array{Int64} = [concs[MAXLAG+t-lags[nd, jj], jj] for jj in 1:NNODES]
-      path::Array{Int64} = [paths[nd, k][MAXLAG+t-lags[nd, k]] for k in 1:NNODES]
+      genes::Array{Int64} = [concs[maxlag+t-lags[nd, jj], jj] for jj in 1:NNODES]
+      path::Array{Int64} = [paths[nd, k][maxlag+t-lags[nd, k]] for k in 1:NNODES]
       envpath::Array{Int64} = [envpaths[nd]]
       envinput::Array{Int64} = [environ_signal[t]]
       gate::Array{Int64} = [gates[nd]]
-      init::Array{Int64} = [concs[MAXLAG+t, nd]]
+      init::Array{Int64} = [concs[maxlag+t, nd]]
       # Next will compare this row to the rows in decision matrix to determine
       # the next state of gene nd.
       decisionrow::Array{Int64, 1} = [genes, path, envpath, envinput,
                                       gate, init]
-      concs[t+MAXLAG+1, nd] = dec_hash[decisionrow]
+      concs[t+maxlag+1, nd] = dec_hash[decisionrow]
     end
   end
-  concs = concs[MAXLAG+1:end, :]
+  concs = concs[maxlag+1:end, :]
 end
