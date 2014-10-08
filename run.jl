@@ -4,8 +4,9 @@ include("generate_networks.jl")
 using GeneticAlgorithms.runga
 using HDF5, JLD
 tic()
-model = runga(clockga; initial_pop_size = 100, stop_after = 10)
-println(toc())
+model = runga(clockga; initial_pop_size = 100, stop_after = 10000)
+println()
+toc()
 now = strftime("%F_%H_%M", time())
 concs1 = model.population[1].net.concseries
 concs2 = model.population[2].net.concseries
