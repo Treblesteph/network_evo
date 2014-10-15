@@ -110,7 +110,7 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
   return decisionarray
 end
 
-function dynamic_simulation(net::Network, nnode::Int64, allmins::Int64,
+function dynamic_simulation(net, nnode::Int64, allmins::Int64,
                             maxlag::Int64, envsignal::Array{Int64},
                             dec_hash::Dict)
   # Making an array of length allmins which indicates whether the environmental
@@ -135,8 +135,8 @@ function dynamic_simulation(net::Network, nnode::Int64, allmins::Int64,
     for t in timearray[1:end-1] # First row is initial condition (already set).
       # Take all current and previous concentrations, all incoming paths and
       # their lags, and the gate type, to determine the next concentration.
-      genes::Array{Int64} = [concs[maxlag+t-lags[nd, jj], jj] for jj in 1:NNODES]
-      path::Array{Int64} = [paths[nd, k][maxlag+t-lags[nd, k]] for k in 1:NNODES]
+      genes::Array{Int64} = [concs[maxlag+t-lags[nd, jj], jj] for jj in 1:nnode]
+      path::Array{Int64} = [paths[nd, k][maxlag+t-lags[nd, k]] for k in 1:nnode]
       envpath::Array{Int64} = [envpaths[nd]]
       envinput::Array{Int64} = [environ_signal[t]]
       gate::Array{Int64} = [gates[nd]]

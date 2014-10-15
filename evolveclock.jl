@@ -23,17 +23,19 @@ end
 type EvolvableNetwork <: GeneticAlgorithms.Entity
   net::Network
   fitness
-  EvolvableNetwork() = new(create_determ_net(GeneticAlgorithms.ALLMINS,
-                                             GeneticAlgorithms.NNODES,
-                                             GeneticAlgorithms.MAXLAG,
-                                             DAYS), nothing)
+  EvolvableNetwork() = new(Network(GeneticAlgorithms.ALLMINS,
+                                   GeneticAlgorithms.NNODES,
+                                   GeneticAlgorithms.MAXLAG,
+                                   GeneticAlgorithms.decisionhash, DAYS,
+                                   [repression, activation,
+                                    noInteraction]), nothing)
   EvolvableNetwork(net) = new(net, nothing)
 end
 
 function create_entity(num)
-  netw = generate_fit_network(GeneticAlgorithms.ALLMINS,
-                           GeneticAlgorithms.NNODES,
-                           GeneticAlgorithms.MAXLAG, 50, DAYS, 0)
+  netw = Network(GeneticAlgorithms.ALLMINS, GeneticAlgorithms.NNODES,
+                 GeneticAlgorithms.MAXLAG, GeneticAlgorithms.decisionhash,
+                 DAYS, [repression, activation, noInteraction], 50, fitness)
   # netw = create_troein_1D(GeneticAlgorithms.ALLMINS, DAYS)
   EvolvableNetwork(netw)
 end

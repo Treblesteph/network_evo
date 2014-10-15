@@ -39,13 +39,20 @@ type Network
   Network(paths::Array{Array{Int64}}, transmats::Array{Array{Float64}},
           envpath::Array{Int64}, lags::Array{Int64}, gates::Array{Int64},
           concseries::Array{Int64}) =
-          new(paths, transmats, envpath, lags, gates, 1 concseries)
+          new(paths, transmats, envpath, lags, gates, 1, concseries)
 
   #-- Inner constructor without concentration timeseries.
 
   Network(paths::Array{Array{Int64}}, transmats::Array{Array{Float64}},
           envpath::Array{Int64}, lags::Array{Int64}, gates::Array{Int64}) =
           new(paths, transmats, envpath, lags, gates, 1, [])
+
+  #-- Inner constructor with generation number.
+
+  Network(paths::Array{Array{Int64}}, transmats::Array{Array{Float64}},
+          envpath::Array{Int64}, lags::Array{Int64}, gates::Array{Int64},
+          generation::Int64) =
+          new(paths, transmats, envpath, lags, gates, generation, [])
 end
 
 #-- Outer Network constructor for predefined interactions.
@@ -103,17 +110,18 @@ function Network(allmins::Int64, nnodes::Int64, maxlag::Int64,
 
   paths = reshapepaths!(paths)
   lags = transpose(reshape(lags, nnodes, nnodes))
-  network = Network(paths, transmats, envpaths, lags, gates, 1)
+  network = Network(paths, transmats, envpaths, lags, gates)
   network.concseries = dynamic_simulation(network, nnodes, allmins,
                                           maxlag, envsignal, decisions)
   return network
 end
 
 #-- Outer Network constructor for random fittest selected network.
-
+# TODO: this should accept the fitness function as an argument,
+#       so this file doesn't need to require GeneticAlgorithms, clockga, etc.
 function Network(allmins::Int64, nnodes::Int64, maxlag::Int64,
                  decisions::Dict, envsignal::Array{Int64},
-                 interactchoices::Array{Interaction}, selectfrom::Int64)
+                 interactchoices::Array{Interaction}, selectfrom::Int64, fitness)
 # Generates an array of networks and chooses the fittest one.
   select_pop::Array{Network} = [Network(allmins, nnodes, maxlag,
                                         decisions, envsignal,
