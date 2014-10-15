@@ -136,7 +136,7 @@ end
 #---- Subsidiary functions, required for making networks.
 
 function reshapepaths!(paths::Array{Array{Int64}})
-  nnodes = sqrt(length(paths))
+  nnodes::Int64 = convert(Int64, sqrt(length(paths)))
   paths = transpose(reshape(paths, nnodes, nnodes))
   for i in 1:length(paths)
     paths[i] = vec(paths[i])
