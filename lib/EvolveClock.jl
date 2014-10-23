@@ -18,11 +18,17 @@ type EvolvableNetwork <: Entity
   EvolvableNetwork(net) = new(net, nothing)
 end
 
+# function create_entity(tup::(Int64, Dict))
+#   num = tup[1]; params = tup[2]
+#   netw = Network(params["allmins"], params["nnodes"], params["maxlag"],
+#                  params["decisionhash"], params["envsignal"],
+#                  params["interacttypes"], 50, fitness, params::Dict)
+#   EvolvableNetwork(netw)
+# end
+
 function create_entity(tup::(Int64, Dict))
   num = tup[1]; params = tup[2]
-  netw = Network(params["allmins"], params["nnodes"], params["maxlag"],
-                 params["decisionhash"], params["envsignal"],
-                 params["interacttypes"], 50, fitness, params::Dict)
+  netw = should_be_a_clock(params)
   EvolvableNetwork(netw)
 end
 
@@ -245,8 +251,7 @@ function mutate_gate(gate::Int64, params::Dict)
   gate = mod(gate + 1, 2) # This will switch 0 >> 1 or 1 >> 0
 end
 
-function create_troein_1D(allmins::Int64, envsignal::Array{Int64},
-                          decisions::Dict)
+function create_troein_1D(params::Dict)
   # Creating a boolean representation of the network shown in figure 1D of
   # Troein, Locke et al., 2009.
   # Activation from gene 3 to 4 (lag 2.61hr)
@@ -256,8 +261,9 @@ function create_troein_1D(allmins::Int64, envsignal::Array{Int64},
   # All gates set as "or"
 
   # First making a network with no interactions.
-  interactions = [noInteraction]
-  net = Network(allmins, 4, 14*60, decisions, envsignal, interactions)
+  interactions = [params["interacttypes"][3]]
+  net = Network(params["allmins"], 4, 14*60, params["decisionhash"],
+                params["envsignal"], interactions)
 
   # Now overwriting the interactions, paths, envrionmental paths, and gates.
   net.paths[3] -= 1; net.paths[15] += 1; net.paths[8] -= 1;
@@ -265,7 +271,8 @@ function create_troein_1D(allmins::Int64, envsignal::Array{Int64},
   net.lags[3] = 157; net.lags[15] = 157; net.lags[8] = 840;
   net.gates = zeros(Int64, 4)
 
-  net.concseries = runsim(net, 4, allmins, 60*24, envsignal, decisions)
+  net.concseries = runsim(net, 4, params["allmins"], 60*24,
+                          params["envsignal"], params["decisionhash"])
   return net
 end
 
