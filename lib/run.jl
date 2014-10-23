@@ -45,12 +45,13 @@ concs3 = model.population[3].net.concseries
 concs4 = model.population[4].net.concseries
 concs5 = model.population[5].net.concseries
 all_fitnesses = model.all_fitnesses
-save("out_$(now).jld", "concs1", concs1, "concs2", concs2,
+save("../runs/out_$(now).jld", "concs1", concs1, "concs2", concs2,
      "concs3", concs3, "concs4", concs4, "concs5", concs5,
      "all_fitnesses", all_fitnesses)
 
 h1 = net2hash(model.population[1].net)
 
 clockq = EvolveClock.should_be_a_clock(params)
+troein = EvolveClock.create_troein_1D(params)
 
 #TODO: Can a hash be saved with HDF5? That would be very useful...
