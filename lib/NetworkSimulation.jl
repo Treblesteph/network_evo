@@ -63,17 +63,17 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
     if scenariomat[d, init_i] == 0
     # Case 1.1: Target initially off, "or" logic gate.
       if scenariomat[d, gate_i] == 0
-    # Case 1.1.1: Target initially off, "or" logic gate, overall activation.
-        if effectsum > 0.
+    # Case 1.1.1: Target initially off, "or" logic gate, overall not repression.
+        if effectsum >= 0.
           decisionarray[d] = 1
-    # Case 1.1.2: Target initially off, "or" logic gate, overall not activation.
+    # Case 1.1.2: Target initially off, "or" logic gate, overall repression.
         else
           decisionarray[d] = 0
         end
     # Case 1.2: Target initially off, "and" logic gate.
     elseif scenariomat[d, gate_i] == 1
     # Case 1.2.1: Target initially off, "and" logic gate, all paths activate.
-        if pathcount == effectsum
+        if (pathcount <= effectsum) && (effectsum > 0)
           decisionarray[d] = 1
     # Case 1.2.2: Target initially off, "and" logic gate, not all paths activate.
         else
@@ -128,7 +128,7 @@ function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
   gates::Array{Int64} = copy(net.gates)
   timearray::Array{Int64} = [1:allmins]
   concs::Array{Int64} = zeros(Int64, allmins, nnode)
-  concs[1, :] = zeros(Int64, nnode)
+  concs[1, :] = ones(Int64, nnode)
   concs = vcat(zeros(Int64, maxlag, nnode), concs)
   # Adding maxlag zeros to the beginning of path vectors.
   for i in 1:length(paths)
