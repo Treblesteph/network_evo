@@ -283,15 +283,28 @@ function should_be_a_clock(params::Dict)
 
   # First making a network with no interactions.
   interactions = [params["interacttypes"][3]]
-  net = Network(params["allmins"], 4, 9*60, params["decisionhash"],
+  net = Network(params["allmins"], 4, 24*60, params["decisionhash"],
                 params["envsignal"], interactions)
 
   # Now overwriting the interactions, paths, envrionmental paths, and gates.
-  net.paths[1] -= 1; net.paths[3] -= 1; net.paths[5] += 1
-  net.paths[6] -= 1; net.paths[9] += 1
-  net.envpath = [1, 0, 0, 0]
-  net.lags[1] = 3*60; net.lags[3] = 1.5*60; net.lags[5] = 9*60
-  net.lags[6] = 3*60; net.lags[9] = 1.5*60
+  net.paths[1] -= 1; net.lags[1] = 24*60 # From gene 1 to gene 1
+  net.paths[2] -= 1; net.lags[2] = 0*60  # From gene 1 to gene 2
+  net.paths[3] -= 1; net.lags[3] = 0*60  # From gene 1 to gene 3
+  net.paths[4] -= 1; net.lags[4] = 24*60 # From gene 1 to gene 4
+  net.paths[5]; net.lags[5]              # From gene 2 to gene 1
+  net.paths[6] -= 1; net.lags[6] = 3*60  # From gene 2 to gene 2
+  net.paths[7]; net.lags[7]              # From gene 2 to gene 3
+  net.paths[8]; net.lags[8]              # From gene 2 to gene 4
+  net.paths[9]; net.lags[9]              # From gene 3 to gene 1
+  net.paths[10] -= 1; net.lags[10] = 3*60# From gene 3 to gene 2
+  net.paths[11]; net.lags[11]            # From gene 3 to gene 3
+  net.paths[12]; net.lags[12]            # From gene 3 to gene 4
+  net.paths[13]; net.lags[13]            # From gene 4 to gene 1
+  net.paths[14] -= 1; net.lags[14] = 3*60# From gene 4 to gene 2
+  net.paths[15]; net.lags[15]            # From gene 4 to gene 3
+  net.paths[16]; net.lags[16]            # From gene 4 to gene 4
+
+  net.envpath = [0, 0, 0, 0]
   net.gates = zeros(Int64, 4)
 
   net.concseries = runsim(net, 4, params["allmins"], 60*24,
