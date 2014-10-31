@@ -15,9 +15,9 @@ function set_parameters()
   #      become preferable to sensing systems.
 
   #--- Mutation rates
-  mutatepath::Array{Float64} = [0.02]
+  mutatepath::Array{Float64} = [0.04]
   mutatetmat::Array{Float64} = [0.00]
-  mutateenvpath::Array{Float64} = [0.04]
+  mutateenvpath::Array{Float64} = [0.02]
   mutatelag::Array{Float64} = [0.95]
   mutategate::Array{Float64} = [0.02]
 
@@ -25,7 +25,7 @@ function set_parameters()
   # (through reproduction) each generation.
   percentkilled::Array{Float64} = [0.15]
   tmat_std::Array{Float64} = [0.00]
-  lag_std::Array{Int64} = [60]
+  lag_std::Array{Int64} = [30]
   # Percent of individuals that are required to be at
   # optimal fitness in order to stop evolution.
   stopconverged::Array{Float64} = [0.5]
