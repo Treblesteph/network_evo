@@ -36,7 +36,7 @@ end
 tic()
 params = set_parameters()
 add_clock_params!(params, [repression, activation, noInteraction])
-model = runga(params, EvolveClock; init_pop_size = 100, stop_after = 10000)
+model = runga(params, EvolveClock; init_pop_size = 100, stop_after = 500)
 println()
 toc()
 now = strftime("%F_%H_%M", time())
