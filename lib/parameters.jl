@@ -14,6 +14,7 @@ function set_parameters()
   mutatetmat::Array{Float64} = [0.00]
   mutateenvpath::Array{Float64} = [0.04]
   mutatelag::Array{Float64} = [0.75]
+  mutateenvlag::Array{Float64} = [0.7]
   mutategate::Array{Float64} = [0.04]
 
   # Percent of population killed off and replaced
@@ -21,6 +22,7 @@ function set_parameters()
   percentkilled::Array{Float64} = [0.5]
   tmat_std::Array{Float64} = [0.00]
   lag_std::Array{Int64} = [30]
+  envlag_std::Array{Int64} = [15]
   # Percent of individuals that are required to be at
   # optimal fitness in order to stop evolution.
   stopconverged::Array{Float64} = [0.5]
@@ -47,10 +49,12 @@ function set_parameters()
                                    "mutatetmat" => mutatetmat[1],
                                    "mutateenvpath" => mutateenvpath[1],
                                    "mutatelag" => mutatelag[1],
+                                   "mutateenvlag" => mutateenvlag[1],
                                    "mutategate" => mutategate[1],
                                    "percentkilled" => percentkilled[1],
                                    "tmat_std" => tmat_std[1],
                                    "lag_std" => lag_std[1],
+                                   "envlag_std" => envlag_std[1],
                                    "stopconverged" => stopconverged[1],
                                    "stopthreshold" => stopthreshold[1],
                                    "fitnessweight" => fitnessweight[1],

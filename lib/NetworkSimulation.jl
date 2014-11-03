@@ -125,6 +125,7 @@ function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
   paths::Array{Array{Int64}} = copy(net.paths)
   envpaths::Array{Int64} = copy(net.envpath)
   lags::Array{Int64} = copy(net.lags)
+  envlag::Array{Int64} = copy(net.envlag)
   gates::Array{Int64} = copy(net.gates)
   timearray::Array{Int64} = [1:allmins]
   concs::Array{Int64} = zeros(Int64, allmins, nnode)
@@ -142,7 +143,7 @@ function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
       genes::Array{Int64} = [concs[maxlag+t-lags[nd, jj], jj] for jj in 1:nnode]
       path::Array{Int64} = [paths[nd, k][maxlag+t-lags[nd, k]] for k in 1:nnode]
       envpath::Array{Int64} = [envpaths[nd]]
-      envinput::Array{Int64} = [environ_signal[t]]
+      envinput::Array{Int64} = [environ_signal[t - envlag[nd]]]
       gate::Array{Int64} = [gates[nd]]
       init::Array{Int64} = [concs[maxlag+t, nd]]
       # Next will compare this row to the rows in decision matrix to determine

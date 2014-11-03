@@ -138,6 +138,12 @@ function crossover(tup::(Array{Any}, Dict))
     parent = (rand(Uint) % num_parents) + 1
     childenvpath[i] = group[parent].net.envpath[i]
   end
+  # Set each environmental lag according to a random choice between parents.
+  childenvlag::Array{Int64} = zeros(Int64, params["nnodes"])
+  for i in 1:length(group[1].net.envlag)
+    parent = (rand(Uint) % num_parents) + 1
+    childenvlag[i] = group[parent].net.envlag[i]
+  end
   # Set each lag according to a random choice between parents.
   childlags::Array{Int64} = zeros(Int64, (params["nnodes"])^2)
   for i in 1:length(group[1].net.lags)
@@ -162,7 +168,7 @@ function crossover(tup::(Array{Any}, Dict))
   #      each time the network survives for a new generation. To get generation
   #      from GeneticAlgorithms code, something like model.gen_num.
   childnet = Network(childpaths, childtmats, childenvpath, childlags,
-                     childgates, childgen)
+                     childenvlag, childgates, childgen)
   childnet.concseries = runsim(childnet, params["nnodes"], params["allmins"],
                                params["maxlag"], params["envsignal"], params["decisionhash"])
   child = EvolvableNetwork(childnet)
@@ -174,7 +180,7 @@ function mutate(tup::(EvolvableNetwork, Dict))
   # Path sign switch mutations.
   if rand(Float64) < params["mutatepath"]
     pathind = (rand(Uint) % length(ent.net.paths)) + 1
-    ent.net.paths[pathind] = mutate_path(ent.net.paths[pathind], params)
+    ent.net.paths[pathind] = mutate_path!(ent.net.paths[pathind], params)
   end
   # Transition matrix mutations.
   # --- off in non-stochastic simulations.
@@ -182,17 +188,23 @@ function mutate(tup::(EvolvableNetwork, Dict))
   if rand(Float64) < params["mutateenvpath"]
     envpathind = (rand(Uint) % length(ent.net.envpath)) + 1
     ent.net.envpath[envpathind] =
-        mutate_envpath(ent.net.envpath[envpathind], params)
+        mutate_envpath!(ent.net.envpath[envpathind], params)
   end
   # Lag duration mutations.
   if rand(Float64) < params["mutatelag"]
     lagind = (rand(Uint) % length(ent.net.lags)) + 1
-    ent.net.lags[lagind] = mutate_lag(ent.net.lags[lagind], params)
+    ent.net.lags[lagind] = mutate_lag!(ent.net.lags[lagind], params)
+  end
+  # Environmental lag mutations
+  if rand(Float64) < params["mutateenvlag"]
+    envlagind = (rand(Uint) % length(ent.net.envlag)) + 1
+    ent.net.envlag[envlagind] =
+        mutate_envlag!(ent.net.envlag[envlagind], params)
   end
   # Gate type switch mutations.
   if rand(Float64) < params["mutategate"]
     gateind = (rand(Uint) % length(ent.net.gates)) + 1
-    ent.net.gates[gateind] = mutate_gate(ent.net.gates[gateind], params)
+    ent.net.gates[gateind] = mutate_gate!(ent.net.gates[gateind], params)
   end
   ent.net.concseries = runsim(ent.net, params["nnodes"], params["allmins"],
                               params["maxlag"], params["envsignal"],
@@ -200,7 +212,7 @@ function mutate(tup::(EvolvableNetwork, Dict))
   ent
 end
 
-function mutate_path(path::Array{Int64}, params::Dict)
+function mutate_path!(path::Array{Int64}, params::Dict)
   # Mutation causes the path to switch according to following options:
   # activator >> repressor
   # activator >> no interaction
@@ -229,15 +241,21 @@ function mutate_path(path::Array{Int64}, params::Dict)
   path
 end
 
-function mutate_envpath(envpath::Int64, params::Dict)
+function mutate_envpath!(envpath::Int64, params::Dict)
   print("e")
   envpath = mod(envpath + 1, 2) # This will switch 0 >> 1 or 1 >> 0
 end
 
-function mutate_lag(lag::Int64, params::Dict)
+function mutate_lag!(lag::Int64, params::Dict)
   print("l")
   lag = round(cts_neighbr(lag, params["lag_std"],
                           params["minlag"], params["maxlag"]))
+end
+
+function mutate_envlag!(envlag::Array{Int64}, params::Dict)
+  print("d")
+  envlag = round(cts_neighbr(envlag, params["envlag_std"],
+                             params["minlag"], params["maxlag"]))
 end
 
 function cts_neighbr(val::Number, stdev::Number, lower::Number, upper::Number)
@@ -245,7 +263,7 @@ function cts_neighbr(val::Number, stdev::Number, lower::Number, upper::Number)
   newval = rand(tnorm)
 end
 
-function mutate_gate(gate::Int64, params::Dict)
+function mutate_gate!(gate::Int64, params::Dict)
   print("g")
   # Mutation causes gate to switch (0 = or; 1 = and)
   # either or >> and
@@ -269,6 +287,7 @@ function create_troein_1D(params::Dict)
 
   # Now overwriting the interactions, paths, envrionmental paths, and gates.
   net.paths[3] -= 1; net.paths[15] += 1; net.paths[8] -= 1;
+  net.envlag = [5, 5, 5, 5]
   net.envpath = [1, 1, 1, 0]
   net.lags[3] = 157; net.lags[15] = 157; net.lags[8] = 840;
   net.gates = zeros(Int64, 4)
@@ -307,6 +326,7 @@ function should_be_a_clock(params::Dict)
   net.paths[16]; net.lags[16]            # From gene 4 to gene 4
 
   net.envpath = [0, 0, 0, 0]
+  net.envlag = [5, 5, 5, 5]
   net.gates = zeros(Int64, 4)
 
   net.concseries = runsim(net, 4, params["allmins"], 60*24,

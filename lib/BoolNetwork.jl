@@ -33,6 +33,7 @@ type Network
   transmats::Array{Array{Float64}}
   envpath::Array{Int64} # Is gene activated by environment (bool.)?
   lags::Array{Int64}
+  envlags::Array{Int64}
   gates::Array{Int64}  # (0 = or; 1 = and)
   generation::Int64
   concseries::Array{Int64}
@@ -40,22 +41,28 @@ type Network
   #-- Inner constructor with concentration timeseries.
 
   Network(paths::Array{Array{Int64}}, transmats::Array{Array{Float64}},
-          envpath::Array{Int64}, lags::Array{Int64}, gates::Array{Int64},
+          envpath::Array{Int64}, lags::Array{Int64},
+          envlags::Array{Int64}, gates::Array{Int64},
           concseries::Array{Int64}) =
-          new(paths, transmats, envpath, lags, gates, 1, concseries)
+          new(paths, transmats, envpath, lags, envlags,
+              gates, 1, concseries)
 
   #-- Inner constructor without concentration timeseries.
 
   Network(paths::Array{Array{Int64}}, transmats::Array{Array{Float64}},
-          envpath::Array{Int64}, lags::Array{Int64}, gates::Array{Int64}) =
-          new(paths, transmats, envpath, lags, gates, 1, [])
+          envpath::Array{Int64}, lags::Array{Int64},
+          envlags::Array{Int64}, gates::Array{Int64}) =
+          new(paths, transmats, envpath, lags,
+              envlags, gates, 1, [])
 
   #-- Inner constructor with generation number.
 
   Network(paths::Array{Array{Int64}}, transmats::Array{Array{Float64}},
-          envpath::Array{Int64}, lags::Array{Int64}, gates::Array{Int64},
+          envpath::Array{Int64}, lags::Array{Int64},
+          envlags::Array{Int64}, gates::Array{Int64},
           generation::Int64) =
-          new(paths, transmats, envpath, lags, gates, generation, [])
+          new(paths, transmats, envpath, lags, envlags,
+              gates, generation, [])
 end
 
 #-- Outer Network constructor for predefined interactions.
@@ -63,7 +70,7 @@ end
 function Network(allmins::Int64, maxlag::Int64, decisions::Dict,
                  envsignal::Array{Int64}, interactions::Array{Interaction},
                  envpaths::Array{Int64}, lags::Array{Int64},
-                 gates::Array{Int64})
+                 envlags::Array{Int64}, gates::Array{Int64})
   nnodes::Int64 = length(gates)
   paths::Array{Array{Int64}} = [Int64[] for i in 1:(nnodes^2)]
   transmats::Array{Array{Float64}} = [Float64[] for i in 1:(nnodes^2)]
@@ -72,7 +79,9 @@ function Network(allmins::Int64, maxlag::Int64, decisions::Dict,
   end
   paths = reshapepaths!(paths)
   lags = transpose(reshape(lags, nnodes, nnodes))
-  network = Network(paths, transmats, envpaths, lags, gates, 1)
+  envlags = transpose(reshape(envlags, nnodes, nnodes))
+  network = Network(paths, transmats, envpaths, lags, envlags,
+                    gates, 1)
   network.concseries = runsim(network, nnodes, allmins, maxlag,
                               envsignal, decisions)
   return network
@@ -99,14 +108,17 @@ function Network(allmins::Int64, nnodes::Int64, maxlag::Int64, minlag::Int64,
 
   # Setting random environmental paths.
   envpaths::Array{Int64} = Int64[round(rand()) for i in 1:nnodes]
-
+  envlags::Array{Int64} = minlag + (Base.convert(Int64,
+                                    floor((maxlag - minlag) *
+                                    rand(nnodes))))
   # Filling paths, lags, and transition matrices for each interaction.
   for p = 1:(nnodes^2)
     # Randomly select interaction type for each entry.
     randselect = ceil(length(interactchoices)*rand())
     #TODO: Random paths need to be re-generated each generation (for each
     #      dynanic simulation).
-    lags[p]::Int64 = minlag + (Base.convert(Int64, floor((maxlag-minlag)*rand())))
+    lags[p]::Int64 = minlag + (Base.convert(Int64,
+                               floor((maxlag - minlag) * rand())))
     (paths[p], transmats[p]) = create_interaction(interactchoices[randselect],
                                                   allmins)
   end
