@@ -53,8 +53,9 @@ function fitness(net::Network, params::Dict)
   duskFitness::Array{Float64} = zeros(params["alldays"])
   notDuskFitness::Array{Float64} = zeros(params["alldays"])
 
-  # First working out the fitness for each day.
-  for d in 1:params["alldays"]
+  # First working out the fitness for each day - excluding the first
+  # to give the system time to stabilise.
+  for d in 2:params["alldays"]
     dawnFitness[d] = sum(gene1[params["gene1fit"][d, :]]) /
                      length(params["gene1fit"][d, :])
     notDawnFitness[d] = 1 - (sum(gene1[(1 +
