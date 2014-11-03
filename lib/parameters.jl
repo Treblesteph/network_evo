@@ -7,23 +7,18 @@ function set_parameters()
   popsize::Array{Int64} = [100]
   nnodes::Array{Int64} = [4]
   maxlag::Array{Int64} = [60*24]
-  #TODO: Should there also be a MINLAG? Can transcription and translation
-  #      be effectively instantaneous? If not, what should the MINLAG be?
-  #      Bionumbers? This would mean that the relationship between
-  #      response time (MINLAG), and frequency of environmental switching
-  #      can be analysed. Meaning we can ask when non-sensing systems
-  #      become preferable to sensing systems.
+  minlag::Array{Int64} = [5]
 
   #--- Mutation rates
-  mutatepath::Array{Float64} = [0.04]
+  mutatepath::Array{Float64} = [0.08]
   mutatetmat::Array{Float64} = [0.00]
-  mutateenvpath::Array{Float64} = [0.02]
-  mutatelag::Array{Float64} = [0.95]
-  mutategate::Array{Float64} = [0.02]
+  mutateenvpath::Array{Float64} = [0.04]
+  mutatelag::Array{Float64} = [0.75]
+  mutategate::Array{Float64} = [0.04]
 
   # Percent of population killed off and replaced
   # (through reproduction) each generation.
-  percentkilled::Array{Float64} = [0.15]
+  percentkilled::Array{Float64} = [0.5]
   tmat_std::Array{Float64} = [0.00]
   lag_std::Array{Int64} = [30]
   # Percent of individuals that are required to be at
@@ -47,6 +42,7 @@ function set_parameters()
                                    "popsize" => popsize[1],
                                    "nnodes" => nnodes[1],
                                    "maxlag" => maxlag[1],
+                                   "minlag" => minlag[1],
                                    "mutatepath" => mutatepath[1],
                                    "mutatetmat" => mutatetmat[1],
                                    "mutateenvpath" => mutateenvpath[1],

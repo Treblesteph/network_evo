@@ -73,14 +73,14 @@ function Network(allmins::Int64, maxlag::Int64, decisions::Dict,
   paths = reshapepaths!(paths)
   lags = transpose(reshape(lags, nnodes, nnodes))
   network = Network(paths, transmats, envpaths, lags, gates, 1)
-  network.concseries = dynamic_simulation(network, nnodes, allmins, maxlag,
-                                          envsignal, decisions)
+  network.concseries = runsim(network, nnodes, allmins, maxlag,
+                              envsignal, decisions)
   return network
 end
 
 #-- Outer Network constructor for random network.
 
-function Network(allmins::Int64, nnodes::Int64, maxlag::Int64,
+function Network(allmins::Int64, nnodes::Int64, maxlag::Int64, minlag::Int64,
                  decisions::Dict, envsignal::Array{Int64},
                  interactchoices::Array{Interaction})
   # This function can be used to create stochastic or deterministic models
@@ -106,7 +106,7 @@ function Network(allmins::Int64, nnodes::Int64, maxlag::Int64,
     randselect = ceil(length(interactchoices)*rand())
     #TODO: Random paths need to be re-generated each generation (for each
     #      dynanic simulation).
-    lags[p]::Int64 = Base.convert(Int64, floor(maxlag*rand()))
+    lags[p]::Int64 = minlag + (Base.convert(Int64, floor((maxlag-minlag)*rand())))
     (paths[p], transmats[p]) = create_interaction(interactchoices[randselect],
                                                   allmins)
   end
@@ -121,12 +121,12 @@ end
 
 #-- Outer Network constructor for random fittest selected network.
 
-function Network(allmins::Int64, nnodes::Int64, maxlag::Int64,
+function Network(allmins::Int64, nnodes::Int64, maxlag::Int64, minlag::Int64,
                  decisions::Dict, envsignal::Array{Int64},
                  interactchoices::Array{Interaction}, selectfrom::Int64,
                  fitfunct, params)
 # Generates an array of networks and chooses the fittest one.
-  select_pop::Array{Network} = [Network(allmins, nnodes, maxlag,
+  select_pop::Array{Network} = [Network(allmins, nnodes, maxlag, minlag,
                                         decisions, envsignal,
                                         interactchoices) for j in 1:selectfrom]
   fitnessval::Array{Float64} = ones(Float64, selectfrom)
@@ -181,7 +181,7 @@ end
 #      (sub)set of genes in the network.
 
 
-#---- Exporting networks.
+#---- Exporting networks to a hash.
 
 function net2hash(net::Network)
   NNODES = length(net.gates)
@@ -202,5 +202,9 @@ function net2hash(net::Network)
   hash["concseries"] = [net.concseries]
   return hash
 end
+
+function net2df(net::Network)
+end
+
 
 end # Network

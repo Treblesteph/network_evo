@@ -18,19 +18,20 @@ type EvolvableNetwork <: Entity
   EvolvableNetwork(net) = new(net, nothing)
 end
 
-# function create_entity(tup::(Int64, Dict))
-#   num = tup[1]; params = tup[2]
-#   netw = Network(params["allmins"], params["nnodes"], params["maxlag"],
-#                  params["decisionhash"], params["envsignal"],
-#                  params["interacttypes"], 50, fitness, params::Dict)
-#   EvolvableNetwork(netw)
-# end
-
 function create_entity(tup::(Int64, Dict))
   num = tup[1]; params = tup[2]
-  netw = should_be_a_clock(params)
+  netw = Network(params["allmins"], params["nnodes"], params["maxlag"],
+                 params["minlag"], params["decisionhash"],
+                 params["envsignal"], params["interacttypes"], 50,
+                 fitness, params::Dict)
   EvolvableNetwork(netw)
 end
+
+# function create_entity(tup::(Int64, Dict))
+#   num = tup[1]; params = tup[2]
+#   netw = should_be_a_clock(params)
+#   EvolvableNetwork(netw)
+# end
 
 function fitness(tup::(EvolvableNetwork, Dict))
   ent = tup[1]; params = tup[2]
@@ -235,7 +236,8 @@ end
 
 function mutate_lag(lag::Int64, params::Dict)
   print("l")
-  lag = round(cts_neighbr(lag, params["lag_std"], 0, params["maxlag"]))
+  lag = round(cts_neighbr(lag, params["lag_std"],
+                          params["minlag"], params["maxlag"]))
 end
 
 function cts_neighbr(val::Number, stdev::Number, lower::Number, upper::Number)
@@ -262,7 +264,7 @@ function create_troein_1D(params::Dict)
 
   # First making a network with no interactions.
   interactions = [params["interacttypes"][3]]
-  net = Network(params["allmins"], 4, 14*60, params["decisionhash"],
+  net = Network(params["allmins"], 4, 14*60, 5, params["decisionhash"],
                 params["envsignal"], interactions)
 
   # Now overwriting the interactions, paths, envrionmental paths, and gates.
@@ -283,24 +285,24 @@ function should_be_a_clock(params::Dict)
 
   # First making a network with no interactions.
   interactions = [params["interacttypes"][3]]
-  net = Network(params["allmins"], 4, 24*60, params["decisionhash"],
+  net = Network(params["allmins"], 4, 24*60, 5, params["decisionhash"],
                 params["envsignal"], interactions)
 
   # Now overwriting the interactions, paths, envrionmental paths, and gates.
-  net.paths[1] -= 1; net.lags[1] = 24*60 # From gene 1 to gene 1
-  net.paths[2] -= 1; net.lags[2] = 0*60  # From gene 1 to gene 2
-  net.paths[3] -= 1; net.lags[3] = 0*60  # From gene 1 to gene 3
-  net.paths[4] -= 1; net.lags[4] = 24*60 # From gene 1 to gene 4
-  net.paths[5]; net.lags[5]              # From gene 2 to gene 1
-  net.paths[6] -= 1; net.lags[6] = 3*60  # From gene 2 to gene 2
-  net.paths[7]; net.lags[7]              # From gene 2 to gene 3
-  net.paths[8]; net.lags[8]              # From gene 2 to gene 4
-  net.paths[9]; net.lags[9]              # From gene 3 to gene 1
-  net.paths[10] -= 1; net.lags[10] = 3*60# From gene 3 to gene 2
+  net.paths[1] -= 1; net.lags[1] = 3*60  # From gene 1 to gene 1
+  net.paths[2]; net.lags[2]              # From gene 1 to gene 2
+  net.paths[3]; net.lags[3]              # From gene 1 to gene 3
+  net.paths[4]; net.lags[4]              # From gene 1 to gene 4
+  net.paths[5] -= 1; net.lags[5] = 5     # From gene 2 to gene 1
+  net.paths[6] -= 1; net.lags[6] = 24*60 # From gene 2 to gene 2
+  net.paths[7] -= 1; net.lags[7] = 5     # From gene 2 to gene 3
+  net.paths[8] -= 1; net.lags[8] = 24*60 # From gene 2 to gene 4
+  net.paths[9] -= 1; net.lags[9] = 3*60  # From gene 3 to gene 1
+  net.paths[10]; net.lags[10]            # From gene 3 to gene 2
   net.paths[11]; net.lags[11]            # From gene 3 to gene 3
   net.paths[12]; net.lags[12]            # From gene 3 to gene 4
-  net.paths[13]; net.lags[13]            # From gene 4 to gene 1
-  net.paths[14] -= 1; net.lags[14] = 3*60# From gene 4 to gene 2
+  net.paths[13] -= 1; net.lags[13] = 3*60# From gene 4 to gene 1
+  net.paths[14]; net.lags[14]            # From gene 4 to gene 2
   net.paths[15]; net.lags[15]            # From gene 4 to gene 3
   net.paths[16]; net.lags[16]            # From gene 4 to gene 4
 
