@@ -253,7 +253,7 @@ function mutate_lag!(lag::Int64, params::Dict)
                           params["minlag"], params["maxlag"]))
 end
 
-function mutate_envlag!(envlag::Array{Int64}, params::Dict)
+function mutate_envlag!(envlag::Int64, params::Dict)
   print("d")
   envlag = round(cts_neighbr(envlag, params["envlag_std"],
                              params["minlag"], params["maxlag"]))

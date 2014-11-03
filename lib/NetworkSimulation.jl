@@ -136,6 +136,7 @@ function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
     history = zeros(Int64, maxlag)
     paths[i] = [history, paths[i]]
   end
+  environ_signal = [environ_signal, environ_signal]
   for nd in 1:nnode
     for t in timearray[1:end-1] # First row is initial condition (already set).
       # Take all current and previous concentrations, all incoming paths and
@@ -143,7 +144,7 @@ function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
       genes::Array{Int64} = [concs[maxlag+t-lags[nd, jj], jj] for jj in 1:nnode]
       path::Array{Int64} = [paths[nd, k][maxlag+t-lags[nd, k]] for k in 1:nnode]
       envpath::Array{Int64} = [envpaths[nd]]
-      envinput::Array{Int64} = [environ_signal[t - envlag[nd]]]
+      envinput::Array{Int64} = [environ_signal[maxlag + t - envlag[nd]]]
       gate::Array{Int64} = [gates[nd]]
       init::Array{Int64} = [concs[maxlag+t, nd]]
       # Next will compare this row to the rows in decision matrix to determine
