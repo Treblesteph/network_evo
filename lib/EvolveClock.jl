@@ -78,7 +78,7 @@ function fitness(net::Network, params::Dict)
   # Remember that currently, a low number is a poor fitness.
   allG1fitness::Array{Float64} = []
   allG2fitness::Array{Float64} = []
-  for d in 1:params["alldays"]
+  for d in 1:(params["alldays"] - 1)
     thisG1fitness = repmat([fitnessG1[d]], (params["fitnessweight"])*d, 1)
     thisG2fitness = repmat([fitnessG2[d]], (params["fitnessweight"])*d, 1)
     allG1fitness = [allG1fitness, thisG1fitness]
