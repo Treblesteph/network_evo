@@ -55,15 +55,17 @@ function plotConcs(params::Dict, net)
 
   concframe = stack(concframe, 2:ncol(concframe))
   rename!(concframe, :value, :gene)
-  plot(Scale.x_continuous(minvalue = 0, maxvalue = 96),
-       Scale.y_continuous(minvalue = 0, maxvalue = 1),
-       layer(concframe, x = "time", y = "gene",
-             color = "variable", ygroup = "variable",
-             Geom.subplot_grid(Geom.line)),
-       layer(shadeframe, xmin = "starts", xmax = "ends",
-             y = "y", ygroup = "row",
-             Geom.subplot_grid(Geom.bar(position=:dodge)),
-             color = repeat(["dawns", "dusks", "days", "nights"],
-                            outer = [16])),
-             Scale.discrete_color_manual(colourscheme...))
+  plot1 = plot(Scale.x_continuous(minvalue = 0, maxvalue = 96),
+               Scale.y_continuous(minvalue = 0, maxvalue = 1),
+          layer(concframe, x = "time", y = "gene",
+                color = "variable", ygroup = "variable",
+                Geom.subplot_grid(Geom.line)),
+          layer(shadeframe, xmin = "starts", xmax = "ends",
+                y = "y", ygroup = "row",
+                Geom.subplot_grid(Geom.bar(position=:dodge)),
+                color = repeat(["dawns", "dusks", "days", "nights"],
+                                outer = [16])),
+                Scale.discrete_color_manual(colourscheme...))
+
+draw(PDF("../runs/outputthis.pdf", 12inch, 6inch), plot1)
 end
