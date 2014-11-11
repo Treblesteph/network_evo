@@ -158,13 +158,7 @@ function crossover(tup::(Array{Any}, Dict))
     childgates[i] = group[parent].net.gates[i]
   end
   childgen = 1 + group[1].net.generation
-  childpaths = transpose(reshape(childpaths, params["nnodes"],
-                                 params["nnodes"]))
-  for i in 1:length(childpaths)
-    childpaths[i] = vec(childpaths[i])
-  end
-  childlags = transpose(reshape(childlags, params["nnodes"],
-                                params["nnodes"]))
+
   #TODO: Create an array for generation, push new generation to the array
   #      each time the network survives for a new generation. To get generation
   #      from GeneticAlgorithms code, something like model.gen_num.
@@ -287,10 +281,25 @@ function create_troein_1D(params::Dict)
                 params["envsignal"], interactions)
 
   # Now overwriting the interactions, paths, envrionmental paths, and gates.
-  net.paths[3] -= 1; net.paths[15] += 1; net.paths[8] -= 1;
-  net.envlag = [5, 5, 5, 5]
+  net.paths[1]; net.lags[1]              # From gene 1 to gene 1
+  net.paths[2]; net.lags[2]              # From gene 1 to gene 2
+  net.paths[3] -= 1; net.lags[3] = 157   # From gene 1 to gene 3
+  net.paths[4]; net.lags[4]              # From gene 1 to gene 4
+  net.paths[5]; net.lags[5]              # From gene 2 to gene 1
+  net.paths[6]; net.lags[6]              # From gene 2 to gene 2
+  net.paths[7]; net.lags[7]              # From gene 2 to gene 3
+  net.paths[8] -= 1; net.lags[8] = 840   # From gene 2 to gene 4
+  net.paths[9]; net.lags[9]              # From gene 3 to gene 1
+  net.paths[10]; net.lags[10]            # From gene 3 to gene 2
+  net.paths[11]; net.lags[11]            # From gene 3 to gene 3
+  net.paths[12]; net.lags[12]            # From gene 3 to gene 4
+  net.paths[13]; net.lags[13]            # From gene 4 to gene 1
+  net.paths[14]; net.lags[14]            # From gene 4 to gene 2
+  net.paths[15] += 1; net.lags[15] = 157 # From gene 4 to gene 3
+  net.paths[16]; net.lags[16]            # From gene 4 to gene 4
+
   net.envpath = [1, 1, 1, 0]
-  net.lags[3] = 157; net.lags[15] = 157; net.lags[8] = 840;
+  net.envlag = [5, 5, 5, 5]
   net.gates = zeros(Int64, 4)
 
   net.concseries = runsim(net, 4, params["allmins"], 60*24,

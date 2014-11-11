@@ -77,7 +77,7 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
     repcount::Int64 = length(find(y -> y == -1, scenariomat[d, paths_i]))
     repeffect::Int64 = - sum(thisrowpaths[find(x -> x == -1, thisrowpaths)] .*
                              thisrowgenes[find(x -> x == -1, thisrowpaths)])
-                             
+
 
     # Case 1: Initially the target gene is off.
     if scenariomat[d, init_i] == 0
@@ -175,12 +175,13 @@ function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
     paths[i] = [history, paths[i]]
   end
   environ_signal = [environ_signal, environ_signal]
+  ncount = 0 # Determines what path/lag index to use from the 1D arrays.
   for nd in 1:nnode
     for t in timearray[1:end-1] # First row is initial condition (already set).
       # Take all current and previous concentrations, all incoming paths and
       # their lags, and the gate type, to determine the next concentration.
-      genes::Array{Int64} = [concs[maxlag+t-lags[nd, jj], jj] for jj in 1:nnode]
-      path::Array{Int64} = [paths[nd, k][maxlag+t-lags[nd, k]] for k in 1:nnode]
+      genes::Array{Int64} = [concs[maxlag+t-lags[ncount+jj], jj] for jj in 1:nnode]
+      path::Array{Int64} = [paths[ncount+k][maxlag+t-lags[ncount+k]] for k in 1:nnode]
       envpath::Array{Int64} = [envpaths[nd]]
       envinput::Array{Int64} = [environ_signal[maxlag + t - envlag[nd]]]
       gate::Array{Int64} = [gates[nd]]
@@ -191,6 +192,7 @@ function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
                                       gate, init]
       concs[t+maxlag+1, nd] = dec_hash[decisionrow]
     end
+    ncount += nnode
   end
   concs = concs[maxlag+1:end, :]
 end

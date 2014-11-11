@@ -77,9 +77,6 @@ function Network(allmins::Int64, maxlag::Int64, decisions::Dict,
   for j in 1:(nnodes^2)
     (paths[j], transmats[j]) = create_interaction(interactions[j], allmins)
   end
-  paths = reshapepaths!(paths)
-  lags = transpose(reshape(lags, nnodes, nnodes))
-  envlag = transpose(reshape(envlag, nnodes, nnodes))
   network = Network(paths, transmats, envpaths, lags, envlag,
                     gates, 1)
   network.concseries = runsim(network, nnodes, allmins, maxlag,
@@ -123,8 +120,6 @@ function Network(allmins::Int64, nnodes::Int64, maxlag::Int64, minlag::Int64,
                                                   allmins)
   end
 
-  paths = reshapepaths!(paths)
-  lags = transpose(reshape(lags, nnodes, nnodes))
   network = Network(paths, transmats, envpaths, lags, envlag, gates)
   network.concseries = runsim(network, nnodes, allmins,
                               maxlag, envsignal, decisions)
@@ -149,15 +144,6 @@ function Network(allmins::Int64, nnodes::Int64, maxlag::Int64, minlag::Int64,
 end
 
 #---- Subsidiary functions, required for making networks.
-
-function reshapepaths!(paths::Array{Array{Int64}})
-  nnodes::Int64 = convert(Int64, sqrt(length(paths)))
-  paths = transpose(reshape(paths, nnodes, nnodes))
-  for i in 1:length(paths)
-    paths[i] = vec(paths[i])
-  end
-  return paths
-end
 
 function create_transmat(states::Array)
   # Randomly populating transition matrix with probabilities, where T_ij
@@ -199,13 +185,13 @@ function net2hash(net::Network)
   NNODES = length(net.gates)
   hash::Dict = Dict()
   counter = 1
-  for a in 1:size(net.paths, 2)
-    for b in 1:size(net.paths, 1)
+  nnodes = length(net.gates)
+  for a in 1:nnodes
+    for b in 1:nnodes
       hash["$(a)to$(b)"] = Dict()
-      hash["$(a)to$(b)"]["path"] = net.paths[b, a]
-      hash["$(a)to$(b)"]["lag"] = net.lags[b, a]
-      hash["$(a)to$(b)"]["transitions"] = net.transmats[counter]
-      counter += 1
+      hash["$(a)to$(b)"]["path"] = net.paths[(a - 1) * nnodes + b]
+      hash["$(a)to$(b)"]["lag"] = net.lags[(a - 1) * nnodes + b]
+      # hash["$(a)to$(b)"]["transitions"] = net.transmats[(a - 1) * nnodes + b]
     end
   end
   hash["envpaths"] = net.envpath
@@ -216,6 +202,7 @@ function net2hash(net::Network)
 end
 
 function net2df(net::Network)
+  netframe = DataFrame()
 end
 
 
