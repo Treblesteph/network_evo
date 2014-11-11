@@ -49,64 +49,102 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
                         envpath_i, gate_i, init_i)
   decisionarray::Array{Int64, 1} = zeros(Int64, size(scenariomat, 1))
   for d in 1:length(decisionarray)
-    # Pathcount is the number of interactions present, and effectsum is the
-    # overall effect of all of the path values and gene concentrations. Then,
-    # for an `or' gate, if the effectsum exceeds 0 (or < 0) then the gene will
-    # switch on from off (or off from on). For `and' gates, the effectsum must
-    # exceed the path count in order to have an effect.
-    pathcount::Int64 = sum(scenariomat[d, paths_i]) + scenariomat[d, envpath_i]
-    effectsum::Int64 = sum(scenariomat[d, genes_i] .*
-                           scenariomat[d, paths_i]) +
-                       sum(scenariomat[d, input_i] .*
-                           scenariomat[d, envpath_i])
+
+    # actcount is the number of incoming activator paths
+    # acteffect is the number of active incoming activator paths
+    # repcount is the number of incoming repressor paths
+    # repeffect is the number of active incoming repressor paths
+
+    # netact and netrep depend on logic gate status:
+    # - 'or' gates require that activate/repress effect >= 1
+    # - 'and' gates require that activate/repress count == a/r effect
+
+    # This captures the requirements that an 'or' gate needs at least
+    # one active path, whereas an 'and' gate requires that all present
+    # paths are active.
+
+    # Shortcut names:
+    thisrowpaths::Array{Int64} = scenariomat[d, paths_i]
+    thisrowenvpath::Int64 = scenariomat[d, envpath_i]
+    thisrowgenes::Array{Int64} = scenariomat[d, genes_i]
+    thisrowinput::Int64 = scenariomat[d, input_i]
+
+    actcount::Int64 = length(find(y -> y == 1, scenariomat[d, paths_i])) +
+                      thisrowenvpath
+    acteffect::Int64 = sum(thisrowpaths[find(x -> x == 1, thisrowpaths)] .*
+                           thisrowgenes[find(x -> x == 1, thisrowpaths)]) +
+                       (thisrowenvpath * thisrowinput)
+    repcount::Int64 = length(find(y -> y == -1, scenariomat[d, paths_i]))
+    repeffect::Int64 = - sum(thisrowpaths[find(x -> x == -1, thisrowpaths)] .*
+                             thisrowgenes[find(x -> x == -1, thisrowpaths)])
+                             
+
     # Case 1: Initially the target gene is off.
     if scenariomat[d, init_i] == 0
+
     # Case 1.1: Target initially off, "or" logic gate.
       if scenariomat[d, gate_i] == 0
-    # Case 1.1.1: Target initially off, "or" logic gate, overall not repression.
-        if effectsum >= 0.
+
+    # Case 1.1.1: Target init off, "or" gate, overall not repression.
+        if repeffect <= acteffect
           decisionarray[d] = 1
-    # Case 1.1.2: Target initially off, "or" logic gate, overall repression.
+
+    # Case 1.1.2: Target init off, "or" gate, overall repression.
         else
           decisionarray[d] = 0
         end
-    # Case 1.2: Target initially off, "and" logic gate.
+
+    # Case 1.2: Target init off, "and" gate.
     elseif scenariomat[d, gate_i] == 1
-    # Case 1.2.1: Target initially off, "and" logic gate, all paths activate.
-        if (pathcount <= effectsum) && (effectsum > 0)
+
+    # Case 1.2.1: Target init off, "and" gate, overall not repression.
+        if (repcount > repeffect) || (repcount == 0) ||
+           (repeffect < acteffect && acteffect > 0 && acteffect == actcount)
           decisionarray[d] = 1
-    # Case 1.2.2: Target initially off, "and" logic gate, not all paths activate.
+
+    # Case 1.2.2: Target init off, "and" gate, overall repression.
         else
           decisionarray[d] = 0
         end
+
     # Case 1.3: Error - target off, non-boolean logic gate.
       else
         error("Logic gate should take on a boolean value (zero or one).")
       end
+
     # Case 2: Initially the target gene is on.
     elseif scenariomat[d, init_i] == 1
+
     # Case 2.1: Target initially on, "or" logic gate.
       if scenariomat[d, gate_i] == 0
-    # Case 2.1.1: Target initially on, "or" logic gate, overall repression.
-        if effectsum < 0
+
+    # Case 2.1.1: Target init on, "or" gate, overall repression.
+        if repeffect > acteffect
           decisionarray[d] = 0
-    # Case 2.1.2: Target initially on, "or" logic gate, overall not repression.
+
+    # Case 2.1.2: Target init on, "or" gate, overall not repression.
         else
           decisionarray[d] = 1
         end
+
     # Case 2.2: Target initially on, "and" logic gate.
     elseif scenariomat[d, gate_i] == 1
-    # Case 2.2.1: Target initially on, "and" logic gate, all paths repress.
-        if effectsum == -pathcount
+
+    # Case 2.2.1: Target init on, "and" gate, overall repression.
+        if (repcount == repeffect) && (repcount > 0) &&
+           ((repeffect > acteffect) || (acteffect < actcount))
           decisionarray[d] = 0
-    # Case 2.2.2: Target initially on, "and" logic gate, not all paths repress.
+
+    # Case 2.2.2: Target init on, "and" gate, overall not repression.
         else
           decisionarray[d] = 1
         end
+
     # Case 2.3: Error - target on, non-boolean logic gate.
       else
         error("Logic gate should take on a boolean value (zero or one).")
       end
+
     # Case 3: Error - initial target gene not boolean.
     else
       error("Target gene should be 0 or 1 initially in boolean framework.")
