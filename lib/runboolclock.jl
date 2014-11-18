@@ -36,7 +36,7 @@ end
 tic()
 params = set_parameters()
 add_clock_params!(params, [repression, activation, noInteraction])
-model = runga(params, EvolveClock; init_pop_size = 100, stop_after = 150)
+model = runga(params, EvolveClock; init_pop_size = 100, stop_after = 15)
 println()
 toc()
 now = strftime("%F_%H_%M", time())
@@ -55,7 +55,7 @@ h1 = net2hash(model.population[1].net)
 clockq = EvolveClock.should_be_a_clock(params)
 troein = EvolveClock.create_troein_1D(params)
 
-plotConcs(params, model.population[1].net)
-# plotConcs(params, clockq)
+plotConcs(params, model.population[1].net, now)
+# plotConcs(params, clockq, now)
 
 #TODO: Can a hash be saved with HDF5? That would be very useful...

@@ -1,7 +1,7 @@
 using DataFrames
 using Gadfly
 
-function plotConcs(params::Dict, net)
+function plotConcs(params::Dict, net, filename)
 
   concframe = DataFrame()
   concframe[:time] = (1:4 * 24 * 60) / 60
@@ -67,5 +67,5 @@ function plotConcs(params::Dict, net)
                                 outer = [16])),
                 Scale.discrete_color_manual(colourscheme...))
 
-draw(PDF("../runs/outputthis.pdf", 12inch, 6inch), plot1)
+draw(PDF("../runs/plot$(filename).pdf", 12inch, 6inch), plot1)
 end
