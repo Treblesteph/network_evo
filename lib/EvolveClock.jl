@@ -35,11 +35,11 @@ end
 
 function fitness(tup::(EvolvableNetwork, Dict))
   ent = tup[1]; params = tup[2]
-  troeinfit(ent.net, params)
+  fitness(ent.net, params)
 end
 
-TODO: Make an additional fitness cost to clustering (niching), so that
-     the population remains more diverse.
+#TODO: Make an additional fitness cost to clustering (niching), so that
+#      the population remains more diverse.
 
 function stephfit(net::Network, params::Dict)
   gene1 = net.concseries[:, 1]
@@ -88,7 +88,7 @@ function stephfit(net::Network, params::Dict)
   score = 1 - mean([allG1fitness, allG2fitness])
 end
 
-function troeinfit(net::Network, params::Dict)
+function fitness(net::Network, params::Dict)
   # Four terms make up the fitness, the expression of gene 1 during dawn,
   # gene 2 during dusk, the deterrence of low expression, and the
   # deterrence of superfluous paths that do not contribute to the fitness.
@@ -100,30 +100,41 @@ function troeinfit(net::Network, params::Dict)
 
   dayG1::Array{Float64} = zeros(params["alldays"] - 1)
   dayG2::Array{Float64} = zeros(params["alldays"] - 1)
-  dayexp::Array{Float64} = zeros(params["alldays"] - 1)
+  dayexpmax::Array{Float64} = zeros(params["alldays"] - 1)
   dayfitSuperfluous::Array{Float64} = zeros(params["alldays"] - 1)
 
   # Looping over all days except the first, to give the system time to settle.
 
   for d in 1:params["alldays"]-1
-    dayG1[d] = (0.00001 + sum(gene1[(1 + (d - 1) * 24 * 60):(d * 24 * 60)])) /
-               (0.00001 + sum(gene1[params["gene1fit"][d, :]]))
-    dayG2[d] = (0.00001 + sum(gene2[(1 + (d - 1) * 24 * 60):(d * 24 * 60)])) /
-               (0.00001 + sum(gene2[params["gene2fit"][d, :]]))
+    dayexp1 = sum(gene1[(1 + (d - 1) * 24 * 60):(d * 24 * 60)])
+    dawnexp1 = sum(gene1[params["gene1fit"][d, :]])
 
-    dayexp[d] = 0.01 * ((1 / (min(1, (sum(gene1[(1 +
-                              (d - 1) * 24 * 60):(d * 24 * 60)]) / 1000)))) +
-                             (1 / (min(1, (sum(gene2[(1 +
-                              (d - 1) * 24 * 60):(d * 24 * 60)]) / 1000)))))
+    if dayexp1 == 0
+      dayG1[d] = 1
+    else
+      dayG1[d] = dawnexp1 / dayexp1
+    end
+
+    dayexp2 = sum(gene2[(1 + (d - 1) * 24 * 60):(d * 24 * 60)])
+    duskexp2 = sum(gene2[params["gene2fit"][d, :]])
+
+    if dayexp2 == 0
+      dayG2[d] = 1
+    else
+      dayG2[d] = duskexp2 / dayexp2
+    end
+
+    dayexpmax[d] = 0.01 * (2 - ((dayexp1 + dayexp2) / (60 * 24)))
     # dayfitSuperfluous = 0.001 *
 
   end
 
-  fitnessG1 = mean(dayG1)
-  fitnessG2 = mean(dayG2)
-  fitnessExp = mean(dayexp)
+  fitnessG1 = 1 - mean(dayG1)
+  fitnessG2 = 1 - mean(dayG2)
+  fitnessExp = mean(dayexpmax)
 
-  score = (fitnessG1 + fitnessG2 + fitnessExp) / 3
+  # Giving dawn/dusk matching more weight than expression level.
+  score = fitnessExp + (fitnessG1 + fitnessG2) / 2
 end
 
 function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
