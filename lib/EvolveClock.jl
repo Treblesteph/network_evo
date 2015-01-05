@@ -35,27 +35,27 @@ end
 
 function fitness(tup::(EvolvableNetwork, Dict))
   ent = tup[1]; params = tup[2]
-  fitness(ent.net, params)
+  troeinfit(ent.net, params)
 end
 
-#TODO: Make an additional fitness cost to clustering (niching), so that
-#      the population remains more diverse.
+TODO: Make an additional fitness cost to clustering (niching), so that
+     the population remains more diverse.
 
-function fitness(net::Network, params::Dict)
+function stephfit(net::Network, params::Dict)
   gene1 = net.concseries[:, 1]
   gene2 = net.concseries[:, 2]
 
-  fitnessG1::Array{Float64} = zeros(params["alldays"])
-  fitnessG2::Array{Float64} = zeros(params["alldays"])
+  fitnessG1::Array{Float64} = zeros(params["alldays"] - 1)
+  fitnessG2::Array{Float64} = zeros(params["alldays"] - 1)
 
-  dawnFitness::Array{Float64} = zeros(params["alldays"])
-  notDawnFitness::Array{Float64} = zeros(params["alldays"])
-  duskFitness::Array{Float64} = zeros(params["alldays"])
-  notDuskFitness::Array{Float64} = zeros(params["alldays"])
+  dawnFitness::Array{Float64} = zeros(params["alldays"] - 1)
+  notDawnFitness::Array{Float64} = zeros(params["alldays"] - 1)
+  duskFitness::Array{Float64} = zeros(params["alldays"] - 1)
+  notDuskFitness::Array{Float64} = zeros(params["alldays"] - 1)
 
   # First working out the fitness for each day - excluding the first
   # to give the system time to stabilise.
-  for d in 2:params["alldays"]
+  for d in 1:params["alldays"] - 1
     dawnFitness[d] = sum(gene1[params["gene1fit"][d, :]]) /
                      length(params["gene1fit"][d, :])
     notDawnFitness[d] = 1 - (sum(gene1[(1 +
@@ -86,6 +86,44 @@ function fitness(net::Network, params::Dict)
   end
 
   score = 1 - mean([allG1fitness, allG2fitness])
+end
+
+function troeinfit(net::Network, params::Dict)
+  # Four terms make up the fitness, the expression of gene 1 during dawn,
+  # gene 2 during dusk, the deterrence of low expression, and the
+  # deterrence of superfluous paths that do not contribute to the fitness.
+  gene1 = net.concseries[:, 1]
+  gene2 = net.concseries[:, 2]
+
+  # fitnessG1::Array{Float64} = zeros(params["alldays"] - 1)
+  # fitnessG2::Array{Float64} = zeros(params["alldays"] - 1)
+
+  dayG1::Array{Float64} = zeros(params["alldays"] - 1)
+  dayG2::Array{Float64} = zeros(params["alldays"] - 1)
+  dayexp::Array{Float64} = zeros(params["alldays"] - 1)
+  dayfitSuperfluous::Array{Float64} = zeros(params["alldays"] - 1)
+
+  # Looping over all days except the first, to give the system time to settle.
+
+  for d in 1:params["alldays"]-1
+    dayG1[d] = (0.00001 + sum(gene1[(1 + (d - 1) * 24 * 60):(d * 24 * 60)])) /
+               (0.00001 + sum(gene1[params["gene1fit"][d, :]]))
+    dayG2[d] = (0.00001 + sum(gene2[(1 + (d - 1) * 24 * 60):(d * 24 * 60)])) /
+               (0.00001 + sum(gene2[params["gene2fit"][d, :]]))
+
+    dayexp[d] = 0.01 * ((1 / (min(1, (sum(gene1[(1 +
+                              (d - 1) * 24 * 60):(d * 24 * 60)]) / 1000)))) +
+                             (1 / (min(1, (sum(gene2[(1 +
+                              (d - 1) * 24 * 60):(d * 24 * 60)]) / 1000)))))
+    # dayfitSuperfluous = 0.001 *
+
+  end
+
+  fitnessG1 = mean(dayG1)
+  fitnessG2 = mean(dayG2)
+  fitnessExp = mean(dayexp)
+
+  score = (fitnessG1 + fitnessG2 + fitnessExp) / 3
 end
 
 function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
