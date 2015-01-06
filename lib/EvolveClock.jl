@@ -41,7 +41,7 @@ end
 #TODO: Make an additional fitness cost to clustering (niching), so that
 #      the population remains more diverse.
 
-function stephfit(net::Network, params::Dict)
+function fitness(net::Network, params::Dict)
   gene1 = net.concseries[:, 1]
   gene2 = net.concseries[:, 2]
 
@@ -56,18 +56,23 @@ function stephfit(net::Network, params::Dict)
   # First working out the fitness for each day - excluding the first
   # to give the system time to stabilise.
   for d in 1:params["alldays"] - 1
-    dawnFitness[d] = sum(gene1[params["gene1fit"][d, :]]) /
-                     length(params["gene1fit"][d, :])
-    notDawnFitness[d] = 1 - (sum(gene1[(1 +
-                        params["gene1fit"][d, end]):(d * 24 * 60)]) /
-                        length((1 +
-                        params["gene1fit"][d, end]):(d * 24 * 60)))
-    duskFitness[d] = sum(gene2[params["gene2fit"][d, :]]) /
-                     length(params["gene2fit"][d, :])
-    notDuskFitness[d] = 1 - (sum(gene2[1 + (d - 1) * 24 *
-                        60:(params["gene2fit"][d, 1] - 1)]) /
-                        length(1 + (d - 1) * 24 *
-                        60:(params["gene2fit"][d, 1] - 1)))
+
+    g1dawn = sum(gene1[params["gene1fit"][d, :]])
+    dawn = length(params["gene1fit"][d, :])
+    g1notdawn = sum(gene1[(1 + params["gene1fit"][d, end]):(d * 24 * 60)])
+    notdawn = length((1 + params["gene1fit"][d, end]):(d * 24 * 60))
+
+    dawnFitness[d] = g1dawn / dawn
+    notDawnFitness[d] = 1 - (g1notdawn / notdawn)
+
+    g2dusk = sum(gene2[params["gene2fit"][d, :]])
+    dusk = length(params["gene2fit"][d, :])
+    g2notdusk = sum(gene2[1 + (d - 1) * 24 * 60:(params["gene2fit"][d, 1] - 1)])
+    notdusk = length(1 + (d - 1) * 24 * 60:(params["gene2fit"][d, 1] - 1))
+
+    duskFitness[d] = g2dusk / dusk
+    notDuskFitness[d] = 1 - (g2notdusk / notdusk)
+    
     fitnessG1[d] = (dawnFitness[d] + notDawnFitness[d]) / 2
     fitnessG2[d] = (duskFitness[d] + notDuskFitness[d]) / 2
   end
@@ -88,7 +93,7 @@ function stephfit(net::Network, params::Dict)
   score = 1 - mean([allG1fitness, allG2fitness])
 end
 
-function fitness(net::Network, params::Dict)
+function troeinfit(net::Network, params::Dict)
   # Four terms make up the fitness, the expression of gene 1 during dawn,
   # gene 2 during dusk, the deterrence of low expression, and the
   # deterrence of superfluous paths that do not contribute to the fitness.
