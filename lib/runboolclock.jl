@@ -58,4 +58,6 @@ troein = EvolveClock.create_troein_1D(params)
 plotConcs(params, model.population[1].net, now)
 # plotConcs(params, clockq, now)
 
+plotFitness(model.all_fitnesses, now)
+
 #TODO: Can a hash be saved with HDF5? That would be very useful...

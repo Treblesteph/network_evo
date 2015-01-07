@@ -8,15 +8,20 @@ function prune(net::Network, params::Dict, counter=1)
   # decrease the fitness, keep the new network and prune again. Otherwise,
   # keep the old network and prune again.
   if counter <= length(net.paths)
-    println(counter)
+    println("counter:$(counter). Paths:")
 
     pruned::Network = Network(copy(net.paths), copy(net.transmats),
                               copy(net.envpath), copy(net.lags),
                               copy(net.envlag), copy(net.gates))
     pruned.paths[counter] *= 0
     for n = 1:16
-      println(pruned.paths[n][1])
+      print("$(pruned.paths[n][1]), ")
     end
+
+    net.concseries = runsim(net, params["nnodes"], params["allmins"],
+                            params["maxlag"], params["envsignal"],
+                            params["decisionhash"])
+
     pruned.concseries = runsim(pruned, params["nnodes"], params["allmins"],
                                params["maxlag"], params["envsignal"],
                                params["decisionhash"])
@@ -24,11 +29,11 @@ function prune(net::Network, params::Dict, counter=1)
     origfit = fitness(net, params)
     prunefit = fitness(pruned, params)
 
-    println("orig=$origfit prune=$prunefit")
+    println("orig=$origfit pruned=$prunefit")
 
     counter += 1
 
-    if origfit > prunefit
+    if origfit >= prunefit
       prune(pruned, params, counter)
     else
       prune(net, params, counter)
