@@ -34,11 +34,11 @@ function prune(net::Network, params::Dict, counter=1)
     counter += 1
 
     if origfit >= prunefit
-      prune(pruned, params, counter)
+      return prune(pruned, params, counter)
     else
-      prune(net, params, counter)
+      return prune(net, params, counter)
     end
+  else
+    return net
   end
-
-  return net
 end
