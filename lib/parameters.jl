@@ -17,6 +17,8 @@ function set_parameters()
   mutateenvlag::Array{Float64} = [0.7]
   mutategate::Array{Float64} = [0.04]
 
+  # Generation threshold, under which all gene-gene paths are fixed on.
+  pathson::Array{Int64} = [500]
   # Percent of population killed off and replaced
   # (through reproduction) each generation.
   percentkilled::Array{Float64} = [0.5]
@@ -51,6 +53,7 @@ function set_parameters()
                                    "mutatelag" => mutatelag[1],
                                    "mutateenvlag" => mutateenvlag[1],
                                    "mutategate" => mutategate[1],
+                                   "pathson" => pathson[1],
                                    "percentkilled" => percentkilled[1],
                                    "tmat_std" => tmat_std[1],
                                    "lag_std" => lag_std[1],

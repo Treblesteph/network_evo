@@ -136,7 +136,7 @@ function reset_model(model::GAmodel)
 end
 
 function create_initial_population(model::GAmodel)
-  entities = pmap(model.ga.create_entity, [(k,
+  entities = pmap(model.ga.create_entity, [(k, model.gen_num,
              model.params) for k in 1:model.init_pop_size])
   for i in 1:model.init_pop_size
     push!(model.population, entities[i])
@@ -182,7 +182,7 @@ function crossover_population(model::GAmodel, groupings)
 end
 
 function mutate_population(model::GAmodel)
-  pmap(model.ga.mutate, [(model.population[k],
+  pmap(model.ga.mutate, [(model.population[k], model.gen_num,
        model.params) for k in 1:length(model.population)])
 end
 

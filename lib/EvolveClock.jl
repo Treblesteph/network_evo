@@ -18,12 +18,22 @@ type EvolvableNetwork <: Entity
   EvolvableNetwork(net) = new(net, nothing)
 end
 
-function create_entity(tup::(Int64, Dict))
-  num = tup[1]; params = tup[2]
-  netw = Network(params["allmins"], params["nnodes"], params["maxlag"],
-                 params["minlag"], params["decisionhash"],
-                 params["envsignal"], params["interacttypes"], 50,
-                 fitness, params::Dict)
+function create_entity(tup::(Int64, Int64, Dict))
+  num = tup[1]; gen = tup[2]; params = tup[3]
+
+  # Fixing gene-gene paths on for the first k generations.
+  if gen < params["pathson"]
+    netw = Network(params["allmins"], params["nnodes"], params["maxlag"],
+                   params["minlag"], params["decisionhash"],
+                   params["envsignal"], params["interacttypes"][1:2], 50,
+                   fitness, params::Dict)
+  else
+    netw = Network(params["allmins"], params["nnodes"], params["maxlag"],
+                   params["minlag"], params["decisionhash"],
+                   params["envsignal"], params["interacttypes"], 50,
+                   fitness, params::Dict)
+  end
+
   EvolvableNetwork(netw)
 end
 
@@ -72,7 +82,7 @@ function fitness(net::Network, params::Dict)
 
     duskFitness[d] = g2dusk / dusk
     notDuskFitness[d] = 1 - (g2notdusk / notdusk)
-    
+
     fitnessG1[d] = (dawnFitness[d] + notDawnFitness[d]) / 2
     fitnessG2[d] = (duskFitness[d] + notDuskFitness[d]) / 2
   end
@@ -223,13 +233,16 @@ function crossover(tup::(Array{Any}, Dict))
   child = EvolvableNetwork(childnet)
 end
 
-function mutate(tup::(EvolvableNetwork, Dict))
-  ent = tup[1]; params = tup[2]
+function mutate(tup::(EvolvableNetwork, Int64, Dict))
+  ent = tup[1]; generationnum = tup[2]; params = tup[3]
   print(".")
-  # Path sign switch mutations.
-  if rand(Float64) < params["mutatepath"]
-    pathind = (rand(Uint) % length(ent.net.paths)) + 1
-    ent.net.paths[pathind] = mutate_path!(ent.net.paths[pathind], params)
+  # Keep all paths on during first k generations.
+  if generationnum >= params["pathson"]
+    # Path sign switch mutations.
+    if rand(Float64) < params["mutatepath"]
+      pathind = (rand(Uint) % length(ent.net.paths)) + 1
+      ent.net.paths[pathind] = mutate_path!(ent.net.paths[pathind], params)
+    end
   end
   # Transition matrix mutations.
   # --- off in non-stochastic simulations.
