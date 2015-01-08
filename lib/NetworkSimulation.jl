@@ -85,11 +85,11 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
     # Case 1.1: Target initially off, "or" logic gate.
       if scenariomat[d, gate_i] == 0
 
-    # Case 1.1.1: Target init off, "or" gate, overall not repression.
-        if repeffect <= acteffect
+    # Case 1.1.1: Target init off, "or" gate, overall activation.
+        if repeffect < acteffect
           decisionarray[d] = 1
 
-    # Case 1.1.2: Target init off, "or" gate, overall repression.
+    # Case 1.1.2: Target init off, "or" gate, overall not activation.
         else
           decisionarray[d] = 0
         end
@@ -97,14 +97,14 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
     # Case 1.2: Target init off, "and" gate.
     elseif scenariomat[d, gate_i] == 1
 
-    # Case 1.2.1: Target init off, "and" gate, overall not repression.
-        if (repcount > repeffect) || (repcount == 0) ||
-           (repeffect < acteffect && acteffect > 0 && acteffect == actcount)
-          decisionarray[d] = 1
-
-    # Case 1.2.2: Target init off, "and" gate, overall repression.
-        else
+    # Case 1.2.1: Target init off, "and" gate, overall not activation.
+        if (actcount > acteffect) || (actcount == 0) ||
+           (repeffect > acteffect && repeffect > 0 && repeffect == repcount)
           decisionarray[d] = 0
+
+    # Case 1.2.2: Target init off, "and" gate, overall activation.
+        else
+          decisionarray[d] = 1
         end
 
     # Case 1.3: Error - target off, non-boolean logic gate.
@@ -118,11 +118,11 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
     # Case 2.1: Target initially on, "or" logic gate.
       if scenariomat[d, gate_i] == 0
 
-    # Case 2.1.1: Target init on, "or" gate, overall repression.
-        if repeffect > acteffect
+    # Case 2.1.1: Target init on, "or" gate, overall not activation.
+        if repeffect >= acteffect
           decisionarray[d] = 0
 
-    # Case 2.1.2: Target init on, "or" gate, overall not repression.
+    # Case 2.1.2: Target init on, "or" gate, overall activation.
         else
           decisionarray[d] = 1
         end
@@ -130,12 +130,12 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
     # Case 2.2: Target initially on, "and" logic gate.
     elseif scenariomat[d, gate_i] == 1
 
-    # Case 2.2.1: Target init on, "and" gate, overall repression.
-        if (repcount == repeffect) && (repcount > 0) &&
-           ((repeffect > acteffect) || (acteffect < actcount))
+    # Case 2.2.1: Target init on, "and" gate, overall not activation.
+        if ((actcount > acteffect) || (actcount = 0)) ||
+           (repeffect > acteffect)
           decisionarray[d] = 0
 
-    # Case 2.2.2: Target init on, "and" gate, overall not repression.
+    # Case 2.2.2: Target init on, "and" gate, overall activation.
         else
           decisionarray[d] = 1
         end
@@ -167,7 +167,7 @@ function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
   gates::Array{Int64} = copy(net.gates)
   timearray::Array{Int64} = [1:allmins]
   concs::Array{Int64} = zeros(Int64, allmins, nnode)
-  concs[1, :] = ones(Int64, nnode)
+  concs[1, :] = zeros(Int64, nnode)
   concs = vcat(zeros(Int64, maxlag, nnode), concs)
   # Adding maxlag zeros to the beginning of path vectors.
   for i in 1:length(paths)
