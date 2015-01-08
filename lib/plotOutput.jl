@@ -71,10 +71,11 @@ function plotConcs(params::Dict, net, filename)
 end
 
 function plotFitness(fitnesses, filename)
+  maxfit = max(fitnesses...)
 
   plot1 = plot(x = 1:length(fitnesses), y = fitnesses, Geom.line,
                Scale.x_continuous(minvalue = 0, maxvalue = length(fitnesses)),
-               Scale.y_continuous(minvalue = 0, maxvalue = 0.4))
+               Scale.y_continuous(minvalue = 0, maxvalue = maxfit))
   draw(PDF("../runs/fitness$(filename).pdf", 12inch, 6inch), plot1)
 
 end
