@@ -131,7 +131,7 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
     elseif scenariomat[d, gate_i] == 1
 
     # Case 2.2.1: Target init on, "and" gate, overall not activation.
-        if ((actcount > acteffect) || (actcount = 0)) ||
+        if ((actcount > acteffect) || (actcount == 0)) ||
            (repeffect > acteffect)
           decisionarray[d] = 0
 
