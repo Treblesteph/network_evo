@@ -30,7 +30,7 @@ The following sections refer to the current setup (boolean simulation and clock 
 
 ### 2. Boolean network representation (BoolNetwork)
 
-[network cartoon](https://raw.githubusercontent.com/Treblesteph/network_evo/master/assets/generalnet.png)
+![network cartoon](https://raw.githubusercontent.com/Treblesteph/network_evo/master/assets/generalnet.png)
 
 #### Paths
 
