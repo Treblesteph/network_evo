@@ -25,12 +25,12 @@ function create_entity(tup::(Int64, Int64, Dict))
   if gen < params["pathson"]
     netw = Network(params["allmins"], params["nnodes"], params["maxlag"],
                    params["minlag"], params["decisionhash"],
-                   params["envsignal"], params["interacttypes"][1:2], 50,
+                   params["envsignal"], params["interacttypes"][1:2], 250,
                    fitness, params::Dict)
   else
     netw = Network(params["allmins"], params["nnodes"], params["maxlag"],
                    params["minlag"], params["decisionhash"],
-                   params["envsignal"], params["interacttypes"], 50,
+                   params["envsignal"], params["interacttypes"], 250,
                    fitness, params::Dict)
   end
 
