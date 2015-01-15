@@ -21,7 +21,7 @@ function set_parameters()
   pathson::Array{Int64} = [500]
   # Percent of population killed off and replaced
   # (through reproduction) each generation.
-  percentkilled::Array{Float64} = [0.5]
+  percentkilled::Array{Float64} = [0.1]
   tmat_std::Array{Float64} = [0.00]
   lag_std::Array{Int64} = [30]
   envlag_std::Array{Int64} = [15]
