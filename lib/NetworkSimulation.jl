@@ -155,44 +155,61 @@ end
 
 function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
                 envsignal::Array{Int64}, dec_hash::Dict)
+
   # Making an array of length allmins which indicates whether the environmental
-  # signal is on or off.
+  # signal is on or off (because the argument envsignal is a list of indices).
   environ_signal::Array{Int64} = zeros(Int64, allmins)
   environ_signal[envsignal] = 1
+
   # Extracting network properties for ease of use.
   paths::Array{Array{Int64}} = copy(net.paths)
   envpaths::Array{Int64} = copy(net.envpath)
   lags::Array{Int64} = copy(net.lags)
   envlag::Array{Int64} = copy(net.envlag)
   gates::Array{Int64} = copy(net.gates)
-  timearray::Array{Int64} = [1:allmins]
-  concs::Array{Int64} = zeros(Int64, allmins, nnode)
-  concs[1, :] = ones(Int64, nnode)
-  concs = vcat(zeros(Int64, maxlag, nnode), concs)
+
+  # Making matrix containing all gene concentrations over time (plus history
+  # of zeros to simulate the lags).
+  concs::Array{Int64} = zeros(Int64, maxlag + allmins, nnode)
+
+  # Setting initial concentrations to 1 (after history).
+  concs[maxlag + 1, :] = zeros(Int64, nnode)
+
   # Adding maxlag zeros to the beginning of path vectors.
+  history = zeros(Int64, maxlag)
   for i in 1:length(paths)
-    history = zeros(Int64, maxlag)
     paths[i] = [history, paths[i]]
   end
+
+  # Making environmental signal longer than simulation so that it can be used
+  # for lags into history.
   environ_signal = [environ_signal, environ_signal]
-  ncount = 0 # Determines what path/lag index to use from the 1D arrays.
-  for nd in 1:nnode
-    for t in timearray[1:end-1] # First row is initial condition (already set).
-      # Take all current and previous concentrations, all incoming paths and
-      # their lags, and the gate type, to determine the next concentration.
-      genes::Array{Int64} = [concs[maxlag+t-lags[ncount+jj], jj] for jj in 1:nnode]
-      path::Array{Int64} = [paths[ncount+k][maxlag+t-lags[ncount+k]] for k in 1:nnode]
+
+  for t in 1:(allmins - 1) # First row is initial condition (already set).
+
+    # Take all current and previous concentrations, all incoming paths and
+    # their lags, and the gate type, to determine the next concentration.
+
+    ncount = 0 # Determines what path/lag index to use from the 1D arrays.
+    genes::Array{Int64} = zeros(Int64, nnode)
+    path::Array{Int64} = zeros(Int64, nnode)
+    for k in 1:nnode
+      genes[k] = concs[maxlag + t - lags[ncount + k], k]
+      path[k] = paths[ncount + k][maxlag + t - lags[ncount + k]]
+      ncount += nnode
+    end
+
+    for nd in 1:nnode
       envpath::Array{Int64} = [envpaths[nd]]
-      envinput::Array{Int64} = [environ_signal[maxlag + t - envlag[nd]]]
+      envinput::Array{Int64} = [environ_signal[allmins + t - envlag[nd]]]
       gate::Array{Int64} = [gates[nd]]
-      init::Array{Int64} = [concs[maxlag+t, nd]]
+      init::Array{Int64} = [concs[maxlag + t, nd]]
       # Next will compare this row to the rows in decision matrix to determine
       # the next state of gene nd.
       decisionrow::Array{Int64, 1} = [genes, path, envpath, envinput,
                                       gate, init]
-      concs[t+maxlag+1, nd] = dec_hash[decisionrow]
+      concs[t + maxlag + 1, nd] = dec_hash[decisionrow]
     end
-    ncount += nnode
   end
   concs = concs[maxlag+1:end, :]
 end
