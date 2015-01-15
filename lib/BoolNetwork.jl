@@ -157,20 +157,20 @@ function create_transmat(states::Array)
   return transmat
 end
 
-function create_interaction(i::Interaction, ALLMINS::Int64)
+function create_interaction(i::Interaction, allmins::Int64)
   if i == repression
-    chain = -1 * ones(Int64, ALLMINS)
+    chain = -1 * ones(Int64, allmins)
     transmat = [1 0; 0 1]
   elseif i == activation
-    chain = ones(Int64, ALLMINS)
+    chain = ones(Int64, allmins)
     transmat = [1 0; 0 1]
   elseif i == noInteraction
-    chain = zeros(Int64, ALLMINS)
+    chain = zeros(Int64, allmins)
     transmat = [1 0; 0 1]
   else
     transmat::Array{Float64} = create_transmat(i.states)
     g = MarkovGenerator(i.states, transmat)
-    chain = generate(g, ALLMINS)
+    chain = generate(g, allmins)
   end
   return(chain, transmat)
 end
