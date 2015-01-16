@@ -7,7 +7,7 @@ export Network, runsim
 # Performs a dynamic simuation for a network which is encoded by a matrix
 # of interactions (where P_ij specifies the path from node i to node j).
 
-function make_decision_mat(nnodes::Int64)
+function make_decision_mat(nnodes::Int64, defaulton::Bool)
 # This function makes a matrix containing all of the possible scenarios for
 # time t (columns 1:end-1), and their resultant effect on the initial condition
 # i.e. giving the state at time t + 1 in the last column.
@@ -33,7 +33,8 @@ function make_decision_mat(nnodes::Int64)
   # column determining the state at time t + 1 based on the scenariomat.
   decisionarray::Array{Int64, 1} = decision_array(scenariomat, genes_i,
                                                   paths_i, input_i,
-                                                  envpath_i, gate_i, init_i)
+                                                  envpath_i, gate_i,
+                                                  init_i, defaulton)
   decisionmat::Array{Int64, 2} = hcat(scenariomat, decisionarray)
   decdict = Dict{Array{Int64}, Int64}()
   for r in 1:size(decisionmat, 1)
@@ -46,7 +47,7 @@ function make_decision_mat(nnodes::Int64)
 end
 
 function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
-                        envpath_i, gate_i, init_i)
+                        envpath_i, gate_i, init_i, defaulton)
   decisionarray::Array{Int64, 1} = zeros(Int64, size(scenariomat, 1))
   for d in 1:length(decisionarray)
 
@@ -79,87 +80,207 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
                              thisrowgenes[find(x -> x == -1, thisrowpaths)])
 
 
-    # Case 1: Initially the target gene is off.
+    # CASE 1: Initially the target gene is off.
     if scenariomat[d, init_i] == 0
 
-    # Case 1.1: Target initially off, "or" logic gate.
+    # CASE 1.1: Target initially off, "or" logic gate.
       if scenariomat[d, gate_i] == 0
 
-    # Case 1.1.1: Target init off, "or" gate, overall not repression.
-        if repeffect <= acteffect
-          decisionarray[d] = 1
+    # CASE 1.1.1: Gene default off.
+        if defaulton == 0
 
-    # Case 1.1.2: Target init off, "or" gate, overall repression.
+    # CASE 1.1.1.1: Target init off, "or" gate, overall activation.
+          if repeffect < acteffect
+
+            decisionarray[d] = 1
+
+    # CASE 1.1.1.2: Target init off, "or" gate, overall not activation.
+          else
+
+            decisionarray[d] = 0
+
+          end
+
+    # CASE 1.1.2: Gene default on.
+        elseif defaulton == 1
+
+    # CASE 1.1.2.1: Target init off, "or" gate, overall not repression.
+          if repeffect <= acteffect
+
+            decisionarray[d] = 1
+
+    # CASE 1.1.2.2: Target init off, "or" gate, overall repression.
+          else
+
+            decisionarray[d] = 0
+
+          end
+
+    # CASE 1.1.2.3: Default on not Bool error.
         else
-          decisionarray[d] = 0
+
+          error("defaulton must be Bool type.")
+
         end
 
-    # Case 1.2: Target init off, "and" gate.
-    elseif scenariomat[d, gate_i] == 1
+    # CASE 1.2: Target init off, "and" gate.
+      elseif scenariomat[d, gate_i] == 1
 
-    # Case 1.2.1: Target init off, "and" gate, overall not repression.
-        if (repcount > repeffect) || (repcount == 0) ||
-           (repeffect < acteffect && acteffect > 0 && acteffect == actcount)
-          decisionarray[d] = 1
+    # CASE 1.2.1: Gene default off.
+        if defaulton == 0
 
-    # Case 1.2.2: Target init off, "and" gate, overall repression.
-        else
-          decisionarray[d] = 0
-        end
+    # CASE 1.2.1.1: Target init off, "and" gate, overall activation.
+          if (actcount == acteffect) && (actcount > 0) &&
+             ((repeffect < acteffect) || (repeffect < repcount))
 
-    # Case 1.3: Error - target off, non-boolean logic gate.
+             decisionarray[d] = 1
+
+    # CASE 1.2.1.2: Target init off, "and" gate, overall not activation.
+          else
+
+            decisionarray[d] = 0
+
+          end
+
+    # CASE 1.2.2: Gene default on.
+        elseif defaulton == 1
+
+    # CASE 1.2.2.1: Target init off, "and" gate, overall not repression.
+          if ((repcount > repeffect) || (repcount == 0)) ||
+             ((actcount == acteffect) && (actcount > repcount))
+
+             decisionarray[d] = 1
+
+    # CASE 1.2.2.2: Target init off, "and" gate, overall repression.
+          else
+
+            decisionarray[d] = 0
+
+          end
+
+    # CASE 1.2.2.3: Default on not Bool error.
       else
-        error("Logic gate should take on a boolean value (zero or one).")
+
+        error("defaulton must be Bool type.")
+
       end
 
-    # Case 2: Initially the target gene is on.
+    # CASE 1.3: Error - target off, non-boolean logic gate.
+      else
+
+        error("Logic gate should take on a boolean value (zero or one).")
+
+      end
+
+    # CASE 2: Initially the target gene is on.
     elseif scenariomat[d, init_i] == 1
 
-    # Case 2.1: Target initially on, "or" logic gate.
+    # CASE 2.1: Target initially on, "or" logic gate.
       if scenariomat[d, gate_i] == 0
 
-    # Case 2.1.1: Target init on, "or" gate, overall repression.
-        if repeffect > acteffect
-          decisionarray[d] = 0
+    # CASE 2.1.1: Gene default off.
+        if defaulton == 0
 
-    # Case 2.1.2: Target init on, "or" gate, overall not repression.
+    # CASE 2.1.1.1: Target init on, "or" gate, overall activation.
+          if repeffect < acteffect
+
+            decisionarray[d] = 1
+
+    # CASE 2.1.1.2: Target init on, "or" gate, overall activation.
+          else
+
+            decisionarray[d] = 0
+
+          end
+
+    # CASE 2.1.2: Gene default on.
+        elseif defaulton == 1
+
+    # CASE 2.1.2.1: Target init on, "or" gate, overall not repression.
+          if repeffect <= acteffect
+
+            decisionarray[d] = 1
+
+    # CASE 2.1.2.2: Target init on, "or" gate, overall repression.
+          else
+
+            decisionarray[d] = 0
+
+          end
+
+    # CASE 2.1.2.3: Default on not Bool error.
         else
-          decisionarray[d] = 1
+
+          error("defaulton must be Bool type.")
+
         end
 
-    # Case 2.2: Target initially on, "and" logic gate.
-    elseif scenariomat[d, gate_i] == 1
+    # CASE 2.2: Target initially on, "and" logic gate.
+      elseif scenariomat[d, gate_i] == 1
 
-    # Case 2.2.1: Target init on, "and" gate, overall repression.
-        if (repcount == repeffect) && (repcount > 0) &&
-           ((repeffect > acteffect) || (acteffect < actcount))
+    # CASE 2.2.1: Gene default off.
+        if defaulton == 0
+
+    # CASE 2.2.1.1: Target init on, "and" gate, overall activation.
+        if ((actcount == acteffect) && (actcount > 0)) &&
+           ((repeffect < acteffect) || (repeffect < repcount))
+
+          decisionarray[d] = 1
+
+    # CASE 2.2.1.2: Target init on, "and" gate, overall not activation.
+        else
+
           decisionarray[d] = 0
 
-    # Case 2.2.2: Target init on, "and" gate, overall not repression.
-        else
-          decisionarray[d] = 1
         end
 
-    # Case 2.3: Error - target on, non-boolean logic gate.
+    # CASE 2.2.2: Gene default on.
+      elseif defaulton == 1
+
+    # CASE 2.2.2.1: Target init on, "and" gate, overall not repression.
+        if ((repcount > repeffect) || (repcount == 0)) ||
+           ((actcount == acteffect) && (actcount > repcount))
+
+           decisionarray[d] = 1
+
+    # CASE 2.2.2.2: Target init on, "and" gate, overall repression.
+        else
+
+          decisionarray[d] = 0
+
+        end
+
+    # CASE 2.2.2.3: Default on not Bool error.
       else
-        error("Logic gate should take on a boolean value (zero or one).")
+
+        error("defaulton must be Bool type.")
+
       end
 
-    # Case 3: Error - initial target gene not boolean.
+    # CASE 2.3: Error - target on, non-boolean logic gate.
+      else
+
+        error("Logic gate should take on a boolean value (zero or one).")
+
+      end
+
+    # CASE 3: Error - initial target gene not boolean.
     else
+
       error("Target gene should be 0 or 1 initially in boolean framework.")
+
     end
-  end
+
   return decisionarray
+
 end
 
-function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
-                envsignal::Array{Int64}, dec_hash::Dict)
+function runsim(net::Network, params::Dict)
 
   # Making an array of length allmins which indicates whether the environmental
   # signal is on or off (because the argument envsignal is a list of indices).
-  environ_signal::Array{Int64} = zeros(Int64, allmins)
-  environ_signal[envsignal] = 1
+  environ_signal::Array{Int64} = zeros(Int64, params["allmins"])
+  environ_signal[params["envsignal"]] = 1
 
   # Extracting network properties for ease of use.
   paths::Array{Array{Int64}} = copy(net.paths)
@@ -170,13 +291,21 @@ function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
 
   # Making matrix containing all gene concentrations over time (plus history
   # of zeros to simulate the lags).
-  concs::Array{Int64} = zeros(Int64, maxlag + allmins, nnode)
+  concs::Array{Int64} = zeros(Int64, params["maxlag"] +
+                              params["allmins"], params["nnode"])
 
-  # Setting initial concentrations to 1 (after history).
-  concs[maxlag + 1, :] = zeros(Int64, nnode)
+  # Setting initial concentrations, and history, according to defaults.
+  if params["defaulton"] == 1
+    concs[params["maxlag"] + 1, :] = ones(Int64, params["nnode"])
+    history::Array{Int64} = ones(Int64, params["maxlag"])
+  elseif params["defaulton"] == 0
+    concs[params["maxlag"] + 1, :] = zeros(Int64, params["nnode"])
+    history::Array{Int64} = zeros(Int64, params["maxlag"])
+  else
+    error("Defaulton must be a boolean value.")
 
-  # Adding maxlag zeros to the beginning of path vectors.
-  history = zeros(Int64, maxlag)
+  # Adding history to the beginning of path vectors (to deal with lags).
+
   for i in 1:length(paths)
     paths[i] = [history, paths[i]]
   end
@@ -185,33 +314,33 @@ function runsim(net::Network, nnode::Int64, allmins::Int64, maxlag::Int64,
   # for lags into history.
   environ_signal = [environ_signal, environ_signal]
 
-  for t in 1:(allmins - 1) # First row is initial condition (already set).
+  for t in 1:(params["allmins"] - 1) # First row is initial condition.
 
     # Take all current and previous concentrations, all incoming paths and
     # their lags, and the gate type, to determine the next concentration.
 
     ncount = 0 # Determines what path/lag index to use from the 1D arrays.
-    genes::Array{Int64} = zeros(Int64, nnode)
-    path::Array{Int64} = zeros(Int64, nnode)
-    for k in 1:nnode
-      genes[k] = concs[maxlag + t - lags[ncount + k], k]
-      path[k] = paths[ncount + k][maxlag + t - lags[ncount + k]]
-      ncount += nnode
+    genes::Array{Int64} = zeros(Int64, params["nnode"])
+    path::Array{Int64} = zeros(Int64, params["nnode"])
+    for k in 1:params["nnode"]
+      genes[k] = concs[params["maxlag"] + t - lags[ncount + k], k]
+      path[k] = paths[ncount + k][params["maxlag"] + t - lags[ncount + k]]
+      ncount += params["nnode"]
     end
 
-    for nd in 1:nnode
+    for nd in 1:params["nnode"]
       envpath::Array{Int64} = [envpaths[nd]]
-      envinput::Array{Int64} = [environ_signal[allmins + t - envlag[nd]]]
+      envinput::Array{Int64} = [environ_signal[params["allmins"] + t - envlag[nd]]]
       gate::Array{Int64} = [gates[nd]]
-      init::Array{Int64} = [concs[maxlag + t, nd]]
+      init::Array{Int64} = [concs[params["maxlag"] + t, nd]]
       # Next will compare this row to the rows in decision matrix to determine
       # the next state of gene nd.
       decisionrow::Array{Int64, 1} = [genes, path, envpath, envinput,
                                       gate, init]
-      concs[t + maxlag + 1, nd] = dec_hash[decisionrow]
+      concs[t + params["maxlag"] + 1, nd] = params["dec_hash"][decisionrow]
     end
   end
-  concs = concs[maxlag+1:end, :]
+  concs = concs[params["maxlag"]+1:end, :]
 end
 
 end # NetworkSimulation
