@@ -271,6 +271,8 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
 
     end
 
+  end
+
   return decisionarray
 
 end
@@ -297,12 +299,13 @@ function runsim(net::Network, params::Dict)
   # Setting initial concentrations, and history, according to defaults.
   if params["defaulton"] == 1
     concs[params["maxlag"] + 1, :] = ones(Int64, params["nnode"])
-    history::Array{Int64} = ones(Int64, params["maxlag"])
+    history = ones(Int64, params["maxlag"])
   elseif params["defaulton"] == 0
     concs[params["maxlag"] + 1, :] = zeros(Int64, params["nnode"])
-    history::Array{Int64} = zeros(Int64, params["maxlag"])
+    history = zeros(Int64, params["maxlag"])
   else
     error("Defaulton must be a boolean value.")
+  end
 
   # Adding history to the beginning of path vectors (to deal with lags).
 

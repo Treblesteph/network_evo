@@ -18,13 +18,9 @@ function prune(net::Network, params::Dict, counter=1)
       print("$(pruned.paths[n][1]), ")
     end
 
-    net.concseries = runsim(net, params["nnodes"], params["allmins"],
-                            params["maxlag"], params["envsignal"],
-                            params["decisionhash"])
+    net.concseries = runsim(net, params)
 
-    pruned.concseries = runsim(pruned, params["nnodes"], params["allmins"],
-                               params["maxlag"], params["envsignal"],
-                               params["decisionhash"])
+    pruned.concseries = runsim(pruned, params)
 
     origfit = fitness(net, params)
     prunefit = fitness(pruned, params)

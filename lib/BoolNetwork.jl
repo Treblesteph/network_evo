@@ -67,62 +67,61 @@ end
 
 #-- Outer Network constructor for predefined interactions.
 
-function Network(allmins::Int64, maxlag::Int64, decisions::Dict,
-                 envsignal::Array{Int64}, interactions::Array{Interaction},
-                 envpaths::Array{Int64}, lags::Array{Int64},
-                 envlag::Array{Int64}, gates::Array{Int64})
-  nnodes::Int64 = length(gates)
+function Network(params::Dict)
+
+  nnodes::Int64 = length(params["gates"])
   paths::Array{Array{Int64}} = [Int64[] for i in 1:(nnodes^2)]
   transmats::Array{Array{Float64}} = [Float64[] for i in 1:(nnodes^2)]
+
   for j in 1:(nnodes^2)
-    (paths[j], transmats[j]) = create_interaction(interactions[j], allmins)
+    (paths[j], transmats[j]) = create_interaction(params["interactions"][j],
+                                                  params["allmins"])
   end
-  network = Network(paths, transmats, envpaths, lags, envlag,
-                    gates, 1)
-  network.concseries = runsim(network, nnodes, allmins, maxlag,
-                              envsignal, decisions)
+
+  network = Network(paths, transmats, params["envpaths"], params["lags"],
+                    params["envlag"], params["gates"], 1)
+
+  network.concseries = runsim(network, params)
+
   return network
 end
 
 #-- Outer Network constructor for random network.
 
-function Network(allmins::Int64, nnodes::Int64, maxlag::Int64, minlag::Int64,
-                 decisions::Dict, envsignal::Array{Int64},
-                 interactchoices::Array{Interaction})
+function Network(params::Dict, interactchoices::Array{Interaction})
   # This function can be used to create stochastic or deterministic models
   # by controlling the interactchoices array.
 
   # Initialising fields of Network.
-  paths::Array{Array{Int64}} = [Int64[] for i in 1:(nnodes^2)]
-  lags::Array{Int64} = zeros(Int64, nnodes^2)
+  paths::Array{Array{Int64}} = [Int64[] for i in 1:(params["nnodes"]^2)]
+  lags::Array{Int64} = zeros(Int64, params["nnodes"]^2)
   transmats::Array{Array{Float64}} = [Float64[] for i in
-                                      1:(nnodes^2)]
+                                      1:(params["nnodes"]^2)]
 
   # Setting random gates.
   gatechoices = (0, 1)
   gates::Array{Int64} = [gatechoices[ceil(length(gatechoices)*rand())]
-                         for i in 1:nnodes]
+                         for i in 1:params["nnodes"]]
 
   # Setting random environmental paths.
-  envpaths::Array{Int64} = Int64[round(rand()) for i in 1:nnodes]
-  envlag::Array{Int64} = [minlag + (Base.convert(Int64,
-                                    floor((maxlag - minlag) *
-                                    rand()))) for i = 1:nnodes]
+  envpaths::Array{Int64} = Int64[round(rand()) for i in 1:params["nnodes"]]
+  envlag::Array{Int64} = [params["minlag"] + (Base.convert(Int64,
+                          floor((params["maxlag"] - params["minlag"]) *
+                          rand()))) for i = 1:params["nnodes"]]
   # Filling paths, lags, and transition matrices for each interaction.
-  for p = 1:(nnodes^2)
+  for p = 1:(params["nnodes"]^2)
     # Randomly select interaction type for each entry.
     randselect = ceil(length(interactchoices)*rand())
     #TODO: Random paths need to be re-generated each generation (for each
     #      dynanic simulation).
-    lags[p]::Int64 = minlag + (Base.convert(Int64,
-                               floor((maxlag - minlag) * rand())))
+    lags[p]::Int64 = params["minlag"] + (Base.convert(Int64,
+                     floor((params["maxlag"] - params["minlag"]) * rand())))
     (paths[p], transmats[p]) = create_interaction(interactchoices[randselect],
-                                                  allmins)
+                                                  params["allmins"])
   end
 
   network = Network(paths, transmats, envpaths, lags, envlag, gates)
-  network.concseries = runsim(network, nnodes, allmins,
-                              maxlag, envsignal, decisions)
+  network.concseries = runsim(network, params)
   return network
 end
 

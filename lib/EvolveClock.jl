@@ -228,8 +228,7 @@ function crossover(tup::(Array{Any}, Dict))
   #      from GeneticAlgorithms code, something like model.gen_num.
   childnet = Network(childpaths, childtmats, childenvpath, childlags,
                      childenvlag, childgates, childgen)
-  childnet.concseries = runsim(childnet, params["nnodes"], params["allmins"],
-                               params["maxlag"], params["envsignal"], params["decisionhash"])
+  childnet.concseries = runsim(childnet, params)
   child = EvolvableNetwork(childnet)
 end
 
@@ -268,9 +267,7 @@ function mutate(tup::(EvolvableNetwork, Int64, Dict))
     gateind = (rand(Uint) % length(ent.net.gates)) + 1
     ent.net.gates[gateind] = mutate_gate!(ent.net.gates[gateind], params)
   end
-  ent.net.concseries = runsim(ent.net, params["nnodes"], params["allmins"],
-                              params["maxlag"], params["envsignal"],
-                              params["decisionhash"])
+  ent.net.concseries = runsim(ent.net, params)
   ent
 end
 
@@ -344,8 +341,7 @@ function create_troein_1D(params::Dict)
 
   # First making a network with no interactions.
   interactions = [params["interacttypes"][3]]
-  net = Network(params["allmins"], 4, 14*60, 5, params["decisionhash"],
-                params["envsignal"], interactions)
+  net = Network(params, interactions)
 
   # Now overwriting the interactions, paths, envrionmental paths, and gates.
   net.paths[1]; net.lags[1]              # From gene 1 to gene 1
@@ -369,8 +365,7 @@ function create_troein_1D(params::Dict)
   net.envlag = [5, 5, 5, 5]
   net.gates = zeros(Int64, 4)
 
-  net.concseries = runsim(net, 4, params["allmins"], 60*24,
-                          params["envsignal"], params["decisionhash"])
+  net.concseries = runsim(net, params)
   return net
 end
 
@@ -381,8 +376,7 @@ function should_be_a_clock(params::Dict)
 
   # First making a network with no interactions.
   interactions = [params["interacttypes"][3]]
-  net = Network(params["allmins"], 4, 24*60, 5, params["decisionhash"],
-                params["envsignal"], interactions)
+  net = Network(params, interactions)
 
   # Now overwriting the interactions, paths, envrionmental paths, and gates.
   net.paths[1] -= 1; net.lags[1] = 3*60  # From gene 1 to gene 1
@@ -406,8 +400,7 @@ function should_be_a_clock(params::Dict)
   net.envlag = [5, 5, 5, 5]
   net.gates = zeros(Int64, 4)
 
-  net.concseries = runsim(net, 4, params["allmins"], 60*24,
-                          params["envsignal"], params["decisionhash"])
+  net.concseries = runsim(net, params)
   return net
 end
 
