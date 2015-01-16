@@ -294,14 +294,14 @@ function runsim(net::Network, params::Dict)
   # Making matrix containing all gene concentrations over time (plus history
   # of zeros to simulate the lags).
   concs::Array{Int64} = zeros(Int64, params["maxlag"] +
-                              params["allmins"], params["nnode"])
+                              params["allmins"], params["nnodes"])
 
   # Setting initial concentrations, and history, according to defaults.
   if params["defaulton"] == 1
-    concs[params["maxlag"] + 1, :] = ones(Int64, params["nnode"])
+    concs[params["maxlag"] + 1, :] = ones(Int64, params["nnodes"])
     history = ones(Int64, params["maxlag"])
   elseif params["defaulton"] == 0
-    concs[params["maxlag"] + 1, :] = zeros(Int64, params["nnode"])
+    concs[params["maxlag"] + 1, :] = zeros(Int64, params["nnodes"])
     history = zeros(Int64, params["maxlag"])
   else
     error("Defaulton must be a boolean value.")
@@ -323,15 +323,15 @@ function runsim(net::Network, params::Dict)
     # their lags, and the gate type, to determine the next concentration.
 
     ncount = 0 # Determines what path/lag index to use from the 1D arrays.
-    genes::Array{Int64} = zeros(Int64, params["nnode"])
-    path::Array{Int64} = zeros(Int64, params["nnode"])
-    for k in 1:params["nnode"]
+    genes::Array{Int64} = zeros(Int64, params["nnodes"])
+    path::Array{Int64} = zeros(Int64, params["nnodes"])
+    for k in 1:params["nnodes"]
       genes[k] = concs[params["maxlag"] + t - lags[ncount + k], k]
       path[k] = paths[ncount + k][params["maxlag"] + t - lags[ncount + k]]
-      ncount += params["nnode"]
+      ncount += params["nnodes"]
     end
 
-    for nd in 1:params["nnode"]
+    for nd in 1:params["nnodes"]
       envpath::Array{Int64} = [envpaths[nd]]
       envinput::Array{Int64} = [environ_signal[params["allmins"] + t - envlag[nd]]]
       gate::Array{Int64} = [gates[nd]]
@@ -340,7 +340,7 @@ function runsim(net::Network, params::Dict)
       # the next state of gene nd.
       decisionrow::Array{Int64, 1} = [genes, path, envpath, envinput,
                                       gate, init]
-      concs[t + params["maxlag"] + 1, nd] = params["dec_hash"][decisionrow]
+      concs[t + params["maxlag"] + 1, nd] = params["decisionhash"][decisionrow]
     end
   end
   concs = concs[params["maxlag"]+1:end, :]
