@@ -38,7 +38,7 @@ function set_parameters()
   parentselect::Array{Int64} = [2]
 
   # Default value of genes when there is no net input to them.
-  defaulton::Bool = [0]
+  defaulton::Array{Bool} = [0]
 
   allhours::Array{Int64} = [alldays * 24]
   allmins::Array{Int64} = [allhours * 60]
