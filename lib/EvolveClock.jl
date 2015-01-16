@@ -23,15 +23,9 @@ function create_entity(tup::(Int64, Int64, Dict))
 
   # Fixing gene-gene paths on for the first k generations.
   if gen < params["pathson"]
-    netw = Network(params["allmins"], params["nnodes"], params["maxlag"],
-                   params["minlag"], params["decisionhash"],
-                   params["envsignal"], params["interacttypes"][1:2], 250,
-                   fitness, params::Dict)
+    netw = Network(params["interacttypes"][1:2], 80, fitness, params)
   else
-    netw = Network(params["allmins"], params["nnodes"], params["maxlag"],
-                   params["minlag"], params["decisionhash"],
-                   params["envsignal"], params["interacttypes"], 250,
-                   fitness, params::Dict)
+    netw = Network(params["interacttypes"], 80, fitness, params)
   end
 
   EvolvableNetwork(netw)
