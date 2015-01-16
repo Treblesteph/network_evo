@@ -113,7 +113,13 @@ function runga(params, model::GAmodel, stop_after = nothing)
       break
     end
 
-    if stop_after == counter; break; end
+    if stop_after == counter
+      break
+    elseif (counter >= params[""stopruns""])
+      fitnow = model.allfitnesses[counter]
+      fitthen = model.allfitnesses[counter - params["stopconsec"]]
+      if fitthen - fitnow <= params["stopthreshold"]; break; end
+    end
 
       crossover_population(model, groupings)
       mutate_population(model)

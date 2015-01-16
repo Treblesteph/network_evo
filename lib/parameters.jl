@@ -17,21 +17,32 @@ function set_parameters()
   mutateenvlag::Array{Float64} = [0.7]
   mutategate::Array{Float64} = [0.04]
 
-  # Generation threshold, under which all gene-gene paths are fixed on.
-  pathson::Array{Int64} = [500]
-  # Percent of population killed off and replaced
-  # (through reproduction) each generation.
-  percentkilled::Array{Float64} = [0.1]
   tmat_std::Array{Float64} = [0.00]
   lag_std::Array{Int64} = [30]
   envlag_std::Array{Int64} = [15]
+
+  # Generation threshold, under which all gene-gene paths are fixed on.
+  pathson::Array{Int64} = [500]
+
+  # Percent of population killed off and replaced
+  # (through reproduction) each generation.
+  percentkilled::Array{Float64} = [0.1]
+
+  # Genetic algorithm stopping conditions:
+
   # Percent of individuals that are required to be at
   # optimal fitness in order to stop evolution.
   stopconverged::Array{Float64} = [0.5]
   # Threshold for defining optimal fitness.
-  stopthreshold::Array{Float64} = [0.00001]
+  stopthreshold::Array{Float64} = [1e-7]
+  # Terminate after stopruns if no improvement in fitness for stopconsec
+  # consecutive generations.
+  stopruns::Array{Int64} = [1500]
+  stopconsec::Array{Int64} = [100]
+
   # Degree to which the worst day accounts for most of the fitness score.
   fitnessweight::Array{Number} = [10]
+
   # Exponential distribution scaling coefficient the determines
   # the shape of the parental selection distribution, i.e. how
   # much more likely it is that the fitter networks will be parents.
@@ -63,6 +74,8 @@ function set_parameters()
                                    "envlag_std" => envlag_std[1],
                                    "stopconverged" => stopconverged[1],
                                    "stopthreshold" => stopthreshold[1],
+                                   "stopruns" => stopruns[1],
+                                   "stopconsec" => stopconsec[1],
                                    "fitnessweight" => fitnessweight[1],
                                    "parentselect" => parentselect[1],
                                    "defaulton" => defaulton[1],
