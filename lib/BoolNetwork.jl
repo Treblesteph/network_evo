@@ -132,9 +132,8 @@ function Network(allmins::Int64, nnodes::Int64, maxlag::Int64, minlag::Int64,
                  interactchoices::Array{Interaction}, selectfrom::Int64,
                  fitfunct, params)
 # Generates an array of networks and chooses the fittest one.
-  select_pop::Array{Network} = [Network(allmins, nnodes, maxlag, minlag,
-                                        decisions, envsignal,
-                                        interactchoices) for j in 1:selectfrom]
+  select_pop::Array{Network} = [Network(params,
+                                interactchoices) for j in 1:selectfrom]
   fitnessval::Array{Float64} = ones(Float64, selectfrom)
   for g in 1:selectfrom
     fitnessval[g] = fitfunct(select_pop[g], params)
