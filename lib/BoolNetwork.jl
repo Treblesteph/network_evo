@@ -91,7 +91,6 @@ end
 function Network(params::Dict, interactchoices::Array{Interaction})
   # This function can be used to create stochastic or deterministic models
   # by controlling the interactchoices array.
-
   # Initialising fields of Network.
   paths::Array{Array{Int64}} = [Int64[] for i in 1:(params["nnodes"]^2)]
   lags::Array{Int64} = zeros(Int64, params["nnodes"]^2)
@@ -127,10 +126,8 @@ end
 
 #-- Outer Network constructor for random fittest selected network.
 
-function Network(allmins::Int64, nnodes::Int64, maxlag::Int64, minlag::Int64,
-                 decisions::Dict, envsignal::Array{Int64},
-                 interactchoices::Array{Interaction}, selectfrom::Int64,
-                 fitfunct, params)
+function Network(interactchoices::Array{Interaction}, selectfrom::Int64,
+                 fitfunct::Function, params)
 # Generates an array of networks and chooses the fittest one.
   select_pop::Array{Network} = [Network(params,
                                 interactchoices) for j in 1:selectfrom]
