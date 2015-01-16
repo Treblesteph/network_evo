@@ -37,10 +37,13 @@ function set_parameters()
   # much more likely it is that the fitter networks will be parents.
   parentselect::Array{Int64} = [2]
 
+  # Default value of genes when there is no net input to them.
+  defaulton::Bool = [0]
+
   allhours::Array{Int64} = [alldays * 24]
   allmins::Array{Int64} = [allhours * 60]
 
-  decisionhash::Dict{Array{Int64}, Int64} = make_decision_mat(nnodes[1])
+  decisionhash::Dict{Array{Int64}, Int64} = make_decision_mat(nnodes[1], defaulton[1])
 
   parameters::Dict{String, Any} = {"alldays" => alldays[1],
                                    "popsize" => popsize[1],
@@ -62,6 +65,7 @@ function set_parameters()
                                    "stopthreshold" => stopthreshold[1],
                                    "fitnessweight" => fitnessweight[1],
                                    "parentselect" => parentselect[1],
+                                   "defaulton" => defaulton[1],
                                    "allhours" => allhours[1],
                                    "allmins" => allmins[1],
                                    "decisionhash" => decisionhash}
