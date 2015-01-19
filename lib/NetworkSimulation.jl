@@ -176,31 +176,37 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
 end
 
 function runsim(net::Network, params::Dict)
+  # Naming variables from parameter hash for speed.
+  nnodes::Int64 = params["nnodes"]
+  maxlag::Int64 = params["maxlag"]
+  allmins::Int64 = params["allmins"]
+  decisionhash::Dict = params["decisionhash"]
+
 
   # Making an array of length allmins which indicates whether the environmental
   # signal is on or off (because the argument envsignal is a list of indices).
-  environ_signal::Array{Int64} = zeros(Int64, params["allmins"])
+  environ_signal::Array{Int64} = zeros(Int64, allmins)
   environ_signal[params["envsignal"]] = 1
 
   # Extracting network properties for ease of use.
   paths::Array{Array{Int64}} = copy(net.paths)
-  envpaths::Array{Int64} = copy(net.envpath)
-  lags::Array{Int64} = copy(net.lags)
-  envlag::Array{Int64} = copy(net.envlag)
-  gates::Array{Int64} = copy(net.gates)
+  envpaths::Array{Int64} = net.envpath
+  lags::Array{Int64} = net.lags
+  envlag::Array{Int64} = net.envlag
+  gates::Array{Int64} = net.gates
 
   # Making matrix containing all gene concentrations over time (plus history
   # of zeros to simulate the lags).
-  concs::Array{Int64} = zeros(Int64, params["maxlag"] +
-                              params["allmins"], params["nnodes"])
+  concs::Array{Int64} = zeros(Int64, maxlag +
+  allmins, nnodes)
 
   # Setting initial concentrations, and history, according to defaults.
   if params["defaulton"] == 1
-    concs[params["maxlag"] + 1, :] = ones(Int64, params["nnodes"])
-    history = ones(Int64, params["maxlag"])
+    concs[maxlag + 1, :] = ones(Int64, nnodes)
+    history = ones(Int64, maxlag)
   elseif params["defaulton"] == 0
-    concs[params["maxlag"] + 1, :] = zeros(Int64, params["nnodes"])
-    history = zeros(Int64, params["maxlag"])
+    concs[maxlag + 1, :] = zeros(Int64, nnodes)
+    history = zeros(Int64, maxlag)
   else
     error("Defaulton must be a boolean value.")
   end
@@ -215,33 +221,36 @@ function runsim(net::Network, params::Dict)
   # for lags into history.
   environ_signal = [environ_signal, environ_signal]
 
-  for t in 1:(params["allmins"] - 1) # First row is initial condition.
+  decisionrow = Array(Int64, nnodes * 2 + 4)
+
+  for t in 1:(allmins - 1) # First row is initial condition.
 
     # Take all current and previous concentrations, all incoming paths and
     # their lags, and the gate type, to determine the next concentration.
 
     ncount = 0 # Determines what path/lag index to use from the 1D arrays.
-    genes::Array{Int64} = zeros(Int64, params["nnodes"])
-    path::Array{Int64} = zeros(Int64, params["nnodes"])
-    for k in 1:params["nnodes"]
-      genes[k] = concs[params["maxlag"] + t - lags[ncount + k], k]
-      path[k] = paths[ncount + k][params["maxlag"] + t - lags[ncount + k]]
-      ncount += params["nnodes"]
-    end
 
-    for nd in 1:params["nnodes"]
-      envpath::Array{Int64} = [envpaths[nd]]
-      envinput::Array{Int64} = [environ_signal[params["allmins"] + t - envlag[nd]]]
-      gate::Array{Int64} = [gates[nd]]
-      init::Array{Int64} = [concs[params["maxlag"] + t, nd]]
+    for nd in 1:nnodes
+
+      for k in 1:nnodes
+        twithlag::Int64 = maxlag + t - lags[ncount + k]
+        decisionrow[k] = concs[twithlag, k] # Genes
+        decisionrow[k + nnodes] = paths[ncount + k][twithlag] # Paths
+      end
+      ncount += nnodes
+
+      buffer = nnodes * 2
+      decisionrow[buffer + 1] = envpaths[nd] # Environmental paths
+      decisionrow[buffer + 2] = environ_signal[allmins + t - envlag[nd]]
+      decisionrow[buffer + 3] = gates[nd]
+      decisionrow[buffer + 4] = concs[maxlag + t, nd] # This gene init.
+
       # Next will compare this row to the rows in decision matrix to determine
       # the next state of gene nd.
-      decisionrow::Array{Int64, 1} = [genes, path, envpath, envinput,
-                                      gate, init]
-      concs[t + params["maxlag"] + 1, nd] = params["decisionhash"][decisionrow]
+      concs[t + maxlag + 1, nd] = decisionhash[decisionrow]
     end
   end
-  concs = concs[params["maxlag"]+1:end, :]
+  concs = concs[maxlag+1:end, :]
 end
 
 end # NetworkSimulation
