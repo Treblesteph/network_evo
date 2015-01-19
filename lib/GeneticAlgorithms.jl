@@ -116,8 +116,8 @@ function runga(params, model::GAmodel, stop_after = nothing)
     if stop_after == counter
       break
     elseif (counter >= params["stopruns"])
-      fitnow = model.allfitnesses[counter]
-      fitthen = model.allfitnesses[counter - params["stopconsec"]]
+      fitnow = model.all_fitnesses[counter]
+      fitthen = model.all_fitnesses[counter - params["stopconsec"]]
       if fitthen - fitnow <= params["stopthreshold"]; break; end
     end
 
