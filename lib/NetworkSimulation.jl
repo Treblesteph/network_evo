@@ -80,194 +80,92 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
                              thisrowgenes[find(x -> x == -1, thisrowpaths)])
 
 
-    # CASE 1: Initially the target gene is off.
-    if scenariomat[d, init_i] == 0
+    # CASE 1: "or" logic gate.
+    if scenariomat[d, gate_i] == 0
 
-    # CASE 1.1: Target initially off, "or" logic gate.
-      if scenariomat[d, gate_i] == 0
+    # CASE 1.1: Gene default off.
+      if defaulton == 0
 
-    # CASE 1.1.1: Gene default off.
-        if defaulton == 0
-
-    # CASE 1.1.1.1: Target init off, "or" gate, overall activation.
-          if repeffect < acteffect
-
-            decisionarray[d] = 1
-
-    # CASE 1.1.1.2: Target init off, "or" gate, overall not activation.
-          else
-
-            decisionarray[d] = 0
-
-          end
-
-    # CASE 1.1.2: Gene default on.
-        elseif defaulton == 1
-
-    # CASE 1.1.2.1: Target init off, "or" gate, overall not repression.
-          if repeffect <= acteffect
-
-            decisionarray[d] = 1
-
-    # CASE 1.1.2.2: Target init off, "or" gate, overall repression.
-          else
-
-            decisionarray[d] = 0
-
-          end
-
-    # CASE 1.1.2.3: Default on not Bool error.
-        else
-
-          error("defaulton must be Bool type.")
-
-        end
-
-    # CASE 1.2: Target init off, "and" gate.
-      elseif scenariomat[d, gate_i] == 1
-
-    # CASE 1.2.1: Gene default off.
-        if defaulton == 0
-
-    # CASE 1.2.1.1: Target init off, "and" gate, overall activation.
-          if (actcount == acteffect) && (actcount > 0) &&
-             ((repeffect < acteffect) || (repeffect < repcount))
-
-             decisionarray[d] = 1
-
-    # CASE 1.2.1.2: Target init off, "and" gate, overall not activation.
-          else
-
-            decisionarray[d] = 0
-
-          end
-
-    # CASE 1.2.2: Gene default on.
-        elseif defaulton == 1
-
-    # CASE 1.2.2.1: Target init off, "and" gate, overall not repression.
-          if ((repcount > repeffect) || (repcount == 0)) ||
-             ((actcount == acteffect) && (actcount > repcount))
-
-             decisionarray[d] = 1
-
-    # CASE 1.2.2.2: Target init off, "and" gate, overall repression.
-          else
-
-            decisionarray[d] = 0
-
-          end
-
-    # CASE 1.2.2.3: Default on not Bool error.
-      else
-
-        error("defaulton must be Bool type.")
-
-      end
-
-    # CASE 1.3: Error - target off, non-boolean logic gate.
-      else
-
-        error("Logic gate should take on a boolean value (zero or one).")
-
-      end
-
-    # CASE 2: Initially the target gene is on.
-    elseif scenariomat[d, init_i] == 1
-
-    # CASE 2.1: Target initially on, "or" logic gate.
-      if scenariomat[d, gate_i] == 0
-
-    # CASE 2.1.1: Gene default off.
-        if defaulton == 0
-
-    # CASE 2.1.1.1: Target init on, "or" gate, overall activation.
-          if repeffect < acteffect
-
-            decisionarray[d] = 1
-
-    # CASE 2.1.1.2: Target init on, "or" gate, overall activation.
-          else
-
-            decisionarray[d] = 0
-
-          end
-
-    # CASE 2.1.2: Gene default on.
-        elseif defaulton == 1
-
-    # CASE 2.1.2.1: Target init on, "or" gate, overall not repression.
-          if repeffect <= acteffect
-
-            decisionarray[d] = 1
-
-    # CASE 2.1.2.2: Target init on, "or" gate, overall repression.
-          else
-
-            decisionarray[d] = 0
-
-          end
-
-    # CASE 2.1.2.3: Default on not Bool error.
-        else
-
-          error("defaulton must be Bool type.")
-
-        end
-
-    # CASE 2.2: Target initially on, "and" logic gate.
-      elseif scenariomat[d, gate_i] == 1
-
-    # CASE 2.2.1: Gene default off.
-        if defaulton == 0
-
-    # CASE 2.2.1.1: Target init on, "and" gate, overall activation.
-        if ((actcount == acteffect) && (actcount > 0)) &&
-           ((repeffect < acteffect) || (repeffect < repcount))
+    # CASE 1.1.1: Gene default off, "or" gate, overall activation.
+        if repeffect < acteffect
 
           decisionarray[d] = 1
 
-    # CASE 2.2.1.2: Target init on, "and" gate, overall not activation.
+    # CASE 1.1.2: Gene default off, "or" gate, overall not activation.
         else
 
           decisionarray[d] = 0
 
         end
 
-    # CASE 2.2.2: Gene default on.
+    # CASE 1.2: Gene default on.
       elseif defaulton == 1
 
-    # CASE 2.2.2.1: Target init on, "and" gate, overall not repression.
+    # CASE 1.2.1: Gene default on, "or" gate, overall not repression.
+        if repeffect <= acteffect
+
+          decisionarray[d] = 1
+
+    # CASE 1.2.2: Gene default on, "or" gate, overall repression.
+        else
+
+          decisionarray[d] = 0
+
+        end
+
+    # CASE 1.2.3: Default on not Bool error.
+      else
+
+        error("defaulton must be Bool type.")
+
+      end
+
+    # CASE 2: "and" gate.
+    elseif scenariomat[d, gate_i] == 1
+
+    # CASE 2.1: Gene default off.
+      if defaulton == 0
+
+    # CASE 2.1.1: Gene default off, "and" gate, overall activation.
+        if (actcount == acteffect) && (actcount > 0) &&
+           ((repeffect < acteffect) || (repeffect < repcount))
+
+           decisionarray[d] = 1
+
+    # CASE 2.1.2: Gene default off, "and" gate, overall not activation.
+        else
+
+          decisionarray[d] = 0
+
+        end
+
+    # CASE 2.2: Gene default on.
+      elseif defaulton == 1
+
+    # CASE 2.2.1: Gene default on, "and" gate, overall not repression.
         if ((repcount > repeffect) || (repcount == 0)) ||
            ((actcount == acteffect) && (actcount > repcount))
 
            decisionarray[d] = 1
 
-    # CASE 2.2.2.2: Target init on, "and" gate, overall repression.
+    # CASE 2.2.2: Gene default on, "and" gate, overall repression.
         else
 
           decisionarray[d] = 0
 
         end
 
-    # CASE 2.2.2.3: Default on not Bool error.
-      else
-
-        error("defaulton must be Bool type.")
-
-      end
-
-    # CASE 2.3: Error - target on, non-boolean logic gate.
-      else
-
-        error("Logic gate should take on a boolean value (zero or one).")
-
-      end
-
-    # CASE 3: Error - initial target gene not boolean.
+    # CASE 2.2.3: Default on not Bool error.
     else
 
-      error("Target gene should be 0 or 1 initially in boolean framework.")
+      error("defaulton must be Bool type.")
+
+    end
+
+    # CASE 3: Error - non-boolean logic gate.
+    else
+
+      error("Logic gate should take on a boolean value (zero or one).")
 
     end
 
