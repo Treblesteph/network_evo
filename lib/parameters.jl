@@ -37,7 +37,7 @@ function set_parameters()
   stopthreshold::Array{Float64} = [1e-7]
   # Terminate after stopruns if no improvement in fitness for stopconsec
   # consecutive generations.
-  stopruns::Array{Int64} = [1500]
+  stopruns::Array{Int64} = [5000]
   stopconsec::Array{Int64} = [100]
 
   # Degree to which the worst day accounts for most of the fitness score.
