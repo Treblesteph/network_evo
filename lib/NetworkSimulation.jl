@@ -197,8 +197,7 @@ function runsim(net::Network, params::Dict)
 
   # Making matrix containing all gene concentrations over time (plus history
   # of zeros to simulate the lags).
-  concs::Array{Int64} = zeros(Int64, maxlag +
-  allmins, nnodes)
+  concs::Array{Int64} = zeros(Int64, maxlag + allmins, nnodes)
 
   # Setting initial concentrations, and history, according to defaults.
   if params["defaulton"] == 1
