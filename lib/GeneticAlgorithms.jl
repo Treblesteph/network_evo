@@ -37,6 +37,7 @@ type GAmodel
   init_pop_size::Int
   gen_num::Int
   all_fitnesses
+  meantop10
 
   population::Array
   pop_data::Array{EntityData}
@@ -46,7 +47,7 @@ type GAmodel
 
   ga
 
-  GAmodel() = new(Dict(), 0, 1, Float64[], Any[], EntityData[],
+  GAmodel() = new(Dict(), 0, 1, Float64[], Float64[], Any[], EntityData[],
                   EntityData[], MersenneTwister(time_ns()), nothing)
 end
 
@@ -96,6 +97,7 @@ function runga(params, model::GAmodel, stop_after = nothing)
   reset_model(model)
   create_initial_population(model)
   model.all_fitnesses = zeros(Float64, stop_after)
+  model.meantop10 = zeros(Float64, stop_after)
   counter = 1
   while true
     print("generation $(model.gen_num). ")
@@ -116,8 +118,8 @@ function runga(params, model::GAmodel, stop_after = nothing)
     if stop_after == counter
       break
     elseif (counter >= params["stopruns"])
-      fitnow = model.all_fitnesses[counter]
-      fitthen = model.all_fitnesses[counter - params["stopconsec"]]
+      fitnow = model.meantop10[counter]
+      fitthen = model.meantop10[counter - params["stopconsec"]]
       if fitthen - fitnow <= params["stopthreshold"]; break; end
     end
 
@@ -158,6 +160,8 @@ function evaluate_population(model::GAmodel)
     fitness!(model.population[i], scores[i])
   end
   model.all_fitnesses[model.gen_num] = round(mean(scores), 2)
+  sort!(scores; rev = true); topscores = scores[1:10]
+  model.meantop10[model.gen_num] = mean(topscores)
   print("mean fitness: $(round(mean(scores), 2)). ")
   sort!(model.population; rev = true)
   print("Best fitnesses: $([e.fitness for e in model.population[1:5]])")
