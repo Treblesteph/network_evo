@@ -5,19 +5,19 @@ module Multichoose
 # each column can take. If uniqueelts is 1 then the combination only
 # uses unique entries for each column.
 
-function multichoose(choices::Array{Array{Int64}}, uniqueelts::Int64)
+function multichoose(choices::Array{Array{Any}}, uniqueelts::Int64)
   if uniqueelts == 1
     choices = [[unique(choices[i])] for i in 1:length(choices)]
   end
   ncols::Int64 = length(choices)
   nrows::Int64 = prod([length(choices[i]) for i in 1:ncols])
-  multimat::Array{Int64} = zeros(Int64, nrows, ncols)
+  multimat::Array{typeof(choices)} = zeros(typeof(choices), nrows, ncols)
   fill_column(choices, 1:nrows, ncols, multimat)
   return multimat
 end
 
-function fill_column(choices::Array{Array{Int64}}, rows,
-                     cols, multimat::Array{Int64})
+function fill_column(choices::Array{Array{Any}}, rows,
+                     cols, multimat::Array{typeof(choices)})
   partitionsize::Int64 = (length(rows))/(length(choices[cols]))
   for j = 1:length(choices[cols])
     c::Int64 = cols
