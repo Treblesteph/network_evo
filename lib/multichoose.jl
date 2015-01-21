@@ -17,7 +17,7 @@ function multichoose(choices::Array{Array{Any}}, uniqueelts::Int64)
 end
 
 function fill_column(choices::Array{Array{Any}}, rows,
-                     cols, multimat::Array{typeof(choices)})
+                     cols, multimat::Array{Any})
   partitionsize::Int64 = (length(rows))/(length(choices[cols]))
   for j = 1:length(choices[cols])
     c::Int64 = cols
