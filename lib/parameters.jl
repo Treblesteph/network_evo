@@ -3,56 +3,56 @@ module Parameters
 import NetworkSimulation.make_decision_mat
 
 function set_parameters()
-  alldays::Array{Int64} = [4]
-  popsize::Array{Int64} = [100]
-  nnodes::Array{Int64} = [4]
-  maxlag::Array{Int64} = [60*24]
-  minlag::Array{Int64} = [5]
+  alldays = Int64[4]
+  popsize = Int64[100]
+  nnodes = Int64[4]
+  maxlag = Int64[60*24]
+  minlag = Int64[5]
 
   #--- Mutation rates
-  mutatepath::Array{Float64} = [0.08]
-  mutatetmat::Array{Float64} = [0.00]
-  mutateenvpath::Array{Float64} = [0.04]
-  mutatelag::Array{Float64} = [0.75]
-  mutateenvlag::Array{Float64} = [0.7]
-  mutategate::Array{Float64} = [0.04]
+  mutatepath = Float64[0.08]
+  mutatetmat = Float64[0.00]
+  mutateenvpath = Float64[0.04]
+  mutatelag = Float64[0.2]
+  mutateenvlag = Float64[0.2]
+  mutategate = Float64[0.04]
 
-  tmat_std::Array{Float64} = [0.00]
-  lag_std::Array{Int64} = [30]
-  envlag_std::Array{Int64} = [15]
+  tmat_std = Float64[0.00]
+  lag_std = Int64[100]
+  envlag_std = Int64[100]
 
   # Generation threshold, under which all gene-gene paths are fixed on.
-  pathson::Array{Int64} = [500]
+  pathson = Int64[500]
 
   # Percent of population killed off and replaced
   # (through reproduction) each generation.
-  percentkilled::Array{Float64} = [0.1]
+  percentkilled = Float64[0.1]
 
   # Genetic algorithm stopping conditions:
 
   # Percent of individuals that are required to be at
   # optimal fitness in order to stop evolution.
-  stopconverged::Array{Float64} = [0.5]
+  stopconverged = Float64[0.5]
   # Threshold for defining optimal fitness.
-  stopthreshold::Array{Float64} = [1e-7]
+  stopthreshold = Float64[1e-7]
   # Terminate after stopruns if no improvement in fitness for stopconsec
   # consecutive generations.
-  stopruns::Array{Int64} = [5000]
-  stopconsec::Array{Int64} = [100]
+  stopruns = Int64[5000]
+  stopconsec = Int64[100]
 
   # Degree to which the worst day accounts for most of the fitness score.
-  fitnessweight::Array{Number} = [10]
+  fitnessweight = Number[10]
 
   # Exponential distribution scaling coefficient the determines
   # the shape of the parental selection distribution, i.e. how
   # much more likely it is that the fitter networks will be parents.
-  parentselect::Array{Int64} = [2]
+  parentselect = Int64[2]
 
   # Default value of genes when there is no net input to them.
-  defaulton::Array{Bool} = [0]
+  defaulton = Bool[0]
 
-  allhours::Array{Int64} = [alldays * 24]
-  allmins::Array{Int64} = [allhours * 60]
+  allhours = Int64[alldays * 24]
+  allmins = Int64[allhours * 60]
 
   decisionhash::Dict{Array{Int64}, Int64} = make_decision_mat(nnodes[1], defaulton[1])
 
