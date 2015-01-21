@@ -5,6 +5,10 @@ module Multichoose
 # each column can take. If uniqueelts is 1 then the combination only
 # uses unique entries for each column.
 
+# WARNING: choices argument must be of the type Array{Array{Any}}, this
+#          cannot be preset in the arguments list because Julia won't
+#          allow it.
+
 function multichoose(choices, uniqueelts::Int64)
   if uniqueelts == 1
     choices = [[unique(choices[i])] for i in 1:length(choices)]
