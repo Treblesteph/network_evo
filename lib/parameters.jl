@@ -51,10 +51,10 @@ function set_parameters()
   # Default value of genes when there is no net input to them.
   defaulton = Bool[0]
 
-  allhours = Int64[alldays * 24]
-  allmins = Int64[allhours * 60]
+  allhours = alldays * 24
+  allmins = allhours * 60
 
-  decisionhash::Dict{Array{Int64}, Int64} = make_decision_mat(nnodes[1], defaulton[1])
+  decisionhash::Dict{Array{Int64}, Bool} = make_decision_mat(nnodes[1], defaulton[1])
 
   parameters::Dict{String, Any} = {"alldays" => alldays[1],
                                    "popsize" => popsize[1],
