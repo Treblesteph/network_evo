@@ -192,7 +192,7 @@ function crossover(tup::(Array{Any}, Dict))
     childtmats[i] = group[parent].net.transmats[i]
   end
   # Set each environmental path according to a random choice between parents.
-  childenvpath::Array{Int64} = zeros(Int64, params["nnodes"])
+  childenvpath::Array{Bool} = zeros(Int64, params["nnodes"])
   for i in 1:length(group[1].net.envpath)
     parent = (rand(Uint) % num_parents) + 1
     childenvpath[i] = group[parent].net.envpath[i]
@@ -210,7 +210,7 @@ function crossover(tup::(Array{Any}, Dict))
     childlags[i] = group[parent].net.lags[i]
   end
   # Set each gate according to a random choice between parents.
-  childgates::Array{Int64} = zeros(Int64, params["nnodes"])
+  childgates::Array{Bool} = zeros(Int64, params["nnodes"])
   for i in 1:length(group[1].net.gates)
     parent = (rand(Uint) % num_parents) + 1
     childgates[i] = group[parent].net.gates[i]
@@ -294,7 +294,7 @@ function mutate_path!(path::Array{Int64}, params::Dict)
   path
 end
 
-function mutate_envpath!(envpath::Int64, params::Dict)
+function mutate_envpath!(envpath::Bool, params::Dict)
   print("e")
   envpath = mod(envpath + 1, 2) # This will switch 0 >> 1 or 1 >> 0
 end
@@ -316,7 +316,7 @@ function cts_neighbr(val::Number, stdev::Number, lower::Number, upper::Number)
   newval = rand(tnorm)
 end
 
-function mutate_gate!(gate::Int64, params::Dict)
+function mutate_gate!(gate::Bool, params::Dict)
   print("g")
   # Mutation causes gate to switch (0 = or; 1 = and)
   # either or >> and
