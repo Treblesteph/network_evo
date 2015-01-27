@@ -31,35 +31,36 @@ type Network
   # Order of paths 1->1, 1->2, 1->3 ... 2->1, 2->2, ...
   paths::Array{Array{Int64}}
   transmats::Array{Array{Float64}}
-  envpath::Array{Int64} # Is gene activated by environment (bool.)?
+  envpath::Array{Bool} # Is gene activated by environment (bool.)?
   lags::Array{Int64}
   envlag::Array{Int64}
-  gates::Array{Int64}  # (0 = or; 1 = and)
+  gates::Array{Bool}  # (0 = or; 1 = and)
   generation::Int64
-  concseries::Array{Int64}
+  concseries::Array{Bool}
 
   #-- Inner constructor with concentration timeseries.
 
   Network(paths::Array{Array{Int64}}, transmats::Array{Array{Float64}},
-          envpath::Array{Int64}, lags::Array{Int64},
-          envlag::Array{Int64}, gates::Array{Int64},
+          envpath::Array{Bool}, lags::Array{Int64},
+          envlag::Array{Int64}, gates::Array{Bool},
           concseries::Array{Int64}) =
           new(paths, transmats, envpath, lags, envlag,
               gates, 1, concseries)
 
   #-- Inner constructor without concentration timeseries.
 
-  Network(paths::Array{Array{Int64}}, transmats::Array{Array{Float64}},
-          envpath::Array{Int64}, lags::Array{Int64},
-          envlag::Array{Int64}, gates::Array{Int64}) =
+  Network{T<:Int64, S<:Float64}(paths::Array{Array{T, 1}, 1},
+          transmats::Array{Array{S, 2}, 1},
+          envpath::Array{Bool, 1}, lags::Array{T, 1},
+          envlag::Array{T, 1}, gates::Array{Bool, 1}) =
           new(paths, transmats, envpath, lags,
               envlag, gates, 1, [])
 
   #-- Inner constructor with generation number.
 
   Network(paths::Array{Array{Int64}}, transmats::Array{Array{Float64}},
-          envpath::Array{Int64}, lags::Array{Int64},
-          envlag::Array{Int64}, gates::Array{Int64},
+          envpath::Array{Bool}, lags::Array{Int64},
+          envlag::Array{Int64}, gates::Array{Bool},
           generation::Int64) =
           new(paths, transmats, envpath, lags, envlag,
               gates, generation, [])
@@ -81,7 +82,7 @@ function Network(params::Dict)
   network = Network(paths, transmats, params["envpaths"], params["lags"],
                     params["envlag"], params["gates"], 1)
 
-  network.concseries = runsim(network, params)
+  network.concseries::Array{Bool} = runsim(network, params)
 
   return network
 end
@@ -92,18 +93,17 @@ function Network(params::Dict, interactchoices::Array{Interaction})
   # This function can be used to create stochastic or deterministic models
   # by controlling the interactchoices array.
   # Initialising fields of Network.
-  paths::Array{Array{Int64}} = [Int64[] for i in 1:(params["nnodes"]^2)]
-  lags::Array{Int64} = zeros(Int64, params["nnodes"]^2)
-  transmats::Array{Array{Float64}} = [Float64[] for i in
-                                      1:(params["nnodes"]^2)]
+  paths = [Int64[] for i in 1:(params["nnodes"]^2)]
+  lags = zeros(Int64, params["nnodes"]^2)
+  transmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
 
   # Setting random gates.
   gatechoices = (0, 1)
-  gates::Array{Int64} = [gatechoices[ceil(length(gatechoices)*rand())]
+  gates = Bool[gatechoices[ceil(length(gatechoices)*rand())]
                          for i in 1:params["nnodes"]]
 
   # Setting random environmental paths.
-  envpaths::Array{Int64} = Int64[round(rand()) for i in 1:params["nnodes"]]
+  envpaths = Bool[round(rand()) for i in 1:params["nnodes"]]
   envlag::Array{Int64} = [params["minlag"] + (Base.convert(Int64,
                           floor((params["maxlag"] - params["minlag"]) *
                           rand()))) for i = 1:params["nnodes"]]
@@ -120,7 +120,7 @@ function Network(params::Dict, interactchoices::Array{Interaction})
   end
 
   network = Network(paths, transmats, envpaths, lags, envlag, gates)
-  network.concseries = runsim(network, params)
+  network.concseries::Array{Bool} = runsim(network, params)
   return network
 end
 
@@ -131,7 +131,7 @@ function Network(interactchoices::Array{Interaction}, selectfrom::Int64,
 # Generates an array of networks and chooses the fittest one.
   select_pop::Array{Network} = [Network(params,
                                 interactchoices) for j in 1:selectfrom]
-  fitnessval::Array{Float64} = ones(Float64, selectfrom)
+  fitnessval = ones(Float64, selectfrom)
   for g in 1:selectfrom
     fitnessval[g] = fitfunct(select_pop[g], params)
   end
@@ -143,7 +143,7 @@ end
 function create_transmat(states::Array)
   # Randomly populating transition matrix with probabilities, where T_ij
   # gives the probability of transitioning from state i to state j.
-  transmat::Array{Float64} = rand(length(states), length(states))
+  transmat = rand(Float64, length(states), length(states))
   # Normalising so the columns sum to 1 (since they represent probabilities).
   for k = 1:length(states)
     transmat[:,k] /= sum(transmat[:,k])
