@@ -184,8 +184,8 @@ function crossover(tup::(Array{Any}, Dict))
   # Initialising an empty network to be the child.
   num_parents = length(group)
   # Set each path according to a random choice between parents.
-  childpaths::Array{Array{Int64}} =[Int64[] for i in 1:(params["nnodes"]^2)]
-  childtmats::Array{Array{Float64}} = [Float64[] for i in 1:(params["nnodes"]^2)]
+  childpaths = [Int64[] for i in 1:(params["nnodes"]^2)]
+  childtmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
   for i in 1:length(group[1].net.paths)
     parent = (rand(Uint) % num_parents) + 1
     childpaths[i] = group[parent].net.paths[i]
