@@ -9,7 +9,7 @@ module Multichoose
 #          cannot be preset in the arguments list because Julia won't
 #          allow it.
 
-function multichoose(choices, uniqueelts::Int64)
+function multichoose{T<:Array}(choices::Array{T}, uniqueelts::Int64)
   if uniqueelts == 1
     choices = [[unique(choices[i])] for i in 1:length(choices)]
   end
@@ -21,8 +21,8 @@ function multichoose(choices, uniqueelts::Int64)
   return multimat
 end
 
-function fill_column{T <: Any}(choices, rows,
-                               cols, multimat::Array{T})
+function fill_column{T<:Array}(choices::Array{T}, rows,
+                               cols, multimat::Array)
   partitionsize::Int64 = (length(rows))/(length(choices[cols]))
   for j = 1:length(choices[cols])
     c::Int64 = cols
