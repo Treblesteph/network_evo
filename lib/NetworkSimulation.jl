@@ -18,29 +18,31 @@ function make_decision_mat(nnodes::Int64, defaulton::Bool)
   gate_i = 3+2*nnodes           # Column index for logic gate.
   init_i = 4+2*nnodes           # Column index for initial value.
   # Range of values that each column can take.
-  genechoices::Array{Array{Int64}} = [[0, 1] for i in 1:nnodes]
-  pathchoices::Array{Array{Int64}} = [[0, 1, -1] for i in 1:nnodes]
-  inputchoices::Array{Array{Int64}} = Array[[0, 1]]
-  envpathchoices::Array{Array{Int64}} = Array[[0, 1]]
-  gatechoices::Array{Array{Int64}} = Array[[0, 1]] # 0 = or; 1 = and.
-  initchoices::Array{Array{Int64}} = Array[[0, 1]]
-  allchoices::Array{Array{Int64}} = [genechoices, pathchoices, inputchoices,
-                                     envpathchoices, gatechoices, initchoices]
+  genechoices = [Bool[0, 1] for i in 1:nnodes]
+  pathchoices = [Int64[0, 1, -1] for i in 1:nnodes]
+  inputchoices = Array[Bool[0, 1]]
+  envpathchoices = Array[Bool[0, 1]]
+  gatechoices = Array[Bool[0, 1]] # 0 = or; 1 = and.
+  initchoices = Array[Bool[0, 1]]
+  allchoices = [convert(Array{Array{Int64}}, genechoices),
+                convert(Array{Array{Int64}}, pathchoices),
+                convert(Array{Array{Int64}}, inputchoices),
+                convert(Array{Array{Int64}}, envpathchoices),
+                convert(Array{Array{Int64}}, gatechoices),
+                convert(Array{Array{Int64}}, initchoices)]
   # Scenariomat is all combinations of genes, gene paths, inputs, environment
   # paths, gates, and initial conditions - i.e. all possible scenarios.
   scenariomat::Array{Int64, 2} = multichoose(allchoices, 0)
   # Decision array will become the last column of decision matrix, it is the
   # column determining the state at time t + 1 based on the scenariomat.
-  decisionarray::Array{Int64, 1} = decision_array(scenariomat, genes_i,
+  decisionarray::Array{Bool, 1} = decision_array(scenariomat, genes_i,
                                                   paths_i, input_i,
                                                   envpath_i, gate_i,
                                                   init_i, defaulton)
-  decisionmat::Array{Int64, 2} = hcat(scenariomat, decisionarray)
-  decdict = Dict{Array{Int64}, Int64}()
-  for r in 1:size(decisionmat, 1)
-    row = decisionmat[r, :]
-    key = row[1:end-1]
-    value = row[end]
+  decdict = Dict{Array{Number}, Bool}()
+  for r in 1:size(scenariomat, 1)
+    key = scenariomat[r, :][:]
+    value = decisionarray[r]
     decdict[key] = value
   end
   return decdict
@@ -48,7 +50,7 @@ end
 
 function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
                         envpath_i, gate_i, init_i, defaulton)
-  decisionarray::Array{Int64, 1} = zeros(Int64, size(scenariomat, 1))
+  decisionarray::Array{Bool, 1} = zeros(Int64, size(scenariomat, 1))
   for d in 1:length(decisionarray)
 
     # actcount is the number of incoming activator paths
@@ -197,14 +199,14 @@ function runsim(net::Network, params::Dict)
 
   # Making matrix containing all gene concentrations over time (plus history
   # of zeros to simulate the lags).
-  concs::Array{Int64} = zeros(Int64, maxlag + allmins, nnodes)
+  concs = zeros(Bool, maxlag + allmins, nnodes)
 
   # Setting initial concentrations, and history, according to defaults.
   if params["defaulton"] == 1
-    concs[maxlag + 1, :] = ones(Int64, nnodes)
+    concs[maxlag + 1, :] = ones(Bool, nnodes)
     history = ones(Int64, maxlag)
   elseif params["defaulton"] == 0
-    concs[maxlag + 1, :] = zeros(Int64, nnodes)
+    concs[maxlag + 1, :] = zeros(Bool, nnodes)
     history = zeros(Int64, maxlag)
   else
     error("Defaulton must be a boolean value.")
