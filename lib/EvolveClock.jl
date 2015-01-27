@@ -184,42 +184,39 @@ function crossover(tup::(Array{Any}, Dict))
   # Initialising an empty network to be the child.
   num_parents = length(group)
   # Set each path according to a random choice between parents.
-  childpaths::Array{Array{Int64}} = [Int64[] for i in 1:(params["nnodes"]^2)]
-  childtmats::Array{Array{Float64}} = [Float64[] for i in 1:16]
+  childpaths::Array{Array{Int64}} =[Int64[] for i in 1:(params["nnodes"]^2)]
+  childtmats::Array{Array{Float64}} = [Float64[] for i in 1:(params["nnodes"]^2)]
   for i in 1:length(group[1].net.paths)
     parent = (rand(Uint) % num_parents) + 1
     childpaths[i] = group[parent].net.paths[i]
     childtmats[i] = group[parent].net.transmats[i]
   end
   # Set each environmental path according to a random choice between parents.
-  childenvpath::Array{Bool} = zeros(Int64, params["nnodes"])
+  childenvpath = zeros(Bool, params["nnodes"])
   for i in 1:length(group[1].net.envpath)
     parent = (rand(Uint) % num_parents) + 1
     childenvpath[i] = group[parent].net.envpath[i]
   end
   # Set each environmental lag according to a random choice between parents.
-  childenvlag::Array{Int64} = zeros(Int64, params["nnodes"])
+  childenvlag = zeros(Int64, params["nnodes"])
   for i in 1:length(group[1].net.envlag)
     parent = (rand(Uint) % num_parents) + 1
     childenvlag[i] = group[parent].net.envlag[i]
   end
   # Set each lag according to a random choice between parents.
-  childlags::Array{Int64} = zeros(Int64, (params["nnodes"])^2)
+  childlags = zeros(Int64, (params["nnodes"])^2)
   for i in 1:length(group[1].net.lags)
     parent = (rand(Uint) % num_parents) + 1
     childlags[i] = group[parent].net.lags[i]
   end
   # Set each gate according to a random choice between parents.
-  childgates::Array{Bool} = zeros(Int64, params["nnodes"])
+  childgates = zeros(Bool, params["nnodes"])
   for i in 1:length(group[1].net.gates)
     parent = (rand(Uint) % num_parents) + 1
     childgates[i] = group[parent].net.gates[i]
   end
   childgen = 1 + group[1].net.generation
 
-  #TODO: Create an array for generation, push new generation to the array
-  #      each time the network survives for a new generation. To get generation
-  #      from GeneticAlgorithms code, something like model.gen_num.
   childnet = Network(childpaths, childtmats, childenvpath, childlags,
                      childenvlag, childgates, childgen)
   childnet.concseries = runsim(childnet, params)
