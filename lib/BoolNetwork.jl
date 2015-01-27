@@ -71,8 +71,8 @@ end
 function Network(params::Dict)
 
   nnodes::Int64 = length(params["gates"])
-  paths::Array{Array{Int64}} = [Int64[] for i in 1:(nnodes^2)]
-  transmats::Array{Array{Float64}} = [Float64[] for i in 1:(nnodes^2)]
+  paths = [Int64[] for i in 1:(params["nnodes"]^2)]
+  transmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
 
   for j in 1:(nnodes^2)
     (paths[j], transmats[j]) = create_interaction(params["interactions"][j],
