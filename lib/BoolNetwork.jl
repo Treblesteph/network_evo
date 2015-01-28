@@ -40,10 +40,11 @@ type Network
 
   #-- Inner constructor with concentration timeseries.
 
-  Network(paths::Array{Array{Int64}}, transmats::Array{Array{Float64}},
-          envpath::Array{Bool}, lags::Array{Int64},
-          envlag::Array{Int64}, gates::Array{Bool},
-          concseries::Array{Int64}) =
+  Network{T<:Int64, S<:Float64}(paths::Array{Array{T, 1}, 1},
+          transmats::Array{Array{S, 2}, 1},
+          envpath::Array{Bool, 1}, lags::Array{T, 1},
+          envlag::Array{T, 1}, gates::Array{Bool, 1},
+          concseries::Array{T}) =
           new(paths, transmats, envpath, lags, envlag,
               gates, 1, concseries)
 
@@ -58,10 +59,11 @@ type Network
 
   #-- Inner constructor with generation number.
 
-  Network(paths::Array{Array{Int64}}, transmats::Array{Array{Float64}},
-          envpath::Array{Bool}, lags::Array{Int64},
-          envlag::Array{Int64}, gates::Array{Bool},
-          generation::Int64) =
+  Network{T<:Int64, S<:Float64}(paths::Array{Array{T, 1}, 1},
+          transmats::Array{Array{S, 2}, 1},
+          envpath::Array{Bool, 1}, lags::Array{T, 1},
+          envlag::Array{T, 1}, gates::Array{Bool, 1},
+          generation::T) =
           new(paths, transmats, envpath, lags, envlag,
               gates, generation, [])
 end
