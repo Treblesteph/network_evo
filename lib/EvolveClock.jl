@@ -61,25 +61,32 @@ function fitness(net::Network, params::Dict)
   # to give the system time to stabilise.
   for d in 1:params["alldays"] - 1
 
-    g1dawn = sum(gene1[params["gene1fit"][d, :]])
-    dawn = length(params["gene1fit"][d, :])
-    g1notdawn = sum(gene1[(1 + params["gene1fit"][d, end]):(d * 24 * 60)])
-    notdawn = length((1 + params["gene1fit"][d, end]):(d * 24 * 60))
+    dawn = params["gene1fit"][d + 1, :]
+    g1dawn = sum(gene1[dawn])
+    notdawnstart = 1 + params["gene1fit"][d + 1, end] # End of dawn.
+    notdawnend = (d + 1)*24*60 # End of day.
+    notdawn = notdawnstart:notdawnend
+    g1notdawn = sum(gene1[notdawn])
 
-    dawnFitness[d] = g1dawn / dawn
-    notDawnFitness[d] = 1 - (g1notdawn / notdawn)
+    dawnFitness[d] = 1 - (g1dawn / length(dawn))
+    notDawnFitness[d] = g1notdawn / length(notdawn)
 
-    g2dusk = sum(gene2[params["gene2fit"][d, :]])
-    dusk = length(params["gene2fit"][d, :])
-    g2notdusk = sum(gene2[1 + (d - 1) * 24 * 60:(params["gene2fit"][d, 1] - 1)])
-    notdusk = length(1 + (d - 1) * 24 * 60:(params["gene2fit"][d, 1] - 1))
+    dusk = params["gene2fit"][d + 1, :]
+    g2dusk = sum(gene2[dusk])
+    beforeduskstart = params["gene1fit"][d + 1, 1] # Start of day/dawn.
+    beforeduskend = params["gene2fit"][d + 1, 1] - 1 # Start of dusk.
+    afterduskstart = params["gene2fit"][d + 1, end] + 1 # End of dusk.
+    afterduskend = (d + 1)*24*60 # End of day.
+    notdusk = [beforeduskstart:beforeduskend, afterduskstart:afterduskend]
+    g2notdusk = sum(gene2[notdusk])
 
-    duskFitness[d] = g2dusk / dusk
-    notDuskFitness[d] = 1 - (g2notdusk / notdusk)
+    duskFitness[d] = 1 - (g2dusk / length(dusk))
+    notDuskFitness[d] = g2notdusk / length(notdusk)
 
     fitnessG1[d] = (dawnFitness[d] + notDawnFitness[d]) / 2
     fitnessG2[d] = (duskFitness[d] + notDuskFitness[d]) / 2
   end
+
   # Next order the daily fitnesses, and weight so that the least fit day
   # contributes most to the fitness.
   sort!(fitnessG1; rev = true)
@@ -93,8 +100,7 @@ function fitness(net::Network, params::Dict)
     allG1fitness = [allG1fitness, thisG1fitness]
     allG2fitness = [allG2fitness, thisG2fitness]
   end
-
-  score = 1 - mean([allG1fitness, allG2fitness])
+  score =mean([allG1fitness, allG2fitness])
 end
 
 function troeinfit(net::Network, params::Dict)
