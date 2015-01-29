@@ -10,9 +10,15 @@ function prune(net::Network, params::Dict, counter=1)
   if counter <= length(net.paths)
     println("counter:$(counter). Paths:")
 
-    pruned::Network = Network(copy(net.paths), copy(net.transmats),
-                              copy(net.envpath), copy(net.lags),
-                              copy(net.envlag), copy(net.gates))
+    paths::Array{Array{Int64, 1}, 1} = copy(net.paths)
+    transmats::Array{Array{Float64, 2}, 1} = copy(net.transmats)
+    envpath::Array{Bool, 1} = copy(net.envpath)
+    lags::Array{Int64, 1} = copy(net.lags)
+    envlag::Array{Int64, 1} = copy(net.envlag)
+    gates::Array{Bool, 1} = copy(net.gates)
+
+    pruned::Network = Network(paths, transmats, envpath, lags,
+                              envlag, gates)
     pruned.paths[counter] *= 0
     for n = 1:16
       print("$(pruned.paths[n][1]), ")
