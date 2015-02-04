@@ -340,10 +340,15 @@ function drawgates(gates, c1, c2, canvas, rad)
     gatehash[x]
   end
 
+  d1 = rad/10
+  d2 = d1*2
+  d3 = d1/2
+  d4 = d1*5
+
   compose(context(),
          (context(),
-          text([0.275, 0.675, 0.675, 0.275],
-               [0.35, 0.35, 0.75, 0.75],
+          text([c1 - d2 - d3, c2 - d2 - d3, c2 - d2 - d3, c1 - d2 - d3],
+               [c1 + d4, c1 + d4, c2 + d4, c2 + d4],
                map(gatetxt, gates)),
           font("Arial"),
           fontsize(18pt),
@@ -357,9 +362,12 @@ function drawgeneric(canvas, c1, c2, rad)
   # labels.
   textcolour = fill(LCHab(90, 0, 297))
 
+  d1 = rad/10
+  d2 = d1*2
+
   compose(context(),
-         (context(), text([0.28, 0.68, 0.68, 0.28],
-                          [0.32, 0.32, 0.72, 0.72],
+         (context(), text([c1 - d2, c2 - d2, c2 - d2, c1 - d2],
+                          [c1 + d2, c1 + d2, c2 + d2, c2 + d2],
                           ["A", "B", "C", "D"]),
                      font("Arial"),
                      fontsize(38pt),
