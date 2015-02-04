@@ -266,40 +266,64 @@ function drawenvs(envs, c1, c2, canvas, rad)
   arrowcol = fill(LCHab(90, 0, 297))
   pathcol = stroke(LCHab(90, 0, 297))
 
+  d1 = rad/10
+  d2 = d1*2
+  d3 = d1*5
+
+  p1 = c1 - (rad + d1) # 0.19
+  p2 = c1 + (rad + d1) # 0.41
+  p3 = c1 + (rad + d2) # 0.42
+  p4 = c1 - (d1 + d2) # 0.27
+  p5 = c1 + (d1 + d2) # 0.33
+
+  p6 = c2 - (rad + d1) # 0.59
+  p7 = c2 + (rad + d1) # 0.81
+  p8 = c2 - (rad + d2) # 0.58
+  p9 = c2 - (d1 + d2) # 0.67
+  p10 = c2 + (d1 + d2) # 0.73
+
   drawnenvs[1] = compose(context(),
                         (context(), # gene 1
-                         line([(0.33, 0.05), (0.33, 0.19)]),
+                         line([(p5, d3), (p5, p1)]),
                          linewidth(1mm),
                          pathcol),
                         (context(),
-                         polygon([(0.33, 0.2), (0.31, 0.16), (0.35, 0.16)]),
+                         polygon([(p5, c1 - rad),
+                                  (p5 - d2, p1 - d1 - d2),
+                                  (p5 + d2, p1 - d1 - d2)]),
                          arrowcol))
 
   drawnenvs[2] = compose(context(),
                         (context(), # gene 2
-                         line([(0.67, 0.05), (0.67, 0.19)]),
+                         line([(p9, d3), (p9, p1)]),
                          linewidth(1mm),
                          pathcol),
                         (context(),
-                         polygon([(0.67, 0.2), (0.65, 0.16), (0.69, 0.16)]),
+                         polygon([(p9, c1 - rad),
+                                  (p9 - d2, p1 - d1 - d2),
+                                  (p9 + d2, p1 - d1 - d2)]),
                          arrowcol))
 
   drawnenvs[3] = compose(context(),
                         (context(), # gene 3
-                         line([(0.33, 0.95), (0.33, 0.81)]),
+                         line([(p5, canvas - d3), (p5, p7)]),
                          linewidth(1mm),
                          pathcol),
                         (context(),
-                         polygon([(0.33, 0.8), (0.31, 0.84), (0.35, 0.84)]),
+                         polygon([(p5, c2 + rad),
+                                  (p5 - d2, p7 + d1 + d2),
+                                  (p5 + d2, p7 + d1 + d2)]),
                          arrowcol))
 
   drawnenvs[4] = compose(context(),
                         (context(), # gene 4
-                         line([(0.67, 0.95), (0.67, 0.81)]),
+                         line([(p9, canvas - d3), (p9, p7)]),
                          linewidth(1mm),
                          pathcol),
                         (context(),
-                         polygon([(0.67, 0.8), (0.65, 0.84), (0.69, 0.84)]),
+                         polygon([(p9, c2 + rad),
+                                  (p9 - d2, p7 + d1 + d2),
+                                  (p9 + d2, p7 + d1 + d2)]),
                          arrowcol))
 
   compose(drawnenvs[find(x -> x > 0, envs)]...)
