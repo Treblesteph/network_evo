@@ -152,98 +152,109 @@ function drawpaths(paths, c1, c2, canvas, rad)
 
   d1 = rad/10
   d2 = d1*2
-  p1 = c1 - (d1 + d2)
-  p2 = c1 + (d1 + d2)
+  d3 = d2*2
+
+  p1 = c1 - (rad + d1) # 0.19
+  p2 = c1 + (rad + d1) # 0.41
+  p3 = c1 + (rad + d2) # 0.42
+  p4 = c1 - (d1 + d2) # 0.27
+  p5 = c1 + (d1 + d2) # 0.33
+
+  p6 = c2 - (rad + d1) # 0.59
+  p7 = c2 + (rad + d1) # 0.81
+  p8 = c2 - (rad + d2) # 0.58
+  p9 = c2 - (d1 + d2) # 0.67
+  p10 = c2 + (d1 + d2) # 0.73
 
   drawnpaths[1] = (context(),
-                          curve([(0.19, c1), (0.15, 0.15)],
-                                [(0.12, c1), (0.21, 0.09)],
-                                [(0.09, 0.21), (c1, 0.12)],
-                                [(0.15, 0.15), (c1, 0.19)]),
+                          curve([(p1, c1), (p1 - d3, p1 - d3)],
+                                [(p1 - rad + d1 + d2, c1), (p1 + d2, p1 - rad)],
+                                [(p1 - rad, p1 + d2), (c1, p1 - rad + d1 + d2)],
+                                [(p1 - d3, p1 - d3), (c1, p1)]),
                           fill(nothing), linewidth(1mm),
                           pathcolour) # From 1 to 1.
 
   drawnpaths[2] = (context(),
-                          line([(c1 + rad + d2, 0.27), (0.58, 0.27)]),
+                          line([(c1 + rad + d2, p4), (p8, p4)]),
                           linewidth(1mm),
                           pathcolour) # From 2 to 1.
 
   drawnpaths[3] = (context(),
-                          line([(0.43, 0.39), (0.61, 0.57)]),
+                          line([(p3 + d1, p2 - d2), (p6 + d2, p6 - d2)]),
                           linewidth(1mm),
                           pathcolour) # From 3 to 1.
 
   drawnpaths[4] = (context(),
-                          line([(0.33, c1 + rad + d2), (0.33, 0.58)]),
+                          line([(p5, c1 + rad + d2), (p5, p8)]),
                           linewidth(1mm),
                           pathcolour) # From 4 to 1.
 
   drawnpaths[5] = (context(),
-                          line([(c1 + rad + d2, 0.33), (0.58, 0.33)]),
+                          line([(c1 + rad + d2, p5), (p8, p5)]),
                           linewidth(1mm),
                           pathcolour) # From 1 to 2.
 
   drawnpaths[6] = (context(),
-                          curve([(0.81, c1), (0.85, 0.15)],
-                                [(0.88, c1), (0.79, 0.09)],
-                                [(0.91, 0.21), (c2, 0.12)],
-                                [(0.85, 0.15), (c2, 0.19)]),
+                          curve([(p7, c1), (p7 + d3, p1 - d3)],
+                                [(p7 + rad - d1 - d2, c1), (p7 - d2, p1 - rad)],
+                                [(p7 + rad, p1 + d2), (c2, p1 - rad + d1 + d2)],
+                                [(p7 + d3, p1 - d3), (c2, p1)]),
                           fill(nothing), linewidth(1mm),
                           pathcolour) # From 2 to 2.
 
   drawnpaths[7] = (context(),
-                          line([(0.73, c1 + rad + d2), (0.73, 0.58)]),
+                          line([(p10, c1 + rad + d2), (p10, p8)]),
                           linewidth(1mm),
                           pathcolour) # From 3 to 2.
 
   drawnpaths[8] = (context(),
-                          line([(0.43, 0.61), (0.61, 0.43)]),
+                          line([(p3 + d1, p6 + d2), (p6 + d2, p3 + d1)]),
                           linewidth(1mm),
                           pathcolour) # From 4 to 2.
 
   drawnpaths[9] = (context(),
-                          line([(0.39, 0.43), (0.57, 0.61)]),
+                          line([(p2 - d2, p3 + d1), (p6 - d2, p6 + d2)]),
                           linewidth(1mm),
                           pathcolour) # From 1 to 3.
 
   drawnpaths[10] = (context(),
-                           line([(0.67, 0.58), (0.67, c1 + rad + d2)]),
+                           line([(p9, p8), (p9, c1 + rad + d2)]),
                            linewidth(1mm),
                            pathcolour) # From 2 to 3.
 
   drawnpaths[11] = (context(),
-                           curve([(0.19, c2), (0.15, 0.85)],
-                                 [(0.12, c2), (0.21, 0.91)],
-                                 [(0.09, 0.79), (c1, 0.88)],
-                                 [(0.15, 0.85), (c1, 0.81)]),
+                           curve([(p1, c2), (p1 - d3, p7 + d3)],
+                                 [(p1 - rad + d1 + d2, c2), (p1 + d2, p7 + rad)],
+                                 [(p1 - rad, p7 - d2), (c1, p7 + rad - d1 - d2)],
+                                 [(p1 - d3, p7 + d3), (c1, p7)]),
                            fill(nothing), linewidth(1mm),
                            pathcolour) # From 3 to 3.
 
   drawnpaths[12] = (context(),
-                           line([(c1 + rad + d2, 0.73), (0.58, 0.73)]),
+                           line([(c1 + rad + d2, p10), (p8, p10)]),
                            linewidth(1mm),
                            pathcolour) # From 4 to 3.
 
   drawnpaths[13] = (context(),
-                           line([(0.27, 0.58), (0.27, c1 + rad + d2)]),
+                           line([(p4, p8), (p4, c1 + rad + d2)]),
                            linewidth(1mm),
                            pathcolour) # From 1 to 4.
 
   drawnpaths[14] = (context(),
-                           line([(0.39, 0.57), (0.57, 0.39)]),
+                           line([(p2 - d2, p6 - d2), (p6 - d2, p2 - d2)]),
                            linewidth(1mm),
                            pathcolour) # From 2 to 4.
 
   drawnpaths[15] = (context(),
-                           line([(c1 + rad + d2, 0.67), (0.58, 0.67)]),
+                           line([(c1 + rad + d2, p9), (p8, p9)]),
                            linewidth(1mm),
                            pathcolour) # From 3 to 4.
 
   drawnpaths[16] = (context(),
-                           curve([(0.81, c2), (0.85, 0.85)],
-                                 [(0.88, c2), (0.79, 0.91)],
-                                 [(0.91, 0.79), (c2, 0.88)],
-                                 [(0.85, 0.85), (c2, 0.81)]),
+                           curve([(p7, c2), (p7 + d3, p7 + d3)],
+                                 [(p7 + rad - d1 - d2, c2), (p7 - d2, p7 + rad)],
+                                 [(p7 + rad, p7 - d2), (c2, p7 + rad - d1 - d2)],
+                                 [(p7 + d3, p7 + d3), (c2, p7)]),
                            fill(nothing), linewidth(1mm),
                            pathcolour) # From 4 to 4.
 
