@@ -75,27 +75,70 @@ function drawacts(acts, c1, c2, canvas, rad)
   drawnacts = Array(Any, 16)
   actscolour = fill(LCHab(90, 0, 297))
 
-  d1 = rad/10
-  d2 = d1*2
-  p1 = c1 - (d1 + d2)
-  p2 = c1 + (d1 + d2)
+  d1 = rad/10 # 0.01
+  d2 = d1*2   # 0.02
+  d3 = d2*2   # 0.04
 
-  drawnacts[1] = ([(0.2, 0.3), (0.16, c1 + d2), (0.16, c1 - d2)]) # From 1 to 1.
-  drawnacts[2] = ([(0.41, 0.27), (0.45, 0.29), (0.45, 0.25)]) # From 2 to 1.
-  drawnacts[3] = ([(c1 + rad + d2, 0.38), (0.43, c1 + rad + d2), (0.46, 0.39)]) # From 3 to 1.
-  drawnacts[4] = ([(0.33, 0.41), (0.31, 0.45), (0.35, 0.45)]) # From 4 to 1.
-  drawnacts[5] = ([(0.59, 0.33), (0.55, 0.35), (0.55, 0.31)]) # From 1 to 2.
-  drawnacts[6] = ([(0.8, 0.3), (0.84, c1 + d2), (0.84, c1 - d2)]) # From 2 to 2.
-  drawnacts[7] = ([(0.73, 0.41), (0.71, 0.45), (0.75, 0.45)]) # From 3 to 2.
-  drawnacts[8] = ([(0.62, c1 + rad + d2), (0.61, 0.46), (0.58, 0.43)]) # From 4 to 2.
-  drawnacts[9] = ([(0.58, 0.62), (0.57, 0.58), (0.54, 0.61)]) # From 1 to 3.
-  drawnacts[10] = ([(0.67, 0.59), (0.65, 0.55), (0.69, 0.55)]) # From 2 to 3.
-  drawnacts[11] = ([(0.8, 0.7), (0.84, 0.72), (0.84, 0.68)]) # From 3 to 3.
-  drawnacts[12] = ([(0.59, 0.73), (0.55, 0.75), (0.55, 0.71)]) # From 4 to 3.
-  drawnacts[13] = ([(0.27, 0.59), (0.25, 0.55), (0.29, 0.55)]) # From 1 to 4.
-  drawnacts[14] = ([(0.38, 0.58), (0.39, 0.54), (c1 + rad + d2, 0.57)]) # From 2 to 4.
-  drawnacts[15] = ([(0.41, 0.67), (0.45, 0.69), (0.45, 0.65)]) # From 3 to 4.
-  drawnacts[16] = ([(0.2, 0.7), (0.16, 0.72), (0.16, 0.68)]) # From 4 to 4.
+  p1 = c1 - (rad + d1) # 0.19
+  p2 = c1 + (rad + d1) # 0.41
+  p3 = c1 + (rad + d2) # 0.42
+  p4 = c1 - (d1 + d2) # 0.27
+  p5 = c1 + (d1 + d2) # 0.33
+
+  p6 = c2 - (rad + d1) # 0.59
+  p7 = c2 + (rad + d1) # 0.81
+  p8 = c2 - (rad + d2) # 0.58
+  p9 = c2 - (d1 + d2) # 0.67
+  p10 = c2 + (d1 + d2) # 0.73
+
+  drawnacts[1] = ([(c1 - rad, c1),
+                   (c1 - rad - d3, c1 + d2),
+                   (c1 - rad - d3, c1 - d2)]) # From 1 to 1.
+  drawnacts[2] = ([(p2, p4),
+                   (p2 + d3, p4 + d2),
+                   (p2 + d3, p4 - d2)]) # From 2 to 1.
+  drawnacts[3] = ([(c1 + rad + d2, p3 - d3),
+                   (p3 + d1, c1 + rad + d2),
+                   (p3 + d3, p2 - d2)]) # From 3 to 1.
+  drawnacts[4] = ([(p5, p2),
+                   (p5 - d2, p2 + d3),
+                   (p5 + d2, p2 + d3)]) # From 4 to 1.
+  drawnacts[5] = ([(p6, p5),
+                   (p6 - d3, p5 + d2),
+                   (p6 - d3, p5 - d2)]) # From 1 to 2.
+  drawnacts[6] = ([(c2 + rad, c1),
+                   (c2 + rad + d3, c1 + d2),
+                   (c2 + rad + d3, c1 - d2)]) # From 2 to 2.
+  drawnacts[7] = ([(p10, p2),
+                   (p10 - d2, p2 + d3),
+                   (p10 + d2, p2 + d3)]) # From 3 to 2.
+  drawnacts[8] = ([(p8 + d3, c1 + rad + d2),
+                   (p6 + d2, p3 + d3),
+                   (p8, p3 + d1)]) # From 4 to 2.
+  drawnacts[9] = ([(p8, p8 + d3),
+                   (p6 - d2, p8),
+                   (p8 - d3, p6 + d2)]) # From 1 to 3.
+  drawnacts[10] = ([(p9, p6),
+                    (p9 - d2, p6 - d3),
+                    (p9 + d2, p6 - d3)]) # From 2 to 3.
+  drawnacts[11] = ([(c2 + rad, c2),
+                    (c2 + rad + d3, c2 + d2),
+                    (c2 + rad + d3, c2 - d2)]) # From 3 to 3.
+  drawnacts[12] = ([(p6, p10),
+                    (p6 - d3, p10 + d2),
+                    (p6 - d3, p10 - d2)]) # From 4 to 3.
+  drawnacts[13] = ([(p4, p6),
+                    (p4 - d2, p6 - d3),
+                    (p4 + d2, p6 - d3)]) # From 1 to 4.
+  drawnacts[14] = ([(p3 - d3, p8),
+                    (p2 - d2, p8 - d3),
+                    (c1 + rad + d2, p6 - d2)]) # From 2 to 4.
+  drawnacts[15] = ([(p2, p9),
+                    (p2 + d3, p9 + d2),
+                    (p2 + d3, p9 - d2)]) # From 3 to 4.
+  drawnacts[16] = ([(c1 - rad, c2),
+                  (c1 - rad - d3, c2 + d2),
+                  (c1 - rad - d3, c2 - d2)]) # From 4 to 4.
 
   compose(context(),
          (context(), polygon(drawnacts[find(x -> x > 0, acts)]), actscolour))
