@@ -33,25 +33,37 @@ repcolour = stroke(LCHab(90, 0, 297))
 
 d1 = rad/10
 d2 = d1*2
-p1 = c1 - (d1 + d2)
-p2 = c1 + (d1 + d2)
+d3 = d1/2
+d4 = d2*2
 
-drawnreps[1] = ([(c1 - (rad + d1), c1 - d2), (c1 - (rad + d1), c1 + d2)]) # 1 to 1
-drawnreps[2] = ([(c1 + rad + d2, 0.25), (c1 + rad + d2, 0.29)]) # 2 to 1
-drawnreps[3] = ([(0.415, 0.405), (0.445, 0.375)]) # 3 to 1
-drawnreps[4] = ([(0.31, c1 + rad + d2), (0.35, c1 + rad + d2)]) # 4 to 1
-drawnreps[5] = ([(c2 - (rad + d2), 0.31), (c2 - (rad + d2), 0.35)]) # 1 to 2
-drawnreps[6] = ([(c2 + rad + d1, c1 - d2), (c2 + rad + d1, c1 + d2)]) # 2 to 2
-drawnreps[7] = ([(0.71, c1 + rad + d2), (0.75, c1 + rad + d2)]) # 3 to 2
-drawnreps[8] = ([(0.595, 0.415), (0.625, 0.445)]) # 4 to 2
-drawnreps[9] = ([(0.555, 0.625), (0.585, 0.595)]) # 1 to 3
-drawnreps[10] = ([(0.65, c2 - (rad + d2)), (0.69, c2 - (rad + d2))]) # 2 to 3
-drawnreps[11] = ([(c2 + rad + d1, 0.68), (c2 + rad + d1, 0.72)]) # 3 to 3
-drawnreps[12] = ([(c2 - (rad + d2), 0.71), (c2 - (rad + d2), 0.75)]) # 4 to 3
-drawnreps[13] = ([(0.25, c2 - (rad + d2)), (0.29, c2 - (rad + d2))]) # 1 to 4
-drawnreps[14] = ([(0.375, 0.555), (0.405, 0.585)]) # 2 to 4
-drawnreps[15] = ([(c1 + rad + d2, 0.65), (c1 + rad + d2, 0.69)]) # 3 to 4
-drawnreps[16] = ([(c1 - (rad + d1), 0.68), (c1 - (rad + d1), 0.72)]) # 4 to 4
+p1 = c1 - (rad + d1) # 0.19
+p2 = c1 + (rad + d1) # 0.41
+p3 = c1 + (rad + d2) # 0.42
+p4 = c1 - (d1 + d2) # 0.27
+p5 = c1 + (d1 + d2) # 0.33
+
+p6 = c2 - (rad + d1) # 0.59
+p7 = c2 + (rad + d1) # 0.81
+p8 = c2 - (rad + d2) # 0.58
+p9 = c2 - (d1 + d2) # 0.67
+p10 = c2 + (d1 + d2) # 0.73
+
+drawnreps[1] = ([(p1, c1 - d2), (p1, c1 + d2)]) # 1 to 1
+drawnreps[2] = ([(p3, p4 - d2), (p3, p4 + d2)]) # 2 to 1
+drawnreps[3] = ([(p2 + d3, p2 - d3), (p2 + d4 - d3, p2 - d4 + d3)]) # 3 to 1
+drawnreps[4] = ([(p5 - d2, p3), (p5 + d2, p3)]) # 4 to 1
+drawnreps[5] = ([(p8, p5 - d2), (p8, p5 + d2)]) # 1 to 2
+drawnreps[6] = ([(p7, c1 - d2), (p7, c1 + d2)]) # 2 to 2
+drawnreps[7] = ([(p10 - d2, p3), (p10 + d2, p3)]) # 3 to 2
+drawnreps[8] = ([(p6 + d3, p2 + d3), (p6 + d4 - d3, p2 + d4 - d3)]) # 4 to 2
+drawnreps[9] = ([(p6 - d4 + d3, p6 + d4 - d3), (p6 - d3, p6 + d3)]) # 1 to 3
+drawnreps[10] = ([(p9 - d2, p8), (p9 + d2, p8)]) # 2 to 3
+drawnreps[11] = ([(p7, c2 - d2), (p7, c2 + d2)]) # 3 to 3
+drawnreps[12] = ([(p8, p10 - d2), (p8, p10 + d2)]) # 4 to 3
+drawnreps[13] = ([(p4 - d2, p8), (p4 + d2, p8)]) # 1 to 4
+drawnreps[14] = ([(p2 - d4 + d3, p6 - d4 + d3), (p2 - d3, p6 - d3)]) # 2 to 4
+drawnreps[15] = ([(p3, p9 - d2), (p3, p9 + d2)]) # 3 to 4
+drawnreps[16] = ([(p1, c2 - d2), (p1, c2 + d2)]) # 4 to 4
 
   compose(context(),
          (context(), line(drawnreps[find(x -> x > 0, reps)]),
