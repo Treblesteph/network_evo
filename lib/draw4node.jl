@@ -79,63 +79,61 @@ function drawacts(acts, c1, c2, canvas, rad)
   d2 = d1*2   # 0.02
   d3 = d2*2   # 0.04
 
-  p1 = c1 - (rad + d1) # 0.19
-  p2 = c1 + (rad + d1) # 0.41
-  p3 = c1 + (rad + d2) # 0.42
-  p4 = c1 - (d1 + d2) # 0.27
-  p5 = c1 + (d1 + d2) # 0.33
+  p1 = c1 + (rad + d1) # 0.41
+  p2 = c1 + (rad + d2) # 0.42
+  p3 = c1 - (d1 + d2) # 0.27
+  p4 = c1 + (d1 + d2) # 0.33
 
-  p6 = c2 - (rad + d1) # 0.59
-  p7 = c2 + (rad + d1) # 0.81
-  p8 = c2 - (rad + d2) # 0.58
-  p9 = c2 - (d1 + d2) # 0.67
-  p10 = c2 + (d1 + d2) # 0.73
+  p5 = c2 - (rad + d1) # 0.59
+  p6 = c2 - (rad + d2) # 0.58
+  p7 = c2 - (d1 + d2) # 0.67
+  p8 = c2 + (d1 + d2) # 0.73
 
   drawnacts[1] = ([(c1 - rad, c1),
                    (c1 - rad - d3, c1 + d2),
                    (c1 - rad - d3, c1 - d2)]) # From 1 to 1.
-  drawnacts[2] = ([(p2, p4),
-                   (p2 + d3, p4 + d2),
-                   (p2 + d3, p4 - d2)]) # From 2 to 1.
-  drawnacts[3] = ([(c1 + rad + d2, p3 - d3),
-                   (p3 + d1, c1 + rad + d2),
-                   (p3 + d3, p2 - d2)]) # From 3 to 1.
-  drawnacts[4] = ([(p5, p2),
-                   (p5 - d2, p2 + d3),
-                   (p5 + d2, p2 + d3)]) # From 4 to 1.
-  drawnacts[5] = ([(p6, p5),
-                   (p6 - d3, p5 + d2),
-                   (p6 - d3, p5 - d2)]) # From 1 to 2.
+  drawnacts[2] = ([(p1, p3),
+                   (p1 + d3, p3 + d2),
+                   (p1 + d3, p3 - d2)]) # From 2 to 1.
+  drawnacts[3] = ([(c1 + rad + d2, p2 - d3),
+                   (p2 + d1, c1 + rad + d2),
+                   (p2 + d3, p1 - d2)]) # From 3 to 1.
+  drawnacts[4] = ([(p4, p1),
+                   (p4 - d2, p1 + d3),
+                   (p4 + d2, p1 + d3)]) # From 4 to 1.
+  drawnacts[5] = ([(p5, p4),
+                   (p5 - d3, p4 + d2),
+                   (p5 - d3, p4 - d2)]) # From 1 to 2.
   drawnacts[6] = ([(c2 + rad, c1),
                    (c2 + rad + d3, c1 + d2),
                    (c2 + rad + d3, c1 - d2)]) # From 2 to 2.
-  drawnacts[7] = ([(p10, p2),
-                   (p10 - d2, p2 + d3),
-                   (p10 + d2, p2 + d3)]) # From 3 to 2.
-  drawnacts[8] = ([(p8 + d3, c1 + rad + d2),
-                   (p6 + d2, p3 + d3),
-                   (p8, p3 + d1)]) # From 4 to 2.
-  drawnacts[9] = ([(p8, p8 + d3),
-                   (p6 - d2, p8),
-                   (p8 - d3, p6 + d2)]) # From 1 to 3.
-  drawnacts[10] = ([(p9, p6),
-                    (p9 - d2, p6 - d3),
-                    (p9 + d2, p6 - d3)]) # From 2 to 3.
+  drawnacts[7] = ([(p8, p1),
+                   (p8 - d2, p1 + d3),
+                   (p8 + d2, p1 + d3)]) # From 3 to 2.
+  drawnacts[8] = ([(p6 + d3, c1 + rad + d2),
+                   (p5 + d2, p2 + d3),
+                   (p6, p2 + d1)]) # From 4 to 2.
+  drawnacts[9] = ([(p6, p6 + d3),
+                   (p5 - d2, p6),
+                   (p6 - d3, p5 + d2)]) # From 1 to 3.
+  drawnacts[10] = ([(p7, p5),
+                    (p7 - d2, p5 - d3),
+                    (p7 + d2, p5 - d3)]) # From 2 to 3.
   drawnacts[11] = ([(c2 + rad, c2),
                     (c2 + rad + d3, c2 + d2),
                     (c2 + rad + d3, c2 - d2)]) # From 3 to 3.
-  drawnacts[12] = ([(p6, p10),
-                    (p6 - d3, p10 + d2),
-                    (p6 - d3, p10 - d2)]) # From 4 to 3.
-  drawnacts[13] = ([(p4, p6),
-                    (p4 - d2, p6 - d3),
-                    (p4 + d2, p6 - d3)]) # From 1 to 4.
-  drawnacts[14] = ([(p3 - d3, p8),
-                    (p2 - d2, p8 - d3),
-                    (c1 + rad + d2, p6 - d2)]) # From 2 to 4.
-  drawnacts[15] = ([(p2, p9),
-                    (p2 + d3, p9 + d2),
-                    (p2 + d3, p9 - d2)]) # From 3 to 4.
+  drawnacts[12] = ([(p5, p8),
+                    (p5 - d3, p8 + d2),
+                    (p5 - d3, p8 - d2)]) # From 4 to 3.
+  drawnacts[13] = ([(p3, p5),
+                    (p3 - d2, p5 - d3),
+                    (p3 + d2, p5 - d3)]) # From 1 to 4.
+  drawnacts[14] = ([(p2 - d3, p6),
+                    (p1 - d2, p6 - d3),
+                    (c1 + rad + d2, p5 - d2)]) # From 2 to 4.
+  drawnacts[15] = ([(p1, p7),
+                    (p1 + d3, p7 + d2),
+                    (p1 + d3, p7 - d2)]) # From 3 to 4.
   drawnacts[16] = ([(c1 - rad, c2),
                   (c1 - rad - d3, c2 + d2),
                   (c1 - rad - d3, c2 - d2)]) # From 4 to 4.
