@@ -11,15 +11,15 @@ function plotConcs(params::Dict, net, filename)
   concframe[:gene4] = net.concseries[:, 4]
 
   g1colour = "mediumturquoise"
-  g2colour = "orchid"
-  g3colour = "dodgerblue"
-  g4colour = "coral"
+  # g2colour = "orchid"
+  # g3colour = "dodgerblue"
+  # g4colour = "coral"
   dawncolour = "palegoldenrod"
   daycolour = "cornsilk"
   duskcolour = "lightgrey"
   nightcolour = "azure2"
 
-  colourscheme = [g1colour, g2colour, g3colour, g4colour,
+  colourscheme = [g1colour,
                  dawncolour, daycolour, duskcolour, nightcolour]
 
   days = params["envsignal"]
@@ -57,15 +57,16 @@ function plotConcs(params::Dict, net, filename)
   rename!(concframe, :value, :gene)
   plot1 = plot(Scale.x_continuous(minvalue = 0, maxvalue = 96),
                Scale.y_continuous(minvalue = 0, maxvalue = 1),
-          layer(concframe, x = "time", y = "gene",
-                color = "variable", ygroup = "variable",
-                Geom.subplot_grid(Geom.line)),
-          layer(shadeframe, xmin = "starts", xmax = "ends",
-                y = "y", ygroup = "row",
-                Geom.subplot_grid(Geom.bar(position=:dodge)),
-                color = repeat(["dawns", "dusks", "days", "nights"],
-                                outer = [16])),
-                Scale.discrete_color_manual(colourscheme...))
+               Geom.subplot_grid(
+                 layer(concframe, x = "time", y = "gene",
+                       color = "variable", ygroup = "variable",
+                       Geom.line),
+                 layer(shadeframe, xmin = "starts", xmax = "ends",
+                       y = "y", ygroup = "row",
+                       Geom.bar(position=:dodge),
+                  color = repeat(["dawns", "dusks", "days", "nights"],
+                                       outer = [16])),
+                  Scale.discrete_color_manual(colourscheme...)))
 
   draw(PDF("../runs/plot$(filename).pdf", 12inch, 6inch), plot1)
 end
