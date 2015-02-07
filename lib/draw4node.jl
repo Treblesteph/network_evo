@@ -1,6 +1,7 @@
 
 
-function draw4node(reps, acts, envs, gates)
+function draw4node(reps::Array{Int64}, acts::Array{Int64},
+                   envs::Array{Int64}, gates::Array{Bool}, filename::String)
 
   canvas = 1        # Side length of square canvas
   c1 = 3*canvas/10  # Lower centre co-ordinate
@@ -20,12 +21,12 @@ function draw4node(reps, acts, envs, gates)
            (context(), drawgeneric(canvas, c1, c2, rad)))
   end
 
-  img = PNG("../runs/netpic.png", 8inch, 8inch)
+  img = PNG("../runs/netpic_$(filename).png", 8inch, 8inch)
   draw(img, drawall())
 
 end
 
-function drawreps(reps, c1, c2, canvas, rad)
+function drawreps(reps::Array{Int64}, c1, c2, canvas, rad)
 
 drawnreps = Array(Any, 16)
 
@@ -70,7 +71,7 @@ drawnreps[16] = ([(p1, c2 - d2), (p1, c2 + d2)]) # 4 to 4
                      linewidth(2mm), repcolour))
 end
 
-function drawacts(acts, c1, c2, canvas, rad)
+function drawacts(acts::Array{Int64}, c1, c2, canvas, rad)
 
   drawnacts = Array(Any, 16)
   actscolour = fill(LCHab(90, 0, 297))
@@ -143,7 +144,7 @@ function drawacts(acts, c1, c2, canvas, rad)
 
 end
 
-function drawpaths(paths, c1, c2, canvas, rad)
+function drawpaths(paths::Array{Int64}, c1, c2, canvas, rad)
 
   drawnpaths = Array(Any, 16)
   pathcolour = stroke(LCHab(90, 0, 297))
@@ -260,7 +261,7 @@ function drawpaths(paths, c1, c2, canvas, rad)
 
 end
 
-function drawenvs(envs, c1, c2, canvas, rad)
+function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
 
   drawnenvs = Array(Context, 4)
   arrowcol = fill(LCHab(90, 0, 297))
@@ -330,7 +331,7 @@ function drawenvs(envs, c1, c2, canvas, rad)
 
 end
 
-function drawgates(gates, c1, c2, canvas, rad)
+function drawgates(gates::Array{Bool}, c1, c2, canvas, rad)
 
   gatehash::Dict{Bool, String} = {1 => "and", 0 => " or"}
 
