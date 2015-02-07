@@ -64,7 +64,7 @@ function plotConcs(params::Dict, net, filename)
                  layer(shadeframe, xmin = "starts", xmax = "ends",
                        y = "y", ygroup = "row",
                        Geom.bar(position=:dodge),
-                  color = repeat(["dawns", "dusks", "days", "nights"],
+                       color = repeat(["dawns", "dusks", "days", "nights"],
                                        outer = [16])),
                   Scale.discrete_color_manual(colourscheme...)))
 
