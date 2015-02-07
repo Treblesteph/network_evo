@@ -1,4 +1,5 @@
 using Compose
+using Color
 
 function draw4node(reps::Array{Int64}, acts::Array{Int64},
                    envs::Array{Int64}, gates::Array{Bool}, filename::String)
