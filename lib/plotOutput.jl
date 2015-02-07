@@ -19,8 +19,7 @@ function plotConcs(params::Dict, net, filename)
   duskcolour = "lightgrey"
   nightcolour = "azure2"
 
-  colourscheme = [g1colour,
-                 dawncolour, daycolour, duskcolour, nightcolour]
+  colourscheme = [g1colour, dawncolour, daycolour, duskcolour, nightcolour]
 
   days = params["envsignal"]
   dawns = params["gene1fit"]
@@ -66,7 +65,7 @@ function plotConcs(params::Dict, net, filename)
                        Geom.bar(position=:dodge),
                        color = repeat(["dawns", "dusks", "days", "nights"],
                                        outer = [16])),
-                  Scale.discrete_color_manual(colourscheme...)))
+                  Scale.color_discrete_manual(colourscheme...)))
 
   draw(PDF("../runs/plot$(filename).pdf", 12inch, 6inch), plot1)
 end
