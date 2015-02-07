@@ -53,8 +53,8 @@ save("../runs/out_$(now).jld", "concs1", concs1, "concs2", concs2,
 
 h1 = net2hash(model.population[1].net)
 
-clockq = EvolveClock.should_be_a_clock(params)
-troein = EvolveClock.create_troein_1D(params)
+# clockq = EvolveClock.should_be_a_clock(params)
+# troein = EvolveClock.create_troein_1D(params)
 
 plotConcs(params, model.population[1].net, now)
 # plotConcs(params, clockq, now)
