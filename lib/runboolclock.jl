@@ -61,3 +61,16 @@ plotConcs(params, model.population[1].net, now)
 #plotFitness(model.meantop10, model.gen_num, now)
 
 #TODO: Can a hash be saved with HDF5? That would be very useful...
+
+act_index = find(x -> findfirst(x, 1) != 0, net.paths)
+rep_index = find(x -> findfirst(x, -1) != 0, net.paths)
+
+acts = zeros(Int64, params["nnodes"]*params["nnodes"])
+reps = zeros(Int64, params["nnodes"]*params["nnodes"])
+
+acts[act_index] = net.lags[act_index]
+reps[rep_index] = net.lags[rep_index]
+
+envs = net.envpath.*net.envlag
+
+draw4node(reps, acts, envs, net.gates, now)
