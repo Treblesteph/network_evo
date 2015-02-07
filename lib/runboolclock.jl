@@ -1,5 +1,6 @@
 using GeneticAlgorithms
 include("plotOutput.jl")
+include("draw4node.jl")
 import EvolveClock
 using HDF5, JLD
 import NetworkSimulation.make_decision_mat,
