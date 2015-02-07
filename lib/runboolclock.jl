@@ -1,6 +1,7 @@
 using GeneticAlgorithms
 include("plotOutput.jl")
 include("draw4node.jl")
+include("prune.jl")
 import EvolveClock
 using HDF5, JLD
 import NetworkSimulation.make_decision_mat,
@@ -62,16 +63,17 @@ plotConcs(params, model.population[1].net, now)
 #plotFitness(model.meantop10, model.gen_num, now)
 
 #TODO: Can a hash be saved with HDF5? That would be very useful...
+net = prune(model.population[1].net, params)
 
-act_index = find(x -> findfirst(x, 1) != 0, model.population[1].net.paths)
-rep_index = find(x -> findfirst(x, -1) != 0, model.population[1].net.paths)
+act_index = find(x -> findfirst(x, 1) != 0, net.paths)
+rep_index = find(x -> findfirst(x, -1) != 0, net.paths)
 
 acts = zeros(Int64, params["nnodes"]*params["nnodes"])
 reps = zeros(Int64, params["nnodes"]*params["nnodes"])
 
-acts[act_index] = model.population[1].net.lags[act_index]
-reps[rep_index] = model.population[1].net.lags[rep_index]
+acts[act_index] = net.lags[act_index]
+reps[rep_index] = net.lags[rep_index]
 
-envs = model.population[1].net.envpath.*model.population[1].net.envlag
+envs = net.envpath .* net.envlag
 
 draw4node(reps, acts, envs, net.gates, now)
