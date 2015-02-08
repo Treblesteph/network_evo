@@ -57,8 +57,8 @@ h1 = net2hash(model.population[1].net)
 # clockq = EvolveClock.should_be_a_clock(params)
 # troein = EvolveClock.create_troein_1D(params)
 
-plotConcs(params, model.population[1].net, now)
-# plotConcs(params, clockq, now)
+plotConcs(model.population[1].net, params, now)
+# plotConcs(clockq, params, now)
 
 #plotFitness(model.meantop10, model.gen_num, now)
 
