@@ -46,6 +46,8 @@ end
 #      the population remains more diverse.
 
 function fitness(net::Network, params::Dict)
+  n_paths = length(find(x -> sum(x) != 0, net.paths))
+
   gene1 = net.concseries[:, 1]
   gene2 = net.concseries[:, 2]
 
@@ -100,7 +102,8 @@ function fitness(net::Network, params::Dict)
     allG1fitness = [allG1fitness, thisG1fitness]
     allG2fitness = [allG2fitness, thisG2fitness]
   end
-  score =mean([allG1fitness, allG2fitness])
+  score = mean([allG1fitness, allG2fitness]) + n_paths/1000
+
 end
 
 function troeinfit(net::Network, params::Dict)
