@@ -22,7 +22,7 @@ function set_parameters()
   envlag_std = Int64[100]
 
   # Generation threshold, under which all gene-gene paths are fixed on.
-  pathson = Int64[2]
+  pathson = Int64[250]
 
   # Percent of population killed off and replaced
   # (through reproduction) each generation.
@@ -37,8 +37,8 @@ function set_parameters()
   stopthreshold = Float64[1e-4]
   # Terminate after stopruns if no improvement in fitness for stopconsec
   # consecutive generations.
-  stopruns = Int64[5000]
-  stopconsec = Int64[100]
+  stopruns = Int64[3500]
+  stopconsec = Int64[1000]
 
   # Degree to which the worst day accounts for most of the fitness score.
   fitnessweight = Number[10]
