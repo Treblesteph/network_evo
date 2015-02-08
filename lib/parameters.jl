@@ -22,7 +22,7 @@ function set_parameters()
   envlag_std = Int64[100]
 
   # Generation threshold, under which all gene-gene paths are fixed on.
-  pathson = Int64[250]
+  pathson = Int64[2]
 
   # Percent of population killed off and replaced
   # (through reproduction) each generation.
