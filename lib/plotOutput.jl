@@ -1,29 +1,14 @@
 using DataFrames
 using Gadfly
 
-function plotConcs(params::Dict, net, filename)
+import NetworkSimulation.Network
 
-  concframe = DataFrame()
-  concframe[:time] = (1:4 * 24 * 60) / 60
-  concframe[:gene1] = net.concseries[:, 1]
-  concframe[:gene2] = net.concseries[:, 2]
-  concframe[:gene3] = net.concseries[:, 3]
-  concframe[:gene4] = net.concseries[:, 4]
-
-  g1colour = "mediumturquoise"
-  # g2colour = "orchid"
-  # g3colour = "dodgerblue"
-  # g4colour = "coral"
-  dawncolour = "palegoldenrod"
-  daycolour = "cornsilk"
-  duskcolour = "lightgrey"
-  nightcolour = "azure2"
-
-  colourscheme = [g1colour, dawncolour, daycolour, duskcolour, nightcolour]
+function setShadeFrame(net::Network, params::Dict)
 
   days = params["envsignal"]
   dawns = params["gene1fit"]
   dusks = params["gene2fit"]
+
   daysstarts = (dawns[:, size(dawns, 2)] + 1) / 60
   dusksends = dusks[:, size(dusks, 2)] / 60
   daysends = (dusks[:, 1] - 1) / 60
@@ -52,25 +37,87 @@ function plotConcs(params::Dict, net, filename)
   shadeframe[:row] = repeat([1, 2, 3, 4], inner = [(convert(Int64,
                             length(shadeframe[:y]) / 4))])
 
+  return shadeframe
+
+end
+
+function setColours()
+
+  g1colour = "mediumturquoise"
+  # g2colour = "orchid"
+  # g3colour = "dodgerblue"
+  # g4colour = "coral"
+  dawncolour = "palegoldenrod"
+  daycolour = "cornsilk"
+  duskcolour = "lightgrey"
+  nightcolour = "azure2"
+
+  colourscheme = [g1colour, dawncolour, daycolour, duskcolour, nightcolour]
+
+end
+
+function setConcFrame(net::Network)
+  concframe = DataFrame()
+
+  concframe[:time] = (1:4 * 24 * 60) / 60
+  concframe[:gene1] = net.concseries[:, 1]
+  concframe[:gene2] = net.concseries[:, 2]
+  concframe[:gene3] = net.concseries[:, 3]
+  concframe[:gene4] = net.concseries[:, 4]
+
   concframe = stack(concframe, 2:ncol(concframe))
   rename!(concframe, :value, :gene)
-  plot1 = plot(Scale.x_continuous(minvalue = 0, maxvalue = 96),
+  return concframe
+end
+
+function plotConcs(net::Network, params::Dict, filename::String)
+
+  colourscheme = setColours()
+
+  concframe = setConcFrame(net)
+
+  shadeframe = setShadeFrame(net, params)
+
+  plot1 = plot(Scale.x_continuous(minvalue = 0,
+                                  maxvalue = 24*params["alldays"]),
                Scale.y_continuous(minvalue = 0, maxvalue = 1),
                Geom.subplot_grid(
-                 layer(concframe, x = "time", y = "gene",
-                       color = "variable", ygroup = "variable",
-                       Geom.line),
-                 layer(shadeframe, xmin = "starts", xmax = "ends",
-                       y = "y", ygroup = "row",
-                       Geom.bar(position=:dodge),
-                       color = repeat(["dawns", "dusks", "days", "nights"],
-                                       outer = [16])),
-                  Scale.color_discrete_manual(colourscheme...)))
+                layer(concframe, x = "time", y = "gene",
+                      color = "variable", ygroup = "variable",
+                      Geom.line),
+                layer(shadeframe, xmin = "starts", xmax = "ends",
+                      y = "y", ygroup = "row",
+                      Geom.bar(position=:dodge),
+                      color = repeat(["dawns", "dusks", "days", "nights"],
+                                     outer = [16])),
+                Scale.color_discrete_manual(colourscheme...)))
 
   draw(PDF("../runs/plot$(filename).pdf", 12inch, 6inch), plot1)
 end
 
-function plotFitness(fitnesses, xmax, filename)
+function plotConcs(net::Network, params::Dict)
+
+  colourscheme = setColours()
+
+  concframe = setConcFrame(net)
+
+  shadeframe = setShadeFrame(net, params)
+
+  plot(Scale.x_continuous(minvalue = 0, maxvalue = 24*params["alldays"]),
+       Scale.y_continuous(minvalue = 0, maxvalue = 1),
+       Geom.subplot_grid(
+        layer(concframe, x = "time", y = "gene",
+              color = "variable", ygroup = "variable", Geom.line),
+        layer(shadeframe, xmin = "starts", xmax = "ends",
+              y = "y", ygroup = "row",
+              Geom.bar(position=:dodge),
+              color = repeat(["dawns", "dusks", "days", "nights"],
+                             outer = [16])),
+        Scale.color_discrete_manual(colourscheme...)))
+
+end
+
+function plotFitness(fitnesses, xmax, filename::String)
   maxfit = max(fitnesses...)
 
   plot1 = plot(x = 1:xmax, y = fitnesses[1:xmax], Geom.line,
