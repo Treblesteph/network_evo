@@ -307,17 +307,6 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                          arrowcol))
 
   drawnenvs[3] = compose(context(),
-                        (context(), # gene 3
-                         line([(p5, canvas - d3), (p5, p7)]),
-                         linewidth(1mm),
-                         pathcol),
-                        (context(),
-                         polygon([(p5, c2 + rad),
-                                  (p5 - d2, p7 + d1 + d2),
-                                  (p5 + d2, p7 + d1 + d2)]),
-                         arrowcol))
-
-  drawnenvs[4] = compose(context(),
                         (context(), # gene 4
                          line([(p9, canvas - d3), (p9, p7)]),
                          linewidth(1mm),
@@ -326,6 +315,17 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                          polygon([(p9, c2 + rad),
                                   (p9 - d2, p7 + d1 + d2),
                                   (p9 + d2, p7 + d1 + d2)]),
+                         arrowcol))
+
+  drawnenvs[4] = compose(context(),
+                        (context(), # gene 3
+                         line([(p5, canvas - d3), (p5, p7)]),
+                         linewidth(1mm),
+                         pathcol),
+                        (context(),
+                         polygon([(p5, c2 + rad),
+                                  (p5 - d2, p7 + d1 + d2),
+                                  (p5 + d2, p7 + d1 + d2)]),
                          arrowcol))
 
   compose(drawnenvs[find(x -> x > 0, envs)]...)
