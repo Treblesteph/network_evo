@@ -22,25 +22,52 @@ import BoolNetwork.Network
 # ...
 # Sum of length j loops / j -this is because they will be counted from each of their containing nodes
 
+# Definition of a feedback loop:
+  # continuous path from node k, back to node k
+  # no path traversed more than once
+  # must not contain any sub-cycle (may be easiest to prune supercycles at the end)
+  # must not be congruent to any other cycle (divide count for cycle length m by m
+  #                                           or not enumerate in the first place)
+
+# Terminate conditions
+  # if chain[1] == chain[end]
+  # or only unexplored paths in row are (0,0)
+
 function count_cycles(net::Network, params::Dict)
 
   activepaths = get_active_paths(net, params)
 
-  cycles::Array{Array{Int64]}[]
+  cycles::Array{Array{Int64}}
 
   for n in 1:params["nnodes"]     # Looping over each node.
 
-    find_cycles_from(n)
+    explorer = @task find_cycles_from(n)
+    cycles = consume(explorer)
 
   end
 end
 
+# routematrix will be nnodes x nnodes matrix with ones entered into paths
+# that have been traversed already.
+# routearray will be an array with the list of nodes in the current route
 
-function find_cycles_from(node::Int64)
-  for m in 1:params["nnodes"]   # Looping over all outgoing paths.
+function find_cycles_from(node::Int64,
+  routematrix = zeros(Int64, params["nnodes"], params["nnodes"]),
+  routearray = Int64[])
+  for m in 1:params["nnodes"] # Looping over all outgoing paths.
 
+    # If the path is active, and has not already been traversed:
+    if (activepaths[node, m] != (0, 0)) && routematrix[node, m] == 0
+      push!(routearray, activepaths[node, m])
+      routematrix[node, m] = 1
+      find_cycles_from(m, copy(routematrix), copy(routearray))
+    end
+    if activepaths[node, m] == routearray[1]
+      produce(routearray)
+    end
   end
 end
+
 
 function get_active_paths(net::Network, params::Dict)
 
