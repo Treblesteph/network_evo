@@ -239,10 +239,10 @@ function drawpaths(paths::Array{Int64}, c1, c2, canvas, rad)
                            pathcolour) # From 2 to 3.
 
   drawnpaths[11] = (context(),
-                           curve([(p1, c2), (p1 - d3, p7 + d3)],
-                                 [(p1 - rad + d1 + d2, c2), (p1 + d2, p7 + rad)],
-                                 [(p1 - rad, p7 - d2), (c1, p7 + rad - d1 - d2)],
-                                 [(p1 - d3, p7 + d3), (c1, p7)]),
+                           curve([(p7, c2), (p7 + d3, p7 + d3)],
+                                 [(p7 + rad - d1 - d2, c2), (p7 - d2, p7 + rad)],
+                                 [(p7 + rad, p7 - d2), (c2, p7 + rad - d1 - d2)],
+                                 [(p7 + d3, p7 + d3), (c2, p7)]),
                            fill(nothing), linewidth(1mm),
                            pathcolour) # From 3 to 3.
 
@@ -267,10 +267,10 @@ function drawpaths(paths::Array{Int64}, c1, c2, canvas, rad)
                            pathcolour) # From 3 to 4.
 
   drawnpaths[16] = (context(),
-                           curve([(p7, c2), (p7 + d3, p7 + d3)],
-                                 [(p7 + rad - d1 - d2, c2), (p7 - d2, p7 + rad)],
-                                 [(p7 + rad, p7 - d2), (c2, p7 + rad - d1 - d2)],
-                                 [(p7 + d3, p7 + d3), (c2, p7)]),
+                           curve([(p1, c2), (p1 - d3, p7 + d3)],
+                                 [(p1 - rad + d1 + d2, c2), (p1 + d2, p7 + rad)],
+                                 [(p1 - rad, p7 - d2), (c1, p7 + rad - d1 - d2)],
+                                 [(p1 - d3, p7 + d3), (c1, p7)]),
                            fill(nothing), linewidth(1mm),
                            pathcolour) # From 4 to 4.
 
