@@ -6,7 +6,7 @@ function set_parameters()
   alldays = Int64[4]
   popsize = Int64[50]
   nnodes = Int64[4]
-  maxlag = Int64[60*12]
+  maxlag = Int64[60*14]
   minlag = Int64[5]
 
   #--- Mutation rates
