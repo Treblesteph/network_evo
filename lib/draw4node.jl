@@ -1,5 +1,21 @@
 using Compose
 using Color
+import BoolNetwork.Network
+
+function draw4node(net::Network, params::Dict, filename::String)
+  act_index = find(x -> findfirst(x, 1) != 0, net.paths)
+  rep_index = find(x -> findfirst(x, -1) != 0, net.paths)
+
+  acts = zeros(Int64, params["nnodes"]*params["nnodes"])
+  reps = zeros(Int64, params["nnodes"]*params["nnodes"])
+
+  acts[act_index] = net.lags[act_index]
+  reps[rep_index] = net.lags[rep_index]
+
+  envs = net.envpath .* net.envlag
+
+  draw4node(reps, acts, envs, net.gates, filename)
+end
 
 function draw4node(reps::Array{Int64}, acts::Array{Int64},
                    envs::Array{Int64}, gates::Array{Bool}, filename::String)
