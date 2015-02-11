@@ -1,3 +1,5 @@
+module netAnalysis
+
 import BoolNetwork.Network
 importall Base
 
@@ -147,3 +149,5 @@ function prunecycles!(cycles::Array{Array{Int64}})
   return cycles
 
 end
+
+end # netAnalysis module
