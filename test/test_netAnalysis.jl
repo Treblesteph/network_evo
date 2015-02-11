@@ -7,14 +7,28 @@ import parameters
 
 params = set_parameters()
 
-testnethashes = [{"net" =>
-                  "params" =>
-                  "ncycles" =>
-                  "behaviour" => }
-                 {"net" =>
-                  "params" =>
-                  "ncycles" =>
-                  "behaviour" => }]
+testnethashes = [{"net" => Network([0,0,5,0,5,0,0,0,0,5,0,0,0,0,0,0],
+                                   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                                   [0,0,0,0],
+                                   [0,0,0,0],
+                                   params),
+                  "params" => params,
+                  "ncycles" => 1,
+                  "behaviour" => "Testing for a simple network with one
+                                  route including activation paths from
+                                  1 to 2 to 3 and back to 1 - this should
+                                  be counted as one cycle."}
+                 {"net" => Network([5,0,0,5,0,0,0,0,5,0,0,0,0,0,5,0],
+                                   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                                   [0,0,0,0],
+                                   [0,0,0,0],
+                                   params),
+                  "params" => params,
+                  "ncycles" => 2
+                  "behaviour" => "Testing for a simple network with one
+                                  positive feedback loop (on gene 1),
+                                  and another cyclic (of activations)
+                                  from 1 to 3 to 4 and back to 1."}]
 
 testhashes = [{"activepaths" => [(0,0) (1,2) (0,0) (0,0);
                                  (0,0) (0,0) (2,3) (0,0);
