@@ -68,6 +68,38 @@ type Network
               gates, generation, [])
 end
 
+# Outer Network constructor for deterministic, predefined paths
+
+function Network(acts::Array{Int64}, reps::Array{Int64}, gates::Array{Bool},
+                 envs::Array{Int64}, params::Dict)
+
+  paths = [Int64[] for i in 1:(params["nnodes"]^2)]
+  transmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
+
+  for i in find(x -> x > 0, acts)
+    paths[i] = ones(Int64, params["allmins"])
+  end
+
+  for i in find(x -> x > 0, reps)
+    paths[i] = -1 * ones(Int64, params["allmins"])
+  end
+
+  lags = acts + reps
+
+  envpath = zeros(Bool, params["nnodes"])
+
+  envpath[find(x -> x > 0, envs)] = 1
+
+  envlag = envs
+
+  net = Network(paths, transmats, envpath, lags, envlag, gates, 1)
+
+  net.concseries = runsim(net, params)
+
+  return net
+
+end
+
 #-- Outer Network constructor for predefined interactions.
 
 function Network(params::Dict)
