@@ -46,7 +46,9 @@ end
 #      the population remains more diverse.
 
 function fitness(net::Network, params::Dict)
-  n_paths = length(find(x -> sum(x) != 0, net.paths))
+  n_genepaths = length(find(x -> sum(x) != 0, net.paths))
+  n_envpaths = length(find(x -> x > 0, net.envpath))
+  n_paths = n_genepaths + n_envpaths
 
   gene1 = net.concseries[:, 1]
   gene2 = net.concseries[:, 2]
