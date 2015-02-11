@@ -1,11 +1,20 @@
+module testNetAnalysis
+using FactCheck
+include("netAnalysis.jl")
+import parameters
+
 # Tests for find_cycles_from
+
+params = set_parameters()
 
 testnethashes = [{"net" =>
                   "params" =>
-                  "ncycles" => }
+                  "ncycles" =>
+                  "behaviour" => }
                  {"net" =>
                   "params" =>
-                  "ncycles" => }]
+                  "ncycles" =>
+                  "behaviour" => }]
 
 testhashes = [{"activepaths" => [(0,0) (1,2) (0,0) (0,0);
                                  (0,0) (0,0) (2,3) (0,0);
@@ -73,3 +82,5 @@ end
 test_find_cycles(testhashes)
 
 test_count_cycles(testnethashes)
+
+end # testNetAnalysis module
