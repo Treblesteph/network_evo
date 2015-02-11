@@ -117,13 +117,16 @@ function isless(lhs::Array, rhs::Array)
 end
 
 function prunecycles!(cycles::Array{Array{Int64}})
-  # TODO: Make new method for isless that compares arrays by their length.
+
   sort!(cycles, ; rev = true)
+  # Since cycles are now in ascending order, only need to check
+  # each one with the following ones to see if it is a subset.
   for i in 1:length(cycles) - 1
     for j in (i + 1):length(cycles)
-      k = 1
       for k in 1:length(cycles[i])
-        if find(x -> x == cycles[i][k]) == []
+        if (k == 1) && (find(x -> x == cycles[i][k]) != [])
+        elseif (k > 1) && in(cycles[j][k], find(x -> x == cycles[i][k]) != [])
+        else
           break
 
 
@@ -144,56 +147,3 @@ function prunecycles!(cycles::Array{Array{Int64}})
   return cycles
 
 end
-
-# Array of hashes of size 3 for tests:
-  # activepaths
-  # cycles output
-  # description of behaviour - what is it testing for?
-    # test that a simple non-cycle path does not get detected as a cycle
-    # test that a simple cycle does get detected as a cycle
-
-testhash = [{"activepaths" => [(0,0) (1,2) (0,0) (0,0);
-                               (0,0) (0,0) (2,3) (0,0);
-                               (0,0) (0,0) (0,0) (0,0);
-                               (0,0) (0,0) (0,0) (0,0)],
-             "cyclesout" => [],
-             "behaviour" => "Tests that a simple non-cyclic path does
-                             not get detected as a cycle."},
-            {"activepaths" => [(0,0) (1,2) (0,0) (0,0);
-                               (0,0) (0,0) (2,3) (0,0);
-                               (3,1) (0,0) (0,0) (0,0);
-                               (0,0) (0,0) (0,0) (0,0)],
-             "cyclesout" => [[1, 2, 2, 3, 3, 1]],
-             "behaviour" => "Tests that one simple cyclic path does
-                             get detected as a cycle."},
-            {"activepaths" => [(1,1) (1,2) (0,0) (0,0);
-                               (0,0) (0,0) (2,3) (0,0);
-                               (3,1) (0,0) (0,0) (0,0);
-                               (0,0) (0,0) (0,0) (0,0)],
-             "cyclesout" => [[1, 1], [1, 2, 3, 3, 1]],
-             "behaviour" => "Tests that an autoregulation and a simple
-                             cyclic path do not get overcounted."}]
-
-function test_find_cycles(testhash::Array{Dict})
-
-  cycles = Array{Int64}[]
-
-  routematrix = zeros(Int64, 4, 4)
-  routearray = Int64[]
-
-  activepaths = [(1,1) (1,2) (0,0) (0,0);
-                 (0,0) (0,0) (2,3) (0,0);
-                 (3,1) (0,0) (0,0) (0,0);
-                 (0,0) (0,0) (0,0) (0,0)]
-
-  explorer = @task find_cycles_from(1, routematrix, routearray,
-                                    4, activepaths)
-
-  while !istaskdone(explorer)
-    cycle = consume(explorer)
-    cycle != nothing && push!(cycles, cycle)
-  end
-  println("cycles:\n$cycles")
-end
-
-test_find_cycles()
