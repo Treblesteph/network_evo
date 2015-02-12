@@ -300,6 +300,13 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
   p9 = c2 - (d1 + d2) # 0.67
   p10 = c2 + (d1 + d2) # 0.73
 
+  s1 = canvas/15
+  s2 = canvas/40
+  s3 = s1 - s2*2
+  s4 = s1 - s2*1.1
+  s5 = s1 + s2*2
+  s6 = s2 + s2*1.1
+
   drawnenvs[1] = compose(context(),
                         (context(), # gene 1
                          line([(p5, d3), (p5, p1)]),
@@ -309,7 +316,17 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                          polygon([(p5, c1 - rad),
                                   (p5 - d2, p1 - d1 - d2),
                                   (p5 + d2, p1 - d1 - d2)]),
-                         arrowcol))
+                         arrowcol),
+                        (context(),
+                         circle(s1, s1, s2),
+                         arrowcol),
+                        (context(),
+                         line(([(s3, s1), (s4, s1)]),
+                              ([(s5, s1), (s6, s1)]),
+                              ([(s1, s3), (s1, s4)]),
+                              ([(s1, s5), (s1, s6)])),
+                         linewidth(1mm),
+                         pathcol))
 
   drawnenvs[2] = compose(context(),
                         (context(), # gene 2
