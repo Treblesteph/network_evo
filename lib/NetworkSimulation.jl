@@ -1,8 +1,6 @@
-module NetworkSimulation
+import Multichoose.multichoose
 
-import Multichoose.multichoose, BoolNetwork.Network
-
-export Network, runsim
+export runsim
 
 # Performs a dynamic simuation for a network which is encoded by a matrix
 # of interactions (where P_ij specifies the path from node i to node j).
@@ -253,5 +251,3 @@ function runsim(net::Network, params::Dict)
   end
   concs = concs[maxlag+1:end, :]
 end
-
-end # NetworkSimulation
