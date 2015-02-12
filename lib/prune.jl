@@ -1,4 +1,4 @@
-import NetworkSimulation.runsim, BoolNetwork.Network, EvolveClock.fitness
+import BoolNetwork.runsim, BoolNetwork.Network, EvolveClock.fitness
 
 # Pruning fittest evolved networks in order to check for superfluous
 # interactions (that do not contribute to fitness).

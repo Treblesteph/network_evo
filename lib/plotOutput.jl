@@ -1,7 +1,7 @@
 using DataFrames
 using Gadfly
 
-import NetworkSimulation.Network
+import BoolNetwork.Network
 
 function setShadeFrame(net::Network, params::Dict)
 
