@@ -1,6 +1,6 @@
 module EvolveClock
 
-import NetworkSimulation.runsim,
+import BoolNetwork.runsim,
        BoolNetwork.Network,
        GeneticAlgorithms.Entity
 
