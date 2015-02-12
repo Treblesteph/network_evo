@@ -2,8 +2,6 @@ module BoolNetwork
 
 using Markov
 
-using NetworkSimulation
-
 export Network
 
 # Generating a population of random boolean networks that are defined by their
@@ -68,20 +66,36 @@ type Network
               gates, generation, [])
 end
 
+include("NetworkSimulation.jl")
+
 # Outer Network constructor for deterministic, predefined paths
 
 function Network(acts::Array{Int64}, reps::Array{Int64}, gates::Array{Bool},
                  envs::Array{Int64}, params::Dict)
 
+  if !(length(acts) == length(reps) == (params["nnodes"]^2))
+    error("Acts and reps must be nnodes^2 long.")
+  end
+
+  for lags in [acts, reps, envs]
+    if any(x -> x != 0 && x < params["minlag"], lags)
+      error("Minimum lag values for acts are less than minlag")
+    elseif any(x -> x > params["maxlag"], lags)
+      error("Maximum lag values for envs are greater than maxlag")
+    end
+  end
+
   paths = [Int64[] for i in 1:(params["nnodes"]^2)]
   transmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
 
-  for i in find(x -> x > 0, acts)
-    paths[i] = ones(Int64, params["allmins"])
-  end
-
-  for i in find(x -> x > 0, reps)
-    paths[i] = -1 * ones(Int64, params["allmins"])
+  for i in 1:(params["nnodes"]^2)
+    if acts[i] > 0
+      paths[i] = ones(Int64, params["allmins"])
+    elseif reps[i] > 0
+      paths[i] = -1 * ones(Int64, params["allmins"])
+    else
+      paths[i] = zeros(Int64, params["allmins"])
+    end
   end
 
   lags = acts + reps
