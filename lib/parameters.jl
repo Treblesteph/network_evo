@@ -1,6 +1,8 @@
 module Parameters
 
-import NetworkSimulation.make_decision_mat
+import BoolNetwork.make_decision_mat
+
+export set_parameters
 
 function set_parameters()
   alldays = Int64[4]
