@@ -71,8 +71,13 @@ function find_cycles_from(node::Int64, routematrix, routearray,
 
   for m in 1:nnodes # Looping over all outgoing paths.
 
-    # If the path is active, and has not already been traversed:
-    if (activepaths[node, m] != (0, 0)) && routematrix[node, m] == 0
+    # If the path is active, and has not already been traversed,
+    # and if either routearray is empty, or the first element is
+    # not equal to the last (i.e. not already a cycle):
+    if (activepaths[node, m] != (0, 0)) &&
+       (routematrix[node, m] == 0) &&
+       (routearray == [] ||
+       routearray[1] != routearray[end])
       thisroutearr = copy(routearray)
       push!(thisroutearr, activepaths[node, m]...)
       thisroutemat = copy(routematrix)
