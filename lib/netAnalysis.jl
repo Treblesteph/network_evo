@@ -45,8 +45,6 @@ function count_cycles(net::Network, params::Dict)
       traversed[j, :] = 1
     end
 
-    println("traversed before find_cycles\n$traversed")
-
     explorer = @task find_cycles_from(n, traversed, routearray,
                                       params["nnodes"], activepaths)
 
@@ -84,12 +82,13 @@ function find_cycles_from(node::Int64, traversed, routearray,
       find_cycles_from(m, thistraversed, thisroutearr, nnodes, activepaths)
     end
     if length(routearray) > 0 && activepaths[node, m][2] == routearray[1]
+      println("marker")
       if routearray[1] == routearray[end]
         println("case 1")
         produce(routearray)
-      else
-        println("case 2")
-        produce([routearray, activepaths[node, m]...])
+      # else
+      #   println("case 2")
+      #   produce([routearray, activepaths[node, m]...])
       end
     end
   end
