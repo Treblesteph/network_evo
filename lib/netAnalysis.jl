@@ -54,7 +54,9 @@ function count_cycles(net::Network, params::Dict)
     end
 
   end
-  println("cycles:\n$cycles")
+  println("cycles before prune:\n$cycles")
+  cycles = pruneroutes!(cycles)
+  println("cycles after prune:\n$cycles")
   return length(cycles)
 end
 
@@ -123,5 +125,29 @@ function isless(lhs::Array, rhs::Array)
   length(lhs) < length(rhs)
 end
 
+function pruneroutes!(routes)
+
+  routes = sort!(routes)
+
+  for r in 1:(length(routes) - 1)
+    len = length(routes[r])
+
+    for i in (r+1):(length(routes))
+      subsets = [Int64[] for ii in 1:(length(routes[i]) - len + 1)]
+      println("subsets: $subsets")
+      for k in 1:(length(routes[i]) - len + 1)
+        subsets[k] = [routes[i][k:(k + len - 1)]]
+      end
+      println("subsets: $subsets")
+      println("routes[r]:$(routes[r])")
+      if any(x -> x == routes[r], subsets)
+        deleteat!(routes, (r + 1))
+      end
+    end
+  end
+
+  return routes
+
+end
 
 end # netAnalysis module
