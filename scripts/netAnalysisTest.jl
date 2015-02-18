@@ -28,6 +28,8 @@ else
   print(" FAILED!")
 end
 
+# Cycles [[1,1], [1,2,3,1]]
+
 #-------------------- Test case 2 --------------------#
 println("\nTest 2...")
 
@@ -46,6 +48,8 @@ if count2 == 2
 else
   print(" FAILED!")
 end
+
+# Cycles [[1,2,3,4,1], [2,3,4,2]]
 
 #-------------------- Test case 3 --------------------#
 println("\nTest 3...")
@@ -66,6 +70,8 @@ else
   print(" FAILED!")
 end
 
+# Cycles [[1,3,4,1], [1,3,4,2,1], [4,4]]
+
 #-------------------- Test case 4 --------------------#
 println("\nTest 4...")
 
@@ -85,6 +91,8 @@ else
   print(" FAILED!")
 end
 
+# Cycles [[1,1], [2,2], [3,3], [4,4], [2,4,2]]
+
 #-------------------- Test case 5 --------------------#
 println("\nTest 5...")
 
@@ -103,3 +111,5 @@ if count5 == 4
 else
   print(" FAILED!")
 end
+
+# Cycles [[1,1], [2,2], [3,3], [4,4]]
