@@ -45,6 +45,9 @@ function count_cycles(net::Network, params::Dict)
       traversed[j, :] = 1
     end
 
+    # Setting cycle to start on current node.
+    routearray = [n]
+
     explorer = @task find_cycles_from(n, traversed, routearray,
                                       params["nnodes"], activepaths)
 
@@ -69,28 +72,20 @@ function find_cycles_from(node::Int64, traversed, routearray,
 
   for m in 1:nnodes # Looping over all outgoing paths.
 
-    # If the path is active, and has not already been traversed,
-    # and if either routearray is empty, or the first element is
-    # not equal to the last (i.e. not already a cycle):
+    # If the path is active, and has not already been traversed, and if
+    # the first element is not equal to the last (i.e. not already a cycle):
     if (activepaths[node, m] != (0, 0)) &&
        (traversed[node, m] == 0) &&
-       (routearray == [] ||
-       routearray[1] != routearray[end])
+       ((routearray[1] != routearray[end]) || length(routearray) == 1)
       thisroutearr = copy(routearray)
-      push!(thisroutearr, activepaths[node, m]...)
+      push!(thisroutearr, activepaths[node, m][2])
       thistraversed = copy(traversed)
       thistraversed[node, m] = 1
-      println("traversed matrix:\n$thistraversed")
       find_cycles_from(m, thistraversed, thisroutearr, nnodes, activepaths)
     end
     if length(routearray) > 0 && activepaths[node, m][2] == routearray[1]
-      println("marker")
-      if routearray[1] == routearray[end]
-        println("case 1")
-        produce(routearray)
-      # else
-      #   println("case 2")
-      #   produce([routearray, activepaths[node, m]...])
+      if (routearray[1] == routearray[end]) || (length(routearray) != 1)
+        produce([routearray, activepaths[node, m][2]])
       end
     end
   end
@@ -130,22 +125,22 @@ function pruneroutes!(routes)
   routes = sort!(routes)
 
   for r in 1:(length(routes) - 1)
-    len = length(routes[r])
+    if routes[r] != [0]
+      len = length(routes[r])
 
-    for i in (r+1):(length(routes))
-      subsets = [Int64[] for ii in 1:(length(routes[i]) - len + 1)]
-      println("subsets: $subsets")
-      for k in 1:(length(routes[i]) - len + 1)
-        subsets[k] = [routes[i][k:(k + len - 1)]]
-      end
-      println("subsets: $subsets")
-      println("routes[r]:$(routes[r])")
-      if any(x -> x == routes[r], subsets)
-        deleteat!(routes, (r + 1))
+      for i in (r+1):(length(routes))
+        subsets = [Int64[] for ii in 1:(length(routes[i]) - len + 1)]
+        for k in 1:(length(routes[i]) - len + 1)
+          subsets[k] = [routes[i][k:(k + len - 1)]]
+        end
+        if any(x -> x == routes[r], subsets)
+          routes[i] = [0]
+        end
       end
     end
   end
 
+  deleteat!(routes, find(p -> p == [0], routes))
   return routes
 
 end
