@@ -63,6 +63,31 @@ function count_cycles(net::Network, params::Dict)
   return length(cycles)
 end
 
+function countrepsacts(net::Network, cycle::Array{Int64}, nnodes)
+
+  cyclepaths = [Int64[] for i in 1:(length(cycle) - 1)]
+  for i in 1:(length(cycle) - 1)
+    cyclepaths[i] = [cycle[i:(i + 1)]]
+  end
+
+  actindex = find(x -> findfirst(x, 1) != 0, net.paths)
+  repindex = find(x -> findfirst(x, -1) != 0, net.paths)
+
+  activepaths = get_active_paths(net, nnodes)
+
+  actpaths = [Int64[] for i in 1:length(actindex)]
+  reppaths = [Int64[] for i in 1:length(repindex)]
+
+  for i in 1:length(actindex)
+    actpaths[i] = [activepaths[i]...]
+  end
+
+  for i in 1:length(repindex)
+    reppaths[i] = [activepaths[i]...]
+  end
+
+end
+
 # traversed will be nnodes x nnodes matrix with ones entered into paths
 # that have been traversed already.
 # routearray will be an array with the list of nodes in the current route
