@@ -1,5 +1,9 @@
 module ClockParameters
 
+import BoolNetwork.repression,
+       BoolNetwork.activation,
+       BoolNetwork.noInteraction
+
 export add_clock_params!,
        single_pp!,
        multi_pp!,
@@ -27,7 +31,7 @@ function add_clock_params!(params::Dict, envconditions::Function)
   end
 
   params["interacttypes"] = [repression, activation, noInteraction]
-  params["envsignal"] = days
+
   params["gene1fit"] = dawns
   params["gene2fit"] = dusks
 end
@@ -36,53 +40,75 @@ function single_pp!(params::Dict)
 
   lightperiod = 12
   alldays = Int64[4]
+  params["alldays"] = alldays[1]
   daytime = lightperiod * 60
 
-  days = zeros(Int64, alldays, daytime)
+  days = zeros(Int64, params["alldays"], daytime)
 
-  for t = 1:alldays # Converting to array of minutes.
-    days[t, :] = (1 + 60 * 24 * (t - 1)):(daytime + 24 * 60 * (t - 1))
+  for t = 1:params["alldays"] # Converting to array of minutes.
+    firstminute = 1 + 60*24*(t - 1)
+    lastminute = (daytime + 24*60*(t - 1))
+    days[t, :] = firstminute:lastminute
   end
 
   params["alldays"] = alldays[1]
+  params["envsignal"] = days
 
   return params
 end
 
 function multi_pp!(params::Dict)
 
+  ndays = 4
   nphotoperiod = 9
   minlightperiod = 6
   maxlightperiod = 18
+  diff = (maxlightperiod - minlightperiod)/(nphotoperiod - 1)
+  daytime = zeros(Int64, nphotoperiod)
+  for j in 1:nphotoperiod
+    daytime[j] = (minlightperiod + diff*(j - 1)) * 60
+  end
 
-  alldays = Int64[4 * nphotoperiod]
-
-  days = [zeros(Int64, alldays/nphotoperiod, daytime[k]) for k in 1:nphotoperiod]
-
+  alldays = Int64[ndays * nphotoperiod]
   params["alldays"] = alldays[1]
+
+  days = [zeros(Int64, convert(Int64, round(params["alldays"]/nphotoperiod)),
+          daytime[k]) for k in 1:nphotoperiod]
+
+  counter = 1
+  for t = 1:ndays:params["alldays"]
+    for u = 1:ndays
+      firstminute = 1 + 60*24*(t - 1)
+      lastminute = (daytime[counter] + 24*60*(t - 1))
+      days[t + u] = [firstminute:lastminute]
+    end
+    counter += 1
+  end
+
+  params["envsignal"] = days
 
   return params
 end
 
-function single_pp_noise!(params::Dict)
-
-  params["alldays"] = alldays[1]
-
-  return params
-end
-
-function multi_pp_noise!(params::Dict)
-
-  params["alldays"] = alldays[1]
-
-  return params
-end
-
-function harvard_forest!(params::Dict)
-
-  params["alldays"] = alldays[1]
-
-  return params
-end
+# function single_pp_noise!(params::Dict)
+#
+#   params["alldays"] = alldays[1]
+#
+#   return params
+# end
+#
+# function multi_pp_noise!(params::Dict)
+#
+#   params["alldays"] = alldays[1]
+#
+#   return params
+# end
+#
+# function harvard_forest!(params::Dict)
+#
+#   params["alldays"] = alldays[1]
+#
+#   return params
+# end
 
 end # ClockParameters module
