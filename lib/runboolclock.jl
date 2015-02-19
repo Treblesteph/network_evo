@@ -10,14 +10,14 @@ import BoolNetwork.make_decision_mat,
        BoolNetwork.activation,
        BoolNetwork.noInteraction,
        BoolNetwork.net2hash,
-       ClockParameters
+       ClockParameters.add_clock_params!
 
 function runclock()
 
   tic()
   params = set_parameters()
-  add_clock_params!(params, single_pp!)
-  model = runga(params, EvolveClock; init_pop_size = 50, stop_after = 25000)
+  add_clock_params!(params, ClockParameters.single_pp!)
+  model = runga(params, EvolveClock; init_pop_size = 50, stop_after = 25)
   println()
   toc()
   now = strftime("%F_%H_%M", time())
