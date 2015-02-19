@@ -9,7 +9,8 @@ import BoolNetwork.make_decision_mat,
        BoolNetwork.repression,
        BoolNetwork.activation,
        BoolNetwork.noInteraction,
-       BoolNetwork.net2hash
+       BoolNetwork.net2hash,
+       ClockParameters
 
 function runclock()
 
