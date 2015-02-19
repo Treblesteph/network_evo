@@ -5,7 +5,6 @@ import BoolNetwork.make_decision_mat
 export set_parameters
 
 function set_parameters()
-  alldays = Int64[4]
   popsize = Int64[50]
   nnodes = Int64[4]
   maxlag = Int64[60*14]
@@ -53,13 +52,11 @@ function set_parameters()
   # Default value of genes when there is no net input to them.
   defaulton = Bool[0]
 
-  allhours = alldays * 24
-  allmins = allhours * 60
+
 
   decisionhash::Dict{Array{Int64}, Bool} = make_decision_mat(nnodes[1], defaulton[1])
 
-  parameters::Dict{String, Any} = {"alldays" => alldays[1],
-                                   "popsize" => popsize[1],
+  parameters::Dict{String, Any} = {"popsize" => popsize[1],
                                    "nnodes" => nnodes[1],
                                    "maxlag" => maxlag[1],
                                    "minlag" => minlag[1],
@@ -81,8 +78,6 @@ function set_parameters()
                                    "fitnessweight" => fitnessweight[1],
                                    "parentselect" => parentselect[1],
                                    "defaulton" => defaulton[1],
-                                   "allhours" => allhours[1],
-                                   "allmins" => allmins[1],
                                    "decisionhash" => decisionhash}
 end
 
