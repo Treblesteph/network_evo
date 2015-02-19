@@ -25,6 +25,11 @@ importall Base
   # or only unexplored paths in row are (0,0)
 
 function count_cycles(net::Network, params::Dict)
+  cycles = get_cycles(net, params)
+  ncycles = length(cycles)
+end
+
+function get_cycles(net::Network, params::Dict)
 
   activepaths = get_active_paths(net, params["nnodes"])
 
@@ -60,7 +65,7 @@ function count_cycles(net::Network, params::Dict)
   println("cycles before prune:\n$cycles")
   cycles = pruneroutes!(cycles)
   println("cycles after prune:\n$cycles")
-  return length(cycles)
+  return cycles
 end
 
 function countrepsacts(net::Network, cycle::Array{Int64}, nnodes)
