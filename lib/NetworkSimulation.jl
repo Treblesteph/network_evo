@@ -186,7 +186,9 @@ function runsim(net::Network, params::Dict)
   # Making an array of length allmins which indicates whether the environmental
   # signal is on or off (because the argument envsignal is a list of indices).
   environ_signal::Array{Int64} = zeros(Int64, allmins)
-  environ_signal[params["envsignal"]] = 1
+  for pp in params["envsignal"]
+    environ_signal[pp] = 1
+  end
 
   # Extracting network properties for ease of use.
   paths::Array{Array{Int64}} = copy(net.paths)
