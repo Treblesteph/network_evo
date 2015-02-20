@@ -43,12 +43,12 @@ function single_pp!(params::Dict)
   params["alldays"] = alldays[1]
   daytime = lightperiod * 60
 
-  days = zeros(Int64, params["alldays"], daytime)
+  days = [Int64[] for k in 1:params["alldays"]]
 
   for t = 1:params["alldays"] # Converting to array of minutes.
     firstminute = 1 + 60*24*(t - 1)
     lastminute = (daytime + 24*60*(t - 1))
-    days[t, :] = firstminute:lastminute
+    days[t] = firstminute:lastminute
   end
 
   params["alldays"] = alldays[1]
@@ -72,23 +72,20 @@ function multi_pp!(params::Dict)
   alldays = Int64[ndays * nphotoperiod]
   params["alldays"] = alldays[1]
 
-  days = [zeros(Int64, convert(Int64, round(params["alldays"]/nphotoperiod)),
-          daytime[k]) for k in 1:nphotoperiod]
+  days = [Int64[] for k in 1:params["alldays"]]
 
-  counter = 1
-  for t = 1:ndays:params["alldays"]
-    for u = 1:ndays
-      firstminute = 1 + 60*24*(t - 1)
-      lastminute = (daytime[counter] + 24*60*(t - 1))
-      days[t + u] = [firstminute:lastminute]
-    end
-    counter += 1
+  for t = 1:params["alldays"]
+    firstminute = 1 + 60*24*(t - 1)
+    photoperiod = ceil(t / ndays)
+    lastminute = daytime[photoperiod] + 24*60*(t - 1)
+    days[t] = firstminute:lastminute
   end
 
   params["envsignal"] = days
 
   return params
 end
+
 
 # function single_pp_noise!(params::Dict)
 #
