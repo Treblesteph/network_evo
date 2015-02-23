@@ -20,22 +20,22 @@ function setShadeFrame(net::Network, params::Dict)
 
   startswrongorder = [dawnsstarts, daysstarts, dusksstarts, nightsstarts]
   endswrongorder = [dawnsends, daysends, dusksends, nightsends]
-  startsreshape = reshape(startswrongorder, 4, 4)
-  endsreshape = reshape(endswrongorder, 4, 4)
+  startsreshape = reshape(startswrongorder, params["alldays"], params["nnodes"])
+  endsreshape = reshape(endswrongorder, params["alldays"], params["nnodes"])
   startstranspose = transpose(startsreshape)
   endstranspose = transpose(endsreshape)
   starts = startstranspose[:]
   ends = endstranspose[:]
 
   shadeframe = DataFrame()
-  shadeframe[:starts] = repeat(starts, outer = [4])
-  shadeframe[:ends] = repeat(ends, outer = [4])
+  shadeframe[:starts] = repeat(starts, outer = [params["nnodes"]])
+  shadeframe[:ends] = repeat(ends, outer = [params["nnodes"]])
   shadeframe[:y] = repeat(ones(size(dawns, 1) +
                                size(dusks, 1) +
                                length(days) +
-                               length(days)), outer = [4])
-  shadeframe[:row] = repeat([1, 2, 3, 4], inner = [(convert(Int64,
-                            length(shadeframe[:y]) / 4))])
+                               length(days)), outer = [params["nnodes"]])
+  shadeframe[:row] = repeat([1:params["nnodes"]], inner = [(convert(Int64,
+                            length(shadeframe[:y]) / params["nnodes"]))])
 
   return shadeframe
 
@@ -56,11 +56,11 @@ function setColours()
 
 end
 
-function setConcFrame(net::Network)
+function setConcFrame(net::Network, params::Dict)
   concframe = DataFrame()
 
-  concframe[:time] = (1:4 * 24 * 60) / 60
-  concframe[:gene1] = net.concseries[:, 1]
+  concframe[:time] = (1:params["alldays"] * 24 * 60) / 60
+  concframe[:gene] = net.concseries[:, 1]
   concframe[:gene2] = net.concseries[:, 2]
   concframe[:gene3] = net.concseries[:, 3]
   concframe[:gene4] = net.concseries[:, 4]
@@ -74,7 +74,7 @@ function plotConcs(net::Network, params::Dict, filename::String)
 
   colourscheme = setColours()
 
-  concframe = setConcFrame(net)
+  concframe = setConcFrame(net, params)
 
   shadeframe = setShadeFrame(net, params)
 
@@ -89,7 +89,7 @@ function plotConcs(net::Network, params::Dict, filename::String)
                       y = "y", ygroup = "row",
                       Geom.bar(position=:dodge),
                       color = repeat(["dawns", "dusks", "days", "nights"],
-                                     outer = [16])),
+                                     outer = [params["alldays"]*params["nnodes"]])),
                 Scale.color_discrete_manual(colourscheme...)))
 
   draw(PDF("../runs/plot$(filename).pdf", 16inch, 6inch), plot1)
