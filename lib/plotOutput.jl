@@ -32,8 +32,8 @@ function setShadeFrame(net::Network, params::Dict)
   shadeframe[:ends] = repeat(ends, outer = [4])
   shadeframe[:y] = repeat(ones(size(dawns, 1) +
                                size(dusks, 1) +
-                               size(days, 1) +
-                               size(days, 1)), outer = [4])
+                               length(days) +
+                               length(days)), outer = [4])
   shadeframe[:row] = repeat([1, 2, 3, 4], inner = [(convert(Int64,
                             length(shadeframe[:y]) / 4))])
 
@@ -92,7 +92,7 @@ function plotConcs(net::Network, params::Dict, filename::String)
                                      outer = [16])),
                 Scale.color_discrete_manual(colourscheme...)))
 
-  draw(PDF("../runs/plot$(filename).pdf", 12inch, 6inch), plot1)
+  draw(PDF("../runs/plot$(filename).pdf", 16inch, 6inch), plot1)
 end
 
 function plotConcs(net::Network, params::Dict)
