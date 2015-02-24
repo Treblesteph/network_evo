@@ -2,7 +2,8 @@ using Compose
 using Color
 import BoolNetwork.Network
 
-function draw4node(net::Network, params::Dict, filename::String)
+function draw4node(net::Network, params::Dict,
+                   fitness::Float64, filename::String)
   act_index = find(x -> findfirst(x, 1) != 0, net.paths)
   rep_index = find(x -> findfirst(x, -1) != 0, net.paths)
 
@@ -14,11 +15,12 @@ function draw4node(net::Network, params::Dict, filename::String)
 
   envs = net.envpath .* net.envlag
 
-  draw4node(reps, acts, envs, net.gates, filename)
+  draw4node(reps, acts, envs, net.gates, filename, params)
 end
 
 function draw4node(reps::Array{Int64}, acts::Array{Int64},
-                   envs::Array{Int64}, gates::Array{Bool}, filename::String)
+                   envs::Array{Int64}, gates::Array{Bool},
+                   filename::String, fitness::Float64)
 
   canvas = 1        # Side length of square canvas
   c1 = 3*canvas/10  # Lower centre co-ordinate
@@ -35,7 +37,7 @@ function draw4node(reps::Array{Int64}, acts::Array{Int64},
            (context(), drawpaths(acts + reps, c1, c2, canvas, rad)),
            (context(), drawenvs(envs, c1, c2, canvas, rad)),
            (context(), drawgates(gates, c1, c2, canvas, rad)),
-           (context(), drawgeneric(canvas, c1, c2, rad)))
+           (context(), drawgeneric(canvas, c1, c2, rad, fitness)))
   end
 
   img = PNG("../runs/netpic_$(filename).png", 8inch, 8inch)
@@ -300,13 +302,6 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
   p9 = c2 - (d1 + d2) # 0.67
   p10 = c2 + (d1 + d2) # 0.73
 
-  s1 = canvas/15
-  s2 = canvas/40
-  s3 = s1 - s2*2
-  s4 = s1 - s2*1.1
-  s5 = s1 + s2*2
-  s6 = s2 + s2*1.1
-
   drawnenvs[1] = compose(context(),
                         (context(), # gene 1
                          line([(p5, d3), (p5, p1)]),
@@ -316,17 +311,7 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                          polygon([(p5, c1 - rad),
                                   (p5 - d2, p1 - d1 - d2),
                                   (p5 + d2, p1 - d1 - d2)]),
-                         arrowcol),
-                        (context(),
-                         circle(s1, s1, s2),
-                         arrowcol),
-                        (context(),
-                         line(([(s3, s1), (s4, s1)]),
-                              ([(s5, s1), (s6, s1)]),
-                              ([(s1, s3), (s1, s4)]),
-                              ([(s1, s5), (s1, s6)])),
-                         linewidth(1mm),
-                         pathcol))
+                         arrowcol))
 
   drawnenvs[2] = compose(context(),
                         (context(), # gene 2
@@ -391,7 +376,7 @@ function drawgates(gates::Array{Bool}, c1, c2, canvas, rad)
 
 end
 
-function drawgeneric(canvas, c1, c2, rad)
+function drawgeneric(canvas, c1, c2, rad, fitness)
   # This function draws the generic background that exists for all networks.
   # It includes the background colour, the four nodes (genes), and their
   # labels.
@@ -414,6 +399,10 @@ function drawgeneric(canvas, c1, c2, rad)
                 LCHab(58, 50, 151),
                 LCHab(51, 72, 19)])),
          (context(),
-          rectangle(0, 0, canvas, canvas), fill(LCHab(17, 14, 259))))
+          rectangle(0, 0, canvas, canvas), fill(LCHab(17, 14, 259))),
+         (context(), text(canvas/3, rad/2, "fitness: $fitness"),
+                     font("Arial"),
+                     fontsize(32pt),
+                     textcolour))
 
 end
