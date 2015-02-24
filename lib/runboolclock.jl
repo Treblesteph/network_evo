@@ -17,7 +17,7 @@ function runclock()
   tic()
   params = set_parameters()
   add_clock_params!(params, ClockParameters.single_pp!)
-  model = runga(params, EvolveClock; init_pop_size = 50, stop_after = 25)
+  model = runga(params, EvolveClock; init_pop_size = 50, stop_after = 25000)
   println()
   toc()
   now = strftime("%F_%H_%M", time())
@@ -45,4 +45,6 @@ function runclock()
   net = prune(model.population[1].net, params)
 
   draw4node(net, params, now)
+
+  return (model, params)
 end
