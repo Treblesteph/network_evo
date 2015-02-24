@@ -26,9 +26,9 @@ function add_clock_params!(params::Dict, envconditions::Function)
 
   for t = 1:params["alldays"] # Converting to arrays of minutes.
     dawnstart = params["envsignal"][t][1]
-    dawnend = dawnstart + dawnwindow
+    dawnend = dawnstart + dawnwindow - 1
     duskend = params["envsignal"][t][end]
-    duskstart = duskend - duskwindow
+    duskstart = duskend - duskwindow + 1
     dawns[t, :] = dawnstart:dawnend
     dusks[t, :] = duskstart:duskend
   end
