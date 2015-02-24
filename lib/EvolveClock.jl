@@ -104,7 +104,7 @@ function fitness(net::Network, params::Dict)
     allG1fitness = [allG1fitness, thisG1fitness]
     allG2fitness = [allG2fitness, thisG2fitness]
   end
-  score = mean([allG1fitness, allG2fitness]) + n_paths/1000
+  score = mean([allG1fitness, allG2fitness]) + n_paths/params["pathcostweight"]
 
 end
 
