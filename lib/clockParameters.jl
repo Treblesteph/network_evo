@@ -54,7 +54,6 @@ function single_pp!(params::Dict)
     days[t] = firstminute:lastminute
   end
 
-  params["alldays"] = alldays[1]
   params["envsignal"] = days
 
   return params
@@ -92,11 +91,22 @@ end
 
 function single_pp_noise!(params::Dict)
 
-  meanlightperiod = 12
+  minlightperiod = 10
+  maxlightperiod = 14
   alldays = Int64[24]
   params["alldays"] = alldays[1]
 
+  days = [Int64[] for k in 1:params["alldays"]]
 
+  for t = 1:params["alldays"]
+    lightperiod = rand(Uniform(minlightperiod, maxlightperiod))
+    daytime = round(60 * lightperiod)
+    firstminute = 1 + 60*24*(t - 1)
+    lastminute = (daytime + 24*60*(t - 1))
+    days[t] = firstminute:lastminute
+  end
+
+  params["envsignal"] = days
 
   return params
 end
