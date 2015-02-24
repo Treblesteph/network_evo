@@ -25,9 +25,12 @@ function add_clock_params!(params::Dict, envconditions::Function)
   dusks = zeros(Int64, params["alldays"], duskwindow)
 
   for t = 1:params["alldays"] # Converting to arrays of minutes.
-    dawns[t, :] = (1 + 60 * 24 * (t - 1)):(dawnwindow + 24 * 60 * (t - 1))
-    dusks[t, :] = (1 + (12 * 60 - duskwindow +
-    24 * 60 * (t - 1))):(60 * (12 + 24 * (t - 1)))
+    dawnstart = params["envsignal"][t][1]
+    dawnend = dawnstart + dawnwindow
+    duskend = params["envsignal"][t][end]
+    duskstart = duskend - duskwindow
+    dawns[t, :] = dawnstart:dawnend
+    dusks[t, :] = duskstart:duskend
   end
 
   params["interacttypes"] = [repression, activation, noInteraction]
@@ -87,12 +90,16 @@ function multi_pp!(params::Dict)
 end
 
 
-# function single_pp_noise!(params::Dict)
-#
-#   params["alldays"] = alldays[1]
-#
-#   return params
-# end
+function single_pp_noise!(params::Dict)
+
+  meanlightperiod = 12
+  alldays = Int64[24]
+  params["alldays"] = alldays[1]
+
+
+
+  return params
+end
 #
 # function multi_pp_noise!(params::Dict)
 #
