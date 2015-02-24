@@ -44,7 +44,7 @@ function runclock()
   #TODO: Can a hash be saved with HDF5? That would be very useful...
   net = prune(model.population[1].net, params)
 
-  draw4node(net, params, now)
+  draw4node(net, params, model.population[1].fitness, now)
 
   return (model, params)
 end
