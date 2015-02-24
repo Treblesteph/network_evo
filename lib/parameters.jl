@@ -38,11 +38,14 @@ function set_parameters()
   stopthreshold = Float64[1e-4]
   # Terminate after stopruns if no improvement in fitness for stopconsec
   # consecutive generations.
-  stopruns = Int64[3500]
+  stopruns = Int64[7000]
   stopconsec = Int64[1000]
 
   # Degree to which the worst day accounts for most of the fitness score.
   fitnessweight = Number[10]
+
+  # Weight of the cost of paths (to make simplest possible networks evolve).
+  pathcostweight = Int64[500]
 
   # Exponential distribution scaling coefficient the determines
   # the shape of the parental selection distribution, i.e. how
@@ -76,6 +79,7 @@ function set_parameters()
                                    "stopruns" => stopruns[1],
                                    "stopconsec" => stopconsec[1],
                                    "fitnessweight" => fitnessweight[1],
+                                   "pathcostweight" => pathcostweight[1],
                                    "parentselect" => parentselect[1],
                                    "defaulton" => defaulton[1],
                                    "decisionhash" => decisionhash}
