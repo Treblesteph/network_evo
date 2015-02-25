@@ -1,5 +1,8 @@
 using Compose
 using Color
+
+include("netAnalysis.jl")
+
 import BoolNetwork.Network
 
 function draw4node(net::Network, params::Dict,
@@ -15,12 +18,15 @@ function draw4node(net::Network, params::Dict,
 
   envs = net.envpath .* net.envlag
 
-  draw4node(reps, acts, envs, net.gates, filename, fitness)
+  inputs = count_light_inputs(net, params)
+
+  draw4node(reps, acts, envs, net.gates, filename, fitness, inputs)
 end
 
 function draw4node(reps::Array{Int64}, acts::Array{Int64},
                    envs::Array{Int64}, gates::Array{Bool},
-                   filename::String, fitness::Float64)
+                   filename::String, fitness::Float64,
+                   inputs::Int64)
 
   canvas = 1        # Side length of square canvas
   c1 = 3*canvas/10  # Lower centre co-ordinate
@@ -37,7 +43,7 @@ function draw4node(reps::Array{Int64}, acts::Array{Int64},
            (context(), drawpaths(acts + reps, c1, c2, canvas, rad)),
            (context(), drawenvs(envs, c1, c2, canvas, rad)),
            (context(), drawgates(gates, c1, c2, canvas, rad)),
-           (context(), drawgeneric(canvas, c1, c2, rad, fitness)))
+           (context(), drawgeneric(canvas, c1, c2, rad, fitness, inputs)))
   end
 
   img = PNG("../runs/netpic_$(filename).png", 8inch, 8inch)
@@ -376,7 +382,7 @@ function drawgates(gates::Array{Bool}, c1, c2, canvas, rad)
 
 end
 
-function drawgeneric(canvas, c1, c2, rad, fitness)
+function drawgeneric(canvas, c1, c2, rad, fitness::Float64, inputs::Int64)
   # This function draws the generic background that exists for all networks.
   # It includes the background colour, the four nodes (genes), and their
   # labels.
@@ -398,11 +404,12 @@ function drawgeneric(canvas, c1, c2, rad, fitness)
                 LCHab(68, 61, 75),
                 LCHab(58, 50, 151),
                 LCHab(51, 72, 19)])),
-         (context(),
-          rectangle(0, 0, canvas, canvas), fill(LCHab(17, 14, 259))),
-         (context(), text(canvas/3, rad/2, "fitness: $fitness"),
+         (context(), text([canvas/3, canvas/3], [rad/2, rad],
+                          ["fitness: $fitness", "light inputs: $(inputs)"]),
                      font("Arial"),
                      fontsize(32pt),
-                     textcolour))
+                     textcolour),
+         (context(),
+          rectangle(0, 0, canvas, canvas), fill(LCHab(17, 14, 259))),)
 
 end
