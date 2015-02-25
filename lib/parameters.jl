@@ -45,7 +45,7 @@ function set_parameters()
   fitnessweight = Number[10]
 
   # Weight of the cost of paths (to make simplest possible networks evolve).
-  pathcostweight = Int64[500]
+  pathcostweight = Int64[250]
 
   # Exponential distribution scaling coefficient the determines
   # the shape of the parental selection distribution, i.e. how
