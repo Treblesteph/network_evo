@@ -15,7 +15,7 @@ function draw4node(net::Network, params::Dict,
 
   envs = net.envpath .* net.envlag
 
-  draw4node(reps, acts, envs, net.gates, filename, params)
+  draw4node(reps, acts, envs, net.gates, filename, fitness)
 end
 
 function draw4node(reps::Array{Int64}, acts::Array{Int64},
