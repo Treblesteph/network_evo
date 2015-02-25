@@ -19,14 +19,15 @@ function draw4node(net::Network, params::Dict,
   envs = net.envpath .* net.envlag
 
   inputs = count_light_inputs(net, params)
+  cycles = count_cycles(net, params)
 
-  draw4node(reps, acts, envs, net.gates, filename, fitness, inputs)
+  draw4node(reps, acts, envs, net.gates, filename, fitness, inputs, cycles)
 end
 
 function draw4node(reps::Array{Int64}, acts::Array{Int64},
                    envs::Array{Int64}, gates::Array{Bool},
                    filename::String, fitness::Float64,
-                   inputs::Int64)
+                   inputs::Int64, cycles::Int64)
 
   canvas = 1        # Side length of square canvas
   c1 = 3*canvas/10  # Lower centre co-ordinate
@@ -43,7 +44,8 @@ function draw4node(reps::Array{Int64}, acts::Array{Int64},
            (context(), drawpaths(acts + reps, c1, c2, canvas, rad)),
            (context(), drawenvs(envs, c1, c2, canvas, rad)),
            (context(), drawgates(gates, c1, c2, canvas, rad)),
-           (context(), drawgeneric(canvas, c1, c2, rad, fitness, inputs)))
+           (context(), drawgeneric(canvas, c1, c2, rad, fitness,
+                                   inputs, cycles)))
   end
 
   img = PNG("../runs/netpic_$(filename).png", 8inch, 8inch)
@@ -382,7 +384,8 @@ function drawgates(gates::Array{Bool}, c1, c2, canvas, rad)
 
 end
 
-function drawgeneric(canvas, c1, c2, rad, fitness::Float64, inputs::Int64)
+function drawgeneric(canvas, c1, c2, rad, fitness::Float64,
+                     inputs::Int64, cycles::Int64)
   # This function draws the generic background that exists for all networks.
   # It includes the background colour, the four nodes (genes), and their
   # labels.
@@ -404,8 +407,11 @@ function drawgeneric(canvas, c1, c2, rad, fitness::Float64, inputs::Int64)
                 LCHab(68, 61, 75),
                 LCHab(58, 50, 151),
                 LCHab(51, 72, 19)])),
-         (context(), text([canvas/3, canvas/3], [rad/2, rad],
-                          ["fitness: $fitness", "light inputs: $(inputs)"]),
+         (context(), text([canvas/3, canvas/3, canvas/3],
+                          [rad/4, rad/3, rad/2],
+                          ["fitness: $fitness",
+                           "light inputs: $(inputs)",
+                           "feedbacks: $(cycles)"]),
                      font("Arial"),
                      fontsize(32pt),
                      textcolour),
