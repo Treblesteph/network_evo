@@ -1,5 +1,7 @@
 module ClockParameters
 
+using Distributions
+
 import BoolNetwork.repression,
        BoolNetwork.activation,
        BoolNetwork.noInteraction
