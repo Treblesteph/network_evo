@@ -31,8 +31,10 @@ function count_light_inputs(net::Network, params::Dict)
 end
 
 function count_cycles(net::Network, params::Dict)
+
   cycles = get_cycles(net, params)
   ncycles = length(cycles)
+  
 end
 
 function get_cycles(net::Network, params::Dict)
