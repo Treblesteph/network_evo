@@ -24,6 +24,12 @@ importall Base
   # if chain[1] == chain[end]
   # or only unexplored paths in row are (0,0)
 
+function count_light_inputs(net::Network, params::Dict)
+
+  inputs::Int64 = sum(net.envpaths)
+
+end
+
 function count_cycles(net::Network, params::Dict)
   cycles = get_cycles(net, params)
   ncycles = length(cycles)
