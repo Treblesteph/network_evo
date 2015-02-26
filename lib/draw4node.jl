@@ -18,8 +18,8 @@ function draw4node(net::Network, params::Dict,
 
   envs = net.envpath .* net.envlag
 
-  inputs = count_light_inputs(net, params)
-  cycles = count_cycles(net, params)
+  inputs = netAnalysis.count_light_inputs(net, params)
+  cycles = netAnalysis.count_cycles(net, params)
 
   draw4node(reps, acts, envs, net.gates, filename, fitness, inputs, cycles)
 end
@@ -298,60 +298,60 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
   d2 = d1*2
   d3 = d1*5
 
-  p1 = c1 - (rad + d1) # 0.19
-  p2 = c1 + (rad + d1) # 0.41
-  p3 = c1 + (rad + d2) # 0.42
-  p4 = c1 - (d1 + d2) # 0.27
-  p5 = c1 + (d1 + d2) # 0.33
+  p1 = c1 - (rad + d1) # dist 1 from node to line: 0.19
+  p2 = c2 + (rad + d1) # dist 2 from node to line: 0.81
 
-  p6 = c2 - (rad + d1) # 0.59
-  p7 = c2 + (rad + d1) # 0.81
-  p8 = c2 - (rad + d2) # 0.58
-  p9 = c2 - (d1 + d2) # 0.67
-  p10 = c2 + (d1 + d2) # 0.73
+  q1 = c1 - rad + d1 # point of arrow 1: 0.21
+  q2 = q1 - d1 # arrow 1: 0.2
+  q3 = q1 - 4*d1 # arrow 1: 0.17
+
+  q4 = c2 + rad - d1 # point of arrow 2: 0.79
+  q5 = q4 + d1 # arrow 2: 0.8
+  q6 = q4 + 4*d1 # arrow 2: 0.83
+
 
   drawnenvs[1] = compose(context(),
                         (context(), # gene 1
-                         line([(p5, d3), (p5, p1)]),
+                         line([(rad, rad), (p1, p1)]),
                          linewidth(1mm),
                          pathcol),
                         (context(),
-                         polygon([(p5, c1 - rad),
-                                  (p5 - d2, p1 - d1 - d2),
-                                  (p5 + d2, p1 - d1 - d2)]),
+                         polygon([(q1, q1),
+                                  (q2, q3),
+                                  (q3, q2)]),
                          arrowcol))
 
   drawnenvs[2] = compose(context(),
                         (context(), # gene 2
-                         line([(p9, d3), (p9, p1)]),
+                         line([(canvas - rad, rad), (p2, p1)]),
                          linewidth(1mm),
                          pathcol),
                         (context(),
-                         polygon([(p9, c1 - rad),
-                                  (p9 - d2, p1 - d1 - d2),
-                                  (p9 + d2, p1 - d1 - d2)]),
+                         polygon([(q4, q1),
+                                  (q5, q3),
+                                  (q6, q2)]),
                          arrowcol))
 
   drawnenvs[3] = compose(context(),
                         (context(), # gene 4
-                         line([(p9, canvas - d3), (p9, p7)]),
+                         line([(canvas - rad, canvas - rad), (p2, p2)]),
                          linewidth(1mm),
                          pathcol),
                         (context(),
-                         polygon([(p9, c2 + rad),
-                                  (p9 - d2, p7 + d1 + d2),
-                                  (p9 + d2, p7 + d1 + d2)]),
+                         polygon([(q4, q4),
+                                  (q5, q6),
+                                  (q6, q5)]),
                          arrowcol))
 
   drawnenvs[4] = compose(context(),
                         (context(), # gene 3
-                         line([(p5, canvas - d3), (p5, p7)]),
+                         line([(rad, canvas - rad), (p1, p2)]),
                          linewidth(1mm),
                          pathcol),
                         (context(),
-                         polygon([(p5, c2 + rad),
-                                  (p5 - d2, p7 + d1 + d2),
-                                  (p5 + d2, p7 + d1 + d2)]),
+                         polygon([(q1, q4),
+                                  (q2, q6),
+                                  (q3, q5)]),
                          arrowcol))
 
   compose(drawnenvs[find(x -> x > 0, envs)]...)
@@ -408,12 +408,12 @@ function drawgeneric(canvas, c1, c2, rad, fitness::Float64,
                 LCHab(58, 50, 151),
                 LCHab(51, 72, 19)])),
          (context(), text([canvas/3, canvas/3, canvas/3],
-                          [rad/4, rad/3, rad/2],
-                          ["fitness: $fitness",
+                          [rad/3, 2*rad/3, rad],
+                          ["fitness: $(round(fitness, 2))",
                            "light inputs: $(inputs)",
                            "feedbacks: $(cycles)"]),
                      font("Arial"),
-                     fontsize(32pt),
+                     fontsize(15pt),
                      textcolour),
          (context(),
           rectangle(0, 0, canvas, canvas), fill(LCHab(17, 14, 259))),)
