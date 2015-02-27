@@ -4,7 +4,7 @@ import BoolNetwork
 include("../lib/runboolclock.jl")
 
 params = set_parameters()
-add_clock_params!(params, [repression, activation, noInteraction])
+add_clock_params!(params, ClockParameters.single_pp!)
 
 x = params["minlag"]
 
