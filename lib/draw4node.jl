@@ -175,6 +175,9 @@ function drawpaths(paths::Array{Int64}, c1, c2, canvas, rad)
 
   drawnpaths = Array(Any, 16)
   pathcolour = stroke(LCHab(90, 0, 297))
+  textfont = font("Arial")
+  textsize = fontsize(12pt)
+  textcolour = fill(LCHab(90, 0, 297))
 
   d1 = rad/10
   d2 = d1*2
@@ -192,46 +195,82 @@ function drawpaths(paths::Array{Int64}, c1, c2, canvas, rad)
   p9 = c2 - (d1 + d2) # 0.67
   p10 = c2 + (d1 + d2) # 0.73
 
-  drawnpaths[1] = (context(),
-                          curve([(p1, c1), (p1 - d3, p1 - d3)],
-                                [(p1 - rad + d1 + d2, c1), (p1 + d2, p1 - rad)],
-                                [(p1 - rad, p1 + d2), (c1, p1 - rad + d1 + d2)],
-                                [(p1 - d3, p1 - d3), (c1, p1)]),
-                          fill(nothing), linewidth(1mm),
-                          pathcolour) # From 1 to 1.
+  al1x = 5*rad/6              # autolag 1 x coord
+  al1y = c1                   # autolag 1 y coord
+  al2x = canvas - 6*rad/5     # autolag 2 x coord
+  al2y = 41*c2/40             # autolag 2 y coord
 
-  drawnpaths[2] = (context(),
-                          line([(c1 + rad + d2, p4), (p8, p4)]),
-                          linewidth(1mm),
-                          pathcolour) # From 2 to 1.
+  hx = 29*canvas/60           # horiz/vert lag x coord
+  hy = rad/40                 # horiz/vert lag y shift up from line
+  vertrot1 = Rotation(-1.571) # vert lag left rotation
+  vertrot2 = Rotation(1.571)  # vert lag right rotation
+
+  drawnpaths[1] = (context(), # From 1 to 1.
+                    (context(),
+                     curve([(p1, c1), (p1 - d3, p1 - d3)],
+                           [(p1 - rad + d1 + d2, c1), (p1 + d2, p1 - rad)],
+                           [(p1 - rad, p1 + d2), (c1, p1 - rad + d1 + d2)],
+                           [(p1 - d3, p1 - d3), (c1, p1)]),
+                     fill(nothing), linewidth(1mm),
+                     pathcolour),
+                    (context(),
+                     text(al1x, al1y, "$(round(paths[1]/60, 2))"),
+                     textfont, textsize, textcolour))
+
+  drawnpaths[2] = (context(), # From 2 to 1.
+                    (context(),
+                     line([(c1 + rad + d2, p4), (p8, p4)]),
+                     linewidth(1mm),
+                     pathcolour),
+                    (context(),
+                     text(hx, p4 - hy, "$(round(paths[2]/60, 2))"),
+                     textfont, textsize, textcolour))
 
   drawnpaths[3] = (context(),
                           line([(p3 + d1, p2 - d2), (p6 + d2, p6 - d2)]),
                           linewidth(1mm),
                           pathcolour) # From 3 to 1.
 
-  drawnpaths[4] = (context(),
-                          line([(p5, c1 + rad + d2), (p5, p8)]),
-                          linewidth(1mm),
-                          pathcolour) # From 4 to 1.
+  drawnpaths[4] = (context(), # From 4 to 1.
+                    (context(),
+                     line([(p5, c1 + rad + d2), (p5, p8)]),
+                     linewidth(1mm),
+                     pathcolour),
+                    (context(),
+                     text(hx, p5 - hy, "$(round(paths[4]/60, 2))",
+                          hleft, vbottom, vertrot1),
+                     textfont, textsize, textcolour))
 
-  drawnpaths[5] = (context(),
-                          line([(c1 + rad + d2, p5), (p8, p5)]),
-                          linewidth(1mm),
-                          pathcolour) # From 1 to 2.
+  drawnpaths[5] = (context(), # From 1 to 2.
+                    (context(),
+                     line([(c1 + rad + d2, p5), (p8, p5)]),
+                     linewidth(1mm),
+                     pathcolour),
+                    (context(),
+                     text(hx, p5 - hy, "$(round(paths[5]/60, 2))"),
+                     textfont, textsize, textcolour))
 
-  drawnpaths[6] = (context(),
-                          curve([(p7, c1), (p7 + d3, p1 - d3)],
-                                [(p7 + rad - d1 - d2, c1), (p7 - d2, p1 - rad)],
-                                [(p7 + rad, p1 + d2), (c2, p1 - rad + d1 + d2)],
-                                [(p7 + d3, p1 - d3), (c2, p1)]),
-                          fill(nothing), linewidth(1mm),
-                          pathcolour) # From 2 to 2.
+  drawnpaths[6] = (context(), # From 2 to 2.
+                    (context(),
+                     curve([(p7, c1), (p7 + d3, p1 - d3)],
+                           [(p7 + rad - d1 - d2, c1), (p7 - d2, p1 - rad)],
+                           [(p7 + rad, p1 + d2), (c2, p1 - rad + d1 + d2)],
+                           [(p7 + d3, p1 - d3), (c2, p1)]),
+                     fill(nothing), linewidth(1mm),
+                     pathcolour),
+                    (context(),
+                     text(al2x, al1y, "$(round(paths[6]/60 ,2))"),
+                     textfont, textsize, textcolour))
 
-  drawnpaths[7] = (context(),
-                          line([(p10, c1 + rad + d2), (p10, p8)]),
-                          linewidth(1mm),
-                          pathcolour) # From 3 to 2.
+  drawnpaths[7] = (context(), # From 3 to 2.
+                    (context(),
+                     line([(p10, c1 + rad + d2), (p10, p8)]),
+                     linewidth(1mm),
+                     pathcolour),
+                    (context(),
+                     text(hx, p4 - hy, "$(round(paths[7]/60, 2))",
+                          hleft, vbottom, vertrot2),
+                     textfont, textsize, textcolour))
 
   drawnpaths[8] = (context(),
                           line([(p3 + d1, p6 + d2), (p6 + d2, p3 + d1)]),
@@ -243,52 +282,118 @@ function drawpaths(paths::Array{Int64}, c1, c2, canvas, rad)
                           linewidth(1mm),
                           pathcolour) # From 1 to 3.
 
-  drawnpaths[10] = (context(),
-                           line([(p9, p8), (p9, c1 + rad + d2)]),
-                           linewidth(1mm),
-                           pathcolour) # From 2 to 3.
+  drawnpaths[10] = (context(), # From 2 to 3.
+                     (context(),
+                      line([(p9, p8), (p9, c1 + rad + d2)]),
+                      linewidth(1mm),
+                      pathcolour),
+                     (context(),
+                      text(hx, p5 - hy, "$(round(paths[10]/60, 2))",
+                           hleft, vbottom, vertrot2),
+                      textfont, textsize, textcolour))
 
-  drawnpaths[11] = (context(),
-                           curve([(p7, c2), (p7 + d3, p7 + d3)],
-                                 [(p7 + rad - d1 - d2, c2), (p7 - d2, p7 + rad)],
-                                 [(p7 + rad, p7 - d2), (c2, p7 + rad - d1 - d2)],
-                                 [(p7 + d3, p7 + d3), (c2, p7)]),
-                           fill(nothing), linewidth(1mm),
-                           pathcolour) # From 3 to 3.
+  drawnpaths[11] = (context(), # From 3 to 3.
+                     (context(),
+                      curve([(p7, c2), (p7 + d3, p7 + d3)],
+                            [(p7 + rad - d1 - d2, c2), (p7 - d2, p7 + rad)],
+                            [(p7 + rad, p7 - d2), (c2, p7 + rad - d1 - d2)],
+                            [(p7 + d3, p7 + d3), (c2, p7)]),
+                      fill(nothing), linewidth(1mm),
+                      pathcolour),
+                     (context(),
+                      text(al2x, al2y, "$(round(paths[11]/60, 2))"),
+                      textfont, textsize, textcolour))
 
-  drawnpaths[12] = (context(),
-                           line([(c1 + rad + d2, p10), (p8, p10)]),
-                           linewidth(1mm),
-                           pathcolour) # From 4 to 3.
+  drawnpaths[12] = (context(), # From 4 to 3.
+                     (context(),
+                      line([(c1 + rad + d2, p10), (p8, p10)]),
+                      linewidth(1mm),
+                      pathcolour),
+                     (context(),
+                      text(hx, p10 - hy, "$(round(paths[12]/60, 2))"),
+                      textfont, textsize, textcolour))
 
-  drawnpaths[13] = (context(),
-                           line([(p4, p8), (p4, c1 + rad + d2)]),
-                           linewidth(1mm),
-                           pathcolour) # From 1 to 4.
+  drawnpaths[13] = (context(), # From 1 to 4.
+                     (context(),
+                      line([(p4, p8), (p4, c1 + rad + d2)]),
+                      linewidth(1mm),
+                      pathcolour),
+                     (context(),
+                      text(hx, p4 - hy, "$(round(paths[13]/60, 2))",
+                           hleft, vbottom, vertrot1),
+                      textfont, textsize, textcolour))
 
   drawnpaths[14] = (context(),
                            line([(p2 - d2, p6 - d2), (p6 - d2, p2 - d2)]),
                            linewidth(1mm),
                            pathcolour) # From 2 to 4.
 
-  drawnpaths[15] = (context(),
-                           line([(c1 + rad + d2, p9), (p8, p9)]),
-                           linewidth(1mm),
-                           pathcolour) # From 3 to 4.
+  drawnpaths[15] = (context(), # From 3 to 4.
+                     (context(),
+                      line([(c1 + rad + d2, p9), (p8, p9)]),
+                      linewidth(1mm),
+                      pathcolour),
+                     (context(),
+                      text(hx, p9 - hy, "$(round(paths[15]/60, 2))"),
+                      textfont, textsize, textcolour))
 
-  drawnpaths[16] = (context(),
-                           curve([(p1, c2), (p1 - d3, p7 + d3)],
-                                 [(p1 - rad + d1 + d2, c2), (p1 + d2, p7 + rad)],
-                                 [(p1 - rad, p7 - d2), (c1, p7 + rad - d1 - d2)],
-                                 [(p1 - d3, p7 + d3), (c1, p7)]),
-                           fill(nothing), linewidth(1mm),
-                           pathcolour) # From 4 to 4.
+  drawnpaths[16] = (context(), # From 4 to 4.
+                     (context(),
+                      curve([(p1, c2), (p1 - d3, p7 + d3)],
+                            [(p1 - rad + d1 + d2, c2), (p1 + d2, p7 + rad)],
+                            [(p1 - rad, p7 - d2), (c1, p7 + rad - d1 - d2)],
+                            [(p1 - d3, p7 + d3), (c1, p7)]),
+                      fill(nothing), linewidth(1mm),
+                      pathcolour),
+                     (context(),
+                      text(al1x, al2y, "$(round(paths[16]/60, 2))"),
+                      textfont, textsize, textcolour))
 
   compose(context(), drawnpaths[find(x -> x > 0, paths)]...)
 
 end
 
 function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
+
+  function drawsun(centre, canvas)
+    println(centre)
+    c = centre         # centre of sun
+    rad2 = canvas/40   # radius of sun
+    d = rad2/5        # dist from sun to ray
+    l = rad2/2         # length of ray
+
+    k1s = (c[1], c[2] - (rad2 + d)) # north line start coord
+    k1e = (c[1], k1s[2] - l) # north line end coord
+    k2s = (c[1] + (rad2 + d), c[2]) # east line start coord
+    k2e = (k2s[1] + l, c[2]) # east line end coord
+    k3s = (c[1], c[2] + (rad2 + d)) # south line start coord
+    k3e = (c[1], k3s[2] + l) # south line end coord
+    k4s = (c[1] - (rad2 + d), c[2]) # west line start coord
+    k4e = (k4s[1] - l, c[2]) # west line end coord
+    k5s = (k2s[1] - 2*l/3, k1s[2] + 2*l/3) # NE line start coord
+    k5e = (k2e[1] - 4*l/5, k1e[2] + 4*l/5) # NE line end coord
+    k6s = (k2s[1] - 2*l/3, k3s[2] - 2*l/3) # SE line start coord
+    k6e = (k2e[1] - 4*l/5, k3e[2] - 4*l/5) # SE line end coord
+    k7s = (k4s[1] + 2*l/3, k3s[2] - 2*l/3) # SW line start coord
+    k7e = (k4e[1] + 4*l/5, k3e[2] - 4*l/5) # SW line end coord
+    k8s = (k4s[1] + 2*l/3, k1s[2] + 2*l/3) # NW line start coord
+    k8e = (k4e[1] + 4*l/5, k1e[2] + 4*l/5) # NW line end coord
+
+    circcolour = fill(LCHab(90, 0, 297))
+    raycolour = stroke(LCHab(90, 0, 297))
+
+    compose(context(),
+    (context(), circle(centre..., rad2), circcolour),
+    (context(), line([k1s, k1e]), linewidth(1.6mm), raycolour), # N
+    (context(), line([k2s, k2e]), linewidth(1.6mm), raycolour), # E
+    (context(), line([k3s, k3e]), linewidth(1.6mm), raycolour), # S
+    (context(), line([k4s, k4e]), linewidth(1.6mm), raycolour), # W
+    (context(), line([k5s, k5e]), linewidth(1.6mm), raycolour), # NE
+    (context(), line([k6s, k6e]), linewidth(1.6mm), raycolour), # SE
+    (context(), line([k7s, k7e]), linewidth(1.6mm), raycolour), # SW
+    (context(), line([k8s, k8e]), linewidth(1.6mm), raycolour)) # NW
+
+  end
 
   drawnenvs = Array(Context, 4)
   arrowcol = fill(LCHab(90, 0, 297))
@@ -319,7 +424,9 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                          polygon([(q1, q1),
                                   (q2, q3),
                                   (q3, q2)]),
-                         arrowcol))
+                         arrowcol),
+                        (context(),
+                         drawsun([rad/2, rad/2], canvas)))
 
   drawnenvs[2] = compose(context(),
                         (context(), # gene 2
@@ -330,7 +437,9 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                          polygon([(q4, q1),
                                   (q5, q3),
                                   (q6, q2)]),
-                         arrowcol))
+                         arrowcol),
+                         (context(),
+                         drawsun([canvas - rad/2, rad/2], canvas)))
 
   drawnenvs[3] = compose(context(),
                         (context(), # gene 4
@@ -341,7 +450,9 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                          polygon([(q4, q4),
                                   (q5, q6),
                                   (q6, q5)]),
-                         arrowcol))
+                         arrowcol),
+                         (context(),
+                         drawsun([canvas - rad/2, canvas - rad/2], canvas)))
 
   drawnenvs[4] = compose(context(),
                         (context(), # gene 3
@@ -352,7 +463,9 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                          polygon([(q1, q4),
                                   (q2, q6),
                                   (q3, q5)]),
-                         arrowcol))
+                         arrowcol),
+                         (context(),
+                         drawsun([rad/2, canvas - rad/2], canvas)))
 
   compose(drawnenvs[find(x -> x > 0, envs)]...)
 
@@ -407,8 +520,8 @@ function drawgeneric(canvas, c1, c2, rad, fitness::Float64,
                 LCHab(68, 61, 75),
                 LCHab(58, 50, 151),
                 LCHab(51, 72, 19)])),
-         (context(), text([2*canvas/7, 2*canvas/7, 2*canvas/7],
-                          [rad/3, 2*rad/3, rad],
+         (context(), text([17*canvas/40, 17*canvas/40, 17*canvas/40],
+                          [2*rad/3, 3*rad/3, 4*rad/3],
                           ["fitness: $(round(fitness, 4))",
                            "light inputs: $(inputs)",
                            "feedbacks: $(cycles)"]),
