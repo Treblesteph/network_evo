@@ -425,9 +425,20 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
   arrowcol = fill(LCHab(90, 0, 297))
   pathcol = stroke(LCHab(90, 0, 297))
 
+  # For lag labels:
+  textfont = font("Arial")
+  textsize = fontsize(12pt)
+  textcolour = fill(LCHab(90, 0, 297))
+
+  rot1 = Rotation(0.785)
+  rot2 = Rotation(-0.785)
+
   d1 = rad/10
   d2 = d1*2
   d3 = d1*5
+
+  d4 = -d1*5
+  d5 = rad*5
 
   p1 = c1 - (rad + d1) # dist 1 from node to line: 0.19
   p2 = c2 + (rad + d1) # dist 2 from node to line: 0.81
@@ -452,6 +463,10 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                                   (q3, q2)]),
                          arrowcol),
                         (context(),
+                         text(d4, d5, "$(round(envs[1]/60, 2))",
+                              hleft, vbottom, rot1),
+                         textfont, textsize, textcolour),
+                        (context(),
                          drawsun([rad/2, rad/2], canvas)))
 
   drawnenvs[2] = compose(context(),
@@ -464,7 +479,11 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                                   (q5, q3),
                                   (q6, q2)]),
                          arrowcol),
-                         (context(),
+                        (context(),
+                         text(canvas + d1, d5, "$(round(envs[2]/60, 2))",
+                              hleft, vbottom, rot2),
+                         textfont, textsize, textcolour),
+                        (context(),
                          drawsun([canvas - rad/2, rad/2], canvas)))
 
   drawnenvs[3] = compose(context(),
@@ -477,7 +496,12 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                                   (q5, q6),
                                   (q6, q5)]),
                          arrowcol),
-                         (context(),
+                        (context(),
+                         text(canvas + d1, canvas - d5,
+                              "$(round(envs[3]/60, 2))",
+                              hleft, vbottom, rot1),
+                         textfont, textsize, textcolour),
+                        (context(),
                          drawsun([canvas - rad/2, canvas - rad/2], canvas)))
 
   drawnenvs[4] = compose(context(),
@@ -490,7 +514,12 @@ function drawenvs(envs::Array{Int64}, c1, c2, canvas, rad)
                                   (q2, q6),
                                   (q3, q5)]),
                          arrowcol),
-                         (context(),
+                        (context(),
+                         text(d4, canvas - d5,
+                              "$(round(envs[4]/60, 2))",
+                              hleft, vbottom, rot2),
+                         textfont, textsize, textcolour), 
+                        (context(),
                          drawsun([rad/2, canvas - rad/2], canvas)))
 
   compose(drawnenvs[find(x -> x > 0, envs)]...)
