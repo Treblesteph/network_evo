@@ -69,8 +69,15 @@ function multi_pp!(params::Dict)
   maxlightperiod = 18
   diff = (maxlightperiod - minlightperiod)/(nphotoperiod - 1)
   daytime = zeros(Int64, nphotoperiod)
+  shuffleindices = [5, 7, 9, 8, 6, 4, 2, 1, 3]
+
+  if length(shuffleindices) != nphotoperiod
+    error("Length of shuffled indices should equal the number of
+           different photoperiods")
+  end
+
   for j in 1:nphotoperiod
-    daytime[j] = (minlightperiod + diff*(j - 1)) * 60
+    daytime[shuffleindices[j]] = (minlightperiod + diff*(j - 1)) * 60
   end
 
   alldays = Int64[ndays * nphotoperiod]
