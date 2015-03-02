@@ -182,6 +182,9 @@ function drawpaths(paths::Array{Int64}, c1, c2, canvas, rad)
   d1 = rad/10
   d2 = d1*2
   d3 = d2*2
+  d4 = d1*7     # x coord for diag lag 3 to 1
+  d5 = d1*6     # x coord for diag lag 3 to 1
+  d6 = 2*rad    # y coord for diag lag 3 to 1 and 1 to 3
 
   p1 = c1 - (rad + d1) # 0.19
   p2 = c1 + (rad + d1) # 0.41
@@ -205,6 +208,9 @@ function drawpaths(paths::Array{Int64}, c1, c2, canvas, rad)
   vertrot1 = Rotation(-1.571) # vert lag left rotation
   vertrot2 = Rotation(1.571)  # vert lag right rotation
 
+  diagrot1 = Rotation(-0.785) # Diagonal lag left rotation
+  diagrot2 = Rotation(0.785)  # Diagonal lag right rotation
+
   drawnpaths[1] = (context(), # From 1 to 1.
                     (context(),
                      curve([(p1, c1), (p1 - d3, p1 - d3)],
@@ -226,10 +232,15 @@ function drawpaths(paths::Array{Int64}, c1, c2, canvas, rad)
                      text(hx, p4 - hy, "$(round(paths[2]/60, 2))"),
                      textfont, textsize, textcolour))
 
-  drawnpaths[3] = (context(),
-                          line([(p3 + d1, p2 - d2), (p6 + d2, p6 - d2)]),
-                          linewidth(1mm),
-                          pathcolour) # From 3 to 1.
+  drawnpaths[3] = (context(), # From 3 to 1.
+                    (context(),
+                     line([(p3 + d1, p2 - d2), (p6 + d2, p6 - d2)]),
+                     linewidth(1mm),
+                     pathcolour),
+                    (context(),
+                     text(hx - d4, p4 - hy + d6, "$(round(paths[3]/60, 2))",
+                          hleft, vbottom, diagrot2),
+                     textfont, textsize, textcolour))
 
   drawnpaths[4] = (context(), # From 4 to 1.
                     (context(),
@@ -272,15 +283,25 @@ function drawpaths(paths::Array{Int64}, c1, c2, canvas, rad)
                           hleft, vbottom, vertrot2),
                      textfont, textsize, textcolour))
 
-  drawnpaths[8] = (context(),
-                          line([(p3 + d1, p6 + d2), (p6 + d2, p3 + d1)]),
-                          linewidth(1mm),
-                          pathcolour) # From 4 to 2.
+  drawnpaths[8] = (context(), # From 4 to 2.
+                    (context(),
+                     line([(p3 + d1, p6 + d2), (p6 + d2, p3 + d1)]),
+                     linewidth(1mm),
+                     pathcolour),
+                    (context(),
+                     text(hx + d5, p5 - hy + d6, "$(round(paths[8]/60, 2))",
+                          hleft, vbottom, diagrot1),
+                     textfont, textsize, textcolour))
 
-  drawnpaths[9] = (context(),
-                          line([(p2 - d2, p3 + d1), (p6 - d2, p6 + d2)]),
-                          linewidth(1mm),
-                          pathcolour) # From 1 to 3.
+  drawnpaths[9] = (context(), # From 1 to 3.
+                    (context(),
+                     line([(p2 - d2, p3 + d1), (p6 - d2, p6 + d2)]),
+                     linewidth(1mm),
+                     pathcolour),
+                    (context(),
+                     text(hx + d5, p5 - hy + d6, "$(round(paths[9]/60, 2))",
+                          hleft, vbottom, diagrot2),
+                     textfont, textsize, textcolour))
 
   drawnpaths[10] = (context(), # From 2 to 3.
                      (context(),
@@ -323,10 +344,15 @@ function drawpaths(paths::Array{Int64}, c1, c2, canvas, rad)
                            hleft, vbottom, vertrot1),
                       textfont, textsize, textcolour))
 
-  drawnpaths[14] = (context(),
-                           line([(p2 - d2, p6 - d2), (p6 - d2, p2 - d2)]),
-                           linewidth(1mm),
-                           pathcolour) # From 2 to 4.
+  drawnpaths[14] = (context(), # From 2 to 4.
+                     (context(),
+                      line([(p2 - d2, p6 - d2), (p6 - d2, p2 - d2)]),
+                      linewidth(1mm),
+                      pathcolour),
+                     (context(),
+                      text(hx - d4, p4 - hy + d6, "$(round(paths[14]/60, 2))",
+                           hleft, vbottom, diagrot1),
+                      textfont, textsize, textcolour))
 
   drawnpaths[15] = (context(), # From 3 to 4.
                      (context(),
