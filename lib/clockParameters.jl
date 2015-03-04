@@ -14,9 +14,9 @@ export add_clock_params!,
        harvard_forest
 
 
-function add_clock_params!(params::Dict, envconditions::Function)
+function add_clock_params!(params::Dict, nphotoperiod=1, noise=false)
 
-  params = envconditions(params)
+  params = add_envsignal(params, nphotoperiod, noise)
 
   params["allhours"] = params["alldays"] * 24
   params["allmins"] = params["allhours"] * 60
@@ -41,43 +41,38 @@ function add_clock_params!(params::Dict, envconditions::Function)
   params["gene2fit"] = dusks
 end
 
-function single_pp!(params::Dict)
+function add_envsignal!(params::Dict, nphotoperiod::Int64, noise::Bool)
 
-  lightperiod = 12
-  alldays = Int64[4]
-  params["alldays"] = alldays[1]
-  daytime = lightperiod * 60
-
-  days = [Int64[] for k in 1:params["alldays"]]
-
-  for t = 1:params["alldays"] # Converting to array of minutes.
-    firstminute = 1 + 60*24*(t - 1)
-    lastminute = (daytime + 24*60*(t - 1))
-    days[t] = firstminute:lastminute
+  if noise == 0
+    dev = 0
+    ndays = params["daysperpp"]
+  else
+    dev = 2
+    ndays = 6 * params["daysperpp"]
   end
 
-  params["envsignal"] = days
-
-  return params
-end
-
-function multi_pp!(params::Dict)
-
-  ndays = 4
-  nphotoperiod = 9
   minperiod = 6
   maxperiod = 18
-  diff = (maxperiod - minperiod)/(nphotoperiod - 1)
-  photoperiods = zeros(Int64, nphotoperiod)
-  shuffleindices = [5, 7, 9, 8, 6, 4, 2, 1, 3]
+  meanperiod = (minperiod + maxperiod)/2
 
-  if length(shuffleindices) != nphotoperiod
-    error("Length of shuffled indices should equal the number of
-           different photoperiods.")
-  end
+  if nphotoperiod == 1
 
-  for j in 1:nphotoperiod
-    photoperiods[shuffleindices[j]] = (minperiod + diff*(j - 1)) * 60
+    photoperiods = [meanperiod * 60]
+
+  else
+
+    photoperiods = zeros(Int64, nphotoperiod)
+    diff = (maxperiod - minperiod)/(nphotoperiod - 1)
+    shuffleindices = [5, 7, 9, 8, 6, 4, 2, 1, 3]
+
+    if length(shuffleindices) != nphotoperiod
+      error("Length of shuffled indices should equal the number of
+             different photoperiods.")
+    end
+
+    for j in 1:nphotoperiod
+      photoperiods[shuffleindices[j]] = (minperiod + diff*(j - 1)) * 60
+    end
   end
 
   alldays = Int64[ndays * nphotoperiod]
@@ -87,82 +82,21 @@ function multi_pp!(params::Dict)
 
   for t = 1:params["alldays"]
     firstminute = 1 + 60*24*(t - 1)
+
     pp = ceil(t / ndays)
-    lastminute = photoperiods[pp] + 24*60*(t - 1)
-    days[t] = firstminute:lastminute
-  end
 
-  params["envsignal"] = days
+    minlightperiod = photoperiods[pp] - dev
+    maxlightperiod = photoperiods[pp] + dev
 
-  return params
-end
-
-
-function single_pp_noise!(params::Dict)
-
-  meanlightperiod = 12
-  noise = 2
-
-  minlightperiod = meanlightperiod - noise
-  maxlightperiod = meanlightperiod + noise
-  alldays = Int64[24]
-  params["alldays"] = alldays[1]
-
-  days = [Int64[] for k in 1:params["alldays"]]
-
-  for t = 1:params["alldays"]
     lightperiod = rand(Uniform(minlightperiod, maxlightperiod))
+
     daytime = round(60 * lightperiod)
-    firstminute = 1 + 60*24*(t - 1)
+
     lastminute = (daytime + 24*60*(t - 1))
     days[t] = firstminute:lastminute
   end
 
   params["envsignal"] = days
-
-  return params
-end
-
-function multi_pp_noise!(params::Dict)
-
-  noise = 2
-
-  ndays = 24
-  nphotoperiod = 9
-  minperiod = 6
-  maxperiod = 18
-  diff = (maxperiod - minperiod)/(nphotoperiod - 1)
-  photoperiods = zeros(Int64, nphotoperiod)
-  shuffleindices = [5, 7, 9, 8, 6, 4, 2, 1, 3]
-
-  if length(shuffleindices) != nphotoperiod
-    error("Length of shuffled indices should equal the number of
-           different photoperiods.")
-  end
-
-  for j in 1:nphotoperiod
-    photoperiods[shuffledindices[j]] = (minperiod + diff*(j - 1)) * 60
-  end
-
-  alldays = Int64[ndays * nphotoperiod]
-  params["alldays"] = alldays[1]
-
-  days = [Int64[] for k in 1:params["alldays"]]
-
-  for t = 1:params["alldays"]
-    pp = ceil(t / ndays)
-    minlightperiod = photoperiods[pp] - noise
-    maxlightperiod = photoperiods[pp] + noise
-
-    lightperiod = rand(Uniform(minlightperiod, maxlightperiod))
-    daytime = round(60 * lightperiod)
-
-    firstminute = 1 + 60*24*(t - 1)
-    lastminute = (daytime + 24*60*(t - 1))
-
-    days[t] = firstminute:lastminute    
-  end
-
 
   return params
 end
