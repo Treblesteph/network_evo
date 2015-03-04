@@ -16,7 +16,7 @@ function runclock()
 
   tic()
   params = set_parameters()
-  add_clock_params!(params, ClockParameters.single_pp!)
+  add_clock_params!(params, 9, 0)
   model = runga(params, EvolveClock; init_pop_size = 50, stop_after = 25000)
   println()
   toc()
