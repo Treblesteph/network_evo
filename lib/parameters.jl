@@ -7,6 +7,7 @@ export set_parameters
 function set_parameters()
   popsize = Int64[50]
   nnodes = Int64[4]
+  daysperpp = Int64[4]
   maxlag = Int64[60*14]
   minlag = Int64[5]
 
@@ -61,6 +62,7 @@ function set_parameters()
 
   parameters::Dict{String, Any} = {"popsize" => popsize[1],
                                    "nnodes" => nnodes[1],
+                                   "daysperpp" => daysperpp[1],
                                    "maxlag" => maxlag[1],
                                    "minlag" => minlag[1],
                                    "mutatepath" => mutatepath[1],
