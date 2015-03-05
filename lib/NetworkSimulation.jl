@@ -65,19 +65,22 @@ function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
     # paths are active.
 
     # Shortcut names:
-    thisrowpaths::Array{Int64} = scenariomat[d, paths_i]
-    thisrowenvpath::Int64 = scenariomat[d, envpath_i]
-    thisrowgenes::Array{Int64} = scenariomat[d, genes_i]
-    thisrowinput::Int64 = scenariomat[d, input_i]
+    thisrowpaths = scenariomat[d, paths_i]
+    thisrowenvpath = scenariomat[d, envpath_i]
+    thisrowgenes = scenariomat[d, genes_i]
+    thisrowinput = scenariomat[d, input_i]
 
-    actcount::Int64 = length(find(y -> y == 1, scenariomat[d, paths_i])) +
-                      thisrowenvpath
-    acteffect::Int64 = sum(thisrowpaths[find(x -> x == 1, thisrowpaths)] .*
-                           thisrowgenes[find(x -> x == 1, thisrowpaths)]) +
+    pathonindex = find(x -> x == 1, thisrowpaths)
+    pathoffindex = find(y -> y == -1, thisrowpaths)
+
+    actcount::Int64 = length(pathonindex) + thisrowenvpath
+    acteffect::Int64 = sum(thisrowpaths[pathonindex] .*
+                           thisrowgenes[pathonindex]) +
                        (thisrowenvpath * thisrowinput)
-    repcount::Int64 = length(find(y -> y == -1, scenariomat[d, paths_i]))
-    repeffect::Int64 = - sum(thisrowpaths[find(x -> x == -1, thisrowpaths)] .*
-                             thisrowgenes[find(x -> x == -1, thisrowpaths)])
+
+    repcount::Int64 = length(pathoffindex)
+    repeffect::Int64 = - sum(thisrowpaths[pathoffindex] .*
+                             thisrowgenes[pathoffindex])
 
 
     # CASE 1: "or" logic gate.
