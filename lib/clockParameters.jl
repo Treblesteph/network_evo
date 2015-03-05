@@ -13,10 +13,73 @@ export add_clock_params!,
        multi_pp_noise!,
        harvard_forest
 
+function add_envsignal!(params::Dict, nphotoperiod::Int64, noise::Bool)
+
+  if noise
+    dev = 2
+    ndays = 6 * params["daysperpp"]
+  else
+    dev = 0
+    ndays = params["daysperpp"]
+  end
+
+  minperiod = 6
+  maxperiod = 18
+  meanperiod = (minperiod + maxperiod)/2
+
+  if nphotoperiod == 1
+
+    photoperiods = [meanperiod]
+
+  else
+
+    photoperiods = zeros(Int64, nphotoperiod)
+    diff = (maxperiod - minperiod)/(nphotoperiod - 1)
+    shuffleindices = [5, 7, 9, 8, 6, 4, 2, 1, 3]
+
+    if length(shuffleindices) != nphotoperiod
+      error("Length of shuffled indices should equal the number of
+             different photoperiods.")
+    end
+
+    for j in 1:nphotoperiod
+      photoperiods[shuffleindices[j]] = (minperiod + diff*(j - 1))
+    end
+  end
+
+  alldays = Int64[ndays * nphotoperiod]
+  params["alldays"] = alldays[1]
+
+  days = [Int64[] for k in 1:params["alldays"]]
+
+  for t = 1:params["alldays"]
+    firstminute = 1 + 60*24*(t - 1)
+
+    pp = ceil(t / ndays)
+
+    minlightperiod = photoperiods[pp] - dev
+    maxlightperiod = photoperiods[pp] + dev
+
+    if minlightperiod < maxlightperiod
+      lightperiod = rand(Uniform(minlightperiod, maxlightperiod))
+    else
+      lightperiod = minlightperiod
+    end
+
+    daytime = round(60 * lightperiod)
+
+    lastminute = convert(Int64, (daytime + 24*60*(t - 1)))
+    days[t] = firstminute:lastminute
+  end
+
+  params["envsignal"] = days
+
+  return params
+end
 
 function add_clock_params!(params::Dict, nphotoperiod=1, noise=false)
 
-  params = add_envsignal(params, nphotoperiod, noise)
+  params = add_envsignal!(params, nphotoperiod, noise)
 
   params["allhours"] = params["alldays"] * 24
   params["allmins"] = params["allhours"] * 60
@@ -39,66 +102,6 @@ function add_clock_params!(params::Dict, nphotoperiod=1, noise=false)
 
   params["gene1fit"] = dawns
   params["gene2fit"] = dusks
-end
-
-function add_envsignal!(params::Dict, nphotoperiod::Int64, noise::Bool)
-
-  if noise == 0
-    dev = 0
-    ndays = params["daysperpp"]
-  else
-    dev = 2
-    ndays = 6 * params["daysperpp"]
-  end
-
-  minperiod = 6
-  maxperiod = 18
-  meanperiod = (minperiod + maxperiod)/2
-
-  if nphotoperiod == 1
-
-    photoperiods = [meanperiod * 60]
-
-  else
-
-    photoperiods = zeros(Int64, nphotoperiod)
-    diff = (maxperiod - minperiod)/(nphotoperiod - 1)
-    shuffleindices = [5, 7, 9, 8, 6, 4, 2, 1, 3]
-
-    if length(shuffleindices) != nphotoperiod
-      error("Length of shuffled indices should equal the number of
-             different photoperiods.")
-    end
-
-    for j in 1:nphotoperiod
-      photoperiods[shuffleindices[j]] = (minperiod + diff*(j - 1)) * 60
-    end
-  end
-
-  alldays = Int64[ndays * nphotoperiod]
-  params["alldays"] = alldays[1]
-
-  days = [Int64[] for k in 1:params["alldays"]]
-
-  for t = 1:params["alldays"]
-    firstminute = 1 + 60*24*(t - 1)
-
-    pp = ceil(t / ndays)
-
-    minlightperiod = photoperiods[pp] - dev
-    maxlightperiod = photoperiods[pp] + dev
-
-    lightperiod = rand(Uniform(minlightperiod, maxlightperiod))
-
-    daytime = round(60 * lightperiod)
-
-    lastminute = (daytime + 24*60*(t - 1))
-    days[t] = firstminute:lastminute
-  end
-
-  params["envsignal"] = days
-
-  return params
 end
 
 # function harvard_forest!(params::Dict)
