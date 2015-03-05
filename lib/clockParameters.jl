@@ -43,7 +43,7 @@ function add_envsignal!(params::Dict, nphotoperiod::Int64, noise::Bool)
     end
 
     for j in 1:nphotoperiod
-      photoperiods[shuffleindices[j]] = (minperiod + diff*(j - 1))
+      photoperiods[shuffleindices[j]] = round(minperiod + diff*(j - 1))
     end
   end
 
