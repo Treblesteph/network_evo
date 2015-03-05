@@ -34,8 +34,8 @@ function make_decision_mat(nnodes::Int64, defaulton::Bool)
   # Decision array will become the last column of decision matrix, it is the
   # column determining the state at time t + 1 based on the scenariomat.
   decisionarray::Array{Bool, 1} = decision_array(scenariomat, genes_i,
-                                                  paths_i, input_i,
-                                                  envpath_i, gate_i,
+                                                  paths_i, envpath_i,
+                                                  input_i,gate_i,
                                                   init_i, defaulton)
   decdict = Dict{Array{Number}, Bool}()
   for r in 1:size(scenariomat, 1)
@@ -46,8 +46,8 @@ function make_decision_mat(nnodes::Int64, defaulton::Bool)
   return decdict
 end
 
-function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, input_i,
-                        envpath_i, gate_i, init_i, defaulton)
+function decision_array(scenariomat::Array{Int64}, genes_i, paths_i, envpath_i,
+                        input_i, gate_i, init_i, defaulton)
   decisionarray::Array{Bool, 1} = zeros(Int64, size(scenariomat, 1))
   for d in 1:length(decisionarray)
 
