@@ -11,8 +11,8 @@ function make_decision_mat(nnodes::Int64, defaulton::Bool)
 # i.e. giving the state at time t + 1 in the last column.
   genes_i = 1:nnodes            # Column indices for gene values.
   paths_i = 1+nnodes:2*nnodes   # Column indices for path values.
-  input_i = 1+2*nnodes          # Column index for environmental input.
-  envpath_i = 2+2*nnodes        # Column index for environmental path.
+  envpath_i = 1+2*nnodes          # Column index for environmental path.
+  input_i = 2+2*nnodes        # Column index for environmental input.
   gate_i = 3+2*nnodes           # Column index for logic gate.
   init_i = 4+2*nnodes           # Column index for initial value.
   # Range of values that each column can take.
