@@ -99,7 +99,7 @@ function plotConcs(net::Network, params::Dict)
 
   colourscheme = setColours()
 
-  concframe = setConcFrame(net)
+  concframe = setConcFrame(net, params)
 
   shadeframe = setShadeFrame(net, params)
 
@@ -112,7 +112,7 @@ function plotConcs(net::Network, params::Dict)
               y = "y", ygroup = "row",
               Geom.bar(position=:dodge),
               color = repeat(["dawns", "dusks", "days", "nights"],
-                             outer = [16])),
+                             outer = [params["alldays"]*params["nnodes"]])),
         Scale.color_discrete_manual(colourscheme...)))
 
 end
