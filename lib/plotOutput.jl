@@ -72,27 +72,33 @@ end
 
 function plotConcs(net::Network, params::Dict, filename::String)
 
+  nphotoperiods = convert(Int64, params["alldays"]/params["daysperpp"])
+
   colourscheme = setColours()
 
   concframe = setConcFrame(net, params)
 
   shadeframe = setShadeFrame(net, params)
 
-  plot1 = plot(Scale.x_continuous(minvalue = 0,
-                                  maxvalue = 24*params["alldays"]),
-               Scale.y_continuous(minvalue = 0, maxvalue = 1),
-               Geom.subplot_grid(
-                layer(concframe, x = "time", y = "gene",
-                      color = "variable", ygroup = "variable",
-                      Geom.line),
-                layer(shadeframe, xmin = "starts", xmax = "ends",
-                      y = "y", ygroup = "row",
-                      Geom.bar(position=:dodge),
-                      color = repeat(["dawns", "dusks", "days", "nights"],
-                                     outer = [params["alldays"]*params["nnodes"]])),
-                Scale.color_discrete_manual(colourscheme...)))
+  for pp in 1:nphotoperiods
 
-  draw(PDF("../runs/plot$(filename).pdf", 16inch, 6inch), plot1)
+    plot1 = plot(Scale.x_continuous(minvalue = 0,
+                                    maxvalue = 24*params["daysperpp"]),
+                 Scale.y_continuous(minvalue = 0, maxvalue = 1),
+                 Geom.subplot_grid(
+                   layer(concframe, x = "time", y = "gene",
+                         color = "variable", ygroup = "variable",
+                         Geom.line),
+                   layer(shadeframe, xmin = "starts", xmax = "ends",
+                         y = "y", ygroup = "row",
+                         Geom.bar(position=:dodge),
+                         color = repeat(["dawns", "dusks", "days", "nights"],
+                                        outer = [params["alldays"]*
+                                                 params["nnodes"]])),
+                   Scale.color_discrete_manual(colourscheme...)))
+
+    draw(PDF("../runs/plot$(filename)_pp$(pp).pdf", 16inch, 6inch), plot1)
+  end
 end
 
 function plotConcs(net::Network, params::Dict)
