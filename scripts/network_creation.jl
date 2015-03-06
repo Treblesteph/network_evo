@@ -8,10 +8,18 @@ add_clock_params!(params, 9, false)
 
 x = params["minlag"]
 
-acts = [0, 0, round(9.98*60), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-reps = [0, 0, 0, 0, 0, 0, round(6.98*60), 0, 0, 0, 0, 0, 0, 0, 0, 0]
+acts = [round(0*60), round(0*60), round(9.98*60), round(0*60),
+        round(0*60), round(0*60), round(0*60), round(0*60),
+        round(0*60), round(0*60), round(0*60), round(0*60),
+        round(0*60), round(0*60), round(0*60), round(0*60)]
 
-envs = [0, round(0.08*60), round(13.98*60), 0]
+reps = [round(0*60), round(0*60), round(0*60), round(0*60),
+        round(0*60), round(0*60), round(6.98*60), round(0*60),
+        round(0*60), round(0*60), round(0*60), round(0*60),
+        round(0*60), round(0*60), round(0*60), round(0*60)]
+
+envs = [round(0*60), round(0.08*60), round(13.98*60), round(0*60)]
+
 gates = [true, false, true, true]
 
 net = Network(convert(Array{Int64}, acts), convert(Array{Int64}, reps),
