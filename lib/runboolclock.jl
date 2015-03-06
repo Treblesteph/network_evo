@@ -42,5 +42,5 @@ function runclock()
 
   draw4node(net, params, model.population[1].fitness, now)
 
-  return (model, params)
+  return model
 end
