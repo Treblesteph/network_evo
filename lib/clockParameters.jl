@@ -17,10 +17,10 @@ function add_envsignal!(params::Dict, nphotoperiod::Int64, noise::Bool)
 
   if noise
     dev = 2
-    ndays = 6 * params["daysperpp"]
+    params["daysperpp"] = 6 * params["daysperpp"]
   else
     dev = 0
-    ndays = params["daysperpp"]
+    params["daysperpp"] = params["daysperpp"]
   end
 
   minperiod = 6
@@ -47,7 +47,7 @@ function add_envsignal!(params::Dict, nphotoperiod::Int64, noise::Bool)
     end
   end
 
-  alldays = Int64[ndays * nphotoperiod]
+  alldays = Int64[params["daysperpp"] * nphotoperiod]
   params["alldays"] = alldays[1]
 
   days = [Int64[] for k in 1:params["alldays"]]
@@ -55,7 +55,7 @@ function add_envsignal!(params::Dict, nphotoperiod::Int64, noise::Bool)
   for t = 1:params["alldays"]
     firstminute = 1 + 60*24*(t - 1)
 
-    pp = ceil(t / ndays)
+    pp = ceil(t / params["daysperpp"])
 
     minlightperiod = photoperiods[pp] - dev
     maxlightperiod = photoperiods[pp] + dev
