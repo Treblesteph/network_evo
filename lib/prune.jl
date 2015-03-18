@@ -19,6 +19,7 @@ function prune(net::Network, params::Dict, counter=1)
 
     pruned::Network = Network(paths, transmats, envpath, lags,
                               envlag, gates)
+    # Using constructor 3
     pruned.paths[counter] *= 0
     for n = 1:16
       print("$(pruned.paths[n][1]), ")
