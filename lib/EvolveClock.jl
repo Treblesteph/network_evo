@@ -24,8 +24,10 @@ function create_entity(tup::(Int64, Int64, Dict))
   # Fixing gene-gene paths on for the first k generations.
   if gen < params["pathson"]
     netw = Network(params["interacttypes"][1:2], 100, fitness, params)
+    # Using constructor 8
   else
     netw = Network(params["interacttypes"], 100, fitness, params)
+    # Using constructor 8
   end
 
   EvolvableNetwork(netw)
@@ -230,6 +232,7 @@ function crossover(tup::(Array{Any}, Dict))
 
   childnet = Network(childpaths, childtmats, childenvpath, childlags,
                      childenvlag, childgates, childgen)
+  # Using constructor 4
   childnet.concseries = runsim(childnet, params)
   child = EvolvableNetwork(childnet)
 end
