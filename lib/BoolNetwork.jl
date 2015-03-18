@@ -25,6 +25,7 @@ stochasticRep = Interaction([0, -1])
 
 #----- Networks
 
+# Network constructor 1 (default)
 type Network
   # Order of paths 1->1, 1->2, 1->3 ... 2->1, 2->2, ...
   paths::Array{Array{Int64}}
@@ -35,41 +36,49 @@ type Network
   gates::Array{Bool}  # (0 = or; 1 = and)
   generation::Int64
   concseries::Array{Bool}
+  analysis::Dict
 
   #-- Inner constructor with concentration timeseries.
 
+# Network constructor 2
   Network{T<:Int64, S<:Float64}(paths::Array{Array{T, 1}, 1},
           transmats::Array{Array{S, 2}, 1},
           envpath::Array{Bool, 1}, lags::Array{T, 1},
           envlag::Array{T, 1}, gates::Array{Bool, 1},
           concseries::Array{T}) =
           new(paths, transmats, envpath, lags, envlag,
-              gates, 1, concseries)
+              gates, 1, concseries, Dict())
+          # Using constructor 1
 
   #-- Inner constructor without concentration timeseries.
 
+# Network constructor 3
   Network{T<:Int64, S<:Float64}(paths::Array{Array{T, 1}, 1},
           transmats::Array{Array{S, 2}, 1},
           envpath::Array{Bool, 1}, lags::Array{T, 1},
           envlag::Array{T, 1}, gates::Array{Bool, 1}) =
           new(paths, transmats, envpath, lags,
-              envlag, gates, 1, [])
+              envlag, gates, 1, [], Dict())
+          # Using constructor 1
 
   #-- Inner constructor with generation number.
 
+# Network constructor 4
   Network{T<:Int64, S<:Float64}(paths::Array{Array{T, 1}, 1},
           transmats::Array{Array{S, 2}, 1},
           envpath::Array{Bool, 1}, lags::Array{T, 1},
           envlag::Array{T, 1}, gates::Array{Bool, 1},
           generation::T) =
           new(paths, transmats, envpath, lags, envlag,
-              gates, generation, [])
+              gates, generation, [], Dict())
+          # Using constructor 1
 end
 
 include("NetworkSimulation.jl")
 
 # Outer Network constructor for deterministic, predefined paths
 
+# Network constructor 5
 function Network(acts::Array{Int64}, reps::Array{Int64}, gates::Array{Bool},
                  envs::Array{Int64}, params::Dict)
 
@@ -107,6 +116,7 @@ function Network(acts::Array{Int64}, reps::Array{Int64}, gates::Array{Bool},
   envlag = envs
 
   net = Network(paths, transmats, envpath, lags, envlag, gates, 1)
+  # Using constructor 4
 
   net.concseries = runsim(net, params)
 
@@ -116,6 +126,7 @@ end
 
 #-- Outer Network constructor for predefined interactions.
 
+# Network constructor 6
 function Network(params::Dict)
 
   nnodes::Int64 = length(params["gates"])
@@ -129,6 +140,7 @@ function Network(params::Dict)
 
   network = Network(paths, transmats, params["envpaths"], params["lags"],
                     params["envlag"], params["gates"], 1)
+  # Using constructor 4
 
   network.concseries::Array{Bool} = runsim(network, params)
 
@@ -137,6 +149,7 @@ end
 
 #-- Outer Network constructor for random network.
 
+# Network constructor 7
 function Network(params::Dict, interactchoices::Array{Interaction})
   # This function can be used to create stochastic or deterministic models
   # by controlling the interactchoices array.
@@ -168,17 +181,20 @@ function Network(params::Dict, interactchoices::Array{Interaction})
   end
 
   network = Network(paths, transmats, envpaths, lags, envlag, gates)
+  # Using constructor 3
   network.concseries::Array{Bool} = runsim(network, params)
   return network
 end
 
 #-- Outer Network constructor for random fittest selected network.
 
+# Network constructor 8
 function Network(interactchoices::Array{Interaction}, selectfrom::Int64,
                  fitfunct::Function, params)
 # Generates an array of networks and chooses the fittest one.
   select_pop::Array{Network} = [Network(params,
                                 interactchoices) for j in 1:selectfrom]
+  # Using constructor 7
   fitnessval = ones(Float64, selectfrom)
   for g in 1:selectfrom
     fitnessval[g] = fitfunct(select_pop[g], params)
