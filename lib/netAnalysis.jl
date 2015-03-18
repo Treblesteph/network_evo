@@ -24,6 +24,16 @@ importall Base
   # if chain[1] == chain[end]
   # or only unexplored paths in row are (0,0)
 
+function analyse!(net::Network, params::Dict)
+
+  net.analysis["inputs"] = count_light_inputs(net, params)
+  net.analysis["cycles"] = count_cycles(net, params)
+  # net.analysis["oscillators"] = count_oscillators(net, params)
+
+  return net
+
+end
+
 function count_light_inputs(net::Network, params::Dict)
 
   inputs::Int64 = sum(net.envpath)
