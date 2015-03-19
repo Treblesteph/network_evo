@@ -12,35 +12,42 @@ import BoolNetwork.make_decision_mat,
        BoolNetwork.net2hash,
        ClockParameters.add_clock_params!
 
-function runclock()
+function runclock(photoperiods::Int64=1, noise::Bool=false,
+                  output::Bool=true)
 
   tic()
   params = set_parameters()
-  add_clock_params!(params, 1, false)
+  add_clock_params!(params, photoperiods, noise)
   model = runga(params, EvolveClock; init_pop_size = 50, stop_after = 25000)
   println()
   toc()
-  now = strftime("%F_%H_%M", time())
-  concs1 = model.population[1].net.concseries
-  concs2 = model.population[2].net.concseries
-  concs3 = model.population[3].net.concseries
-  concs4 = model.population[4].net.concseries
-  concs5 = model.population[5].net.concseries
-  all_fitnesses = model.all_fitnesses
-  save("../runs/out_$(now).jld", "concs1", concs1, "concs2", concs2,
-       "concs3", concs3, "concs4", concs4, "concs5", concs5,
-       "all_fitnesses", all_fitnesses)
 
-  h1 = net2hash(model.population[1].net)
 
-  plotConcs(model.population[1].net, params, now)
+  if output
 
-  #plotFitness(model.meantop10, model.gen_num, now)
+    now = strftime("%F_%H_%M", time())
+    concs1 = model.population[1].net.concseries
+    concs2 = model.population[2].net.concseries
+    concs3 = model.population[3].net.concseries
+    concs4 = model.population[4].net.concseries
+    concs5 = model.population[5].net.concseries
+    all_fitnesses = model.all_fitnesses
 
-  #TODO: Can a hash be saved with HDF5? That would be very useful...
-  net = prune(model.population[1].net, params)
+    save("../runs/out_$(now).jld", "concs1", concs1, "concs2", concs2,
+    "concs3", concs3, "concs4", concs4, "concs5", concs5,
+    "all_fitnesses", all_fitnesses)
 
-  draw4node(net, params, model.population[1].fitness, now)
+    h1 = net2hash(model.population[1].net)
+
+    plotConcs(model.population[1].net, params, now)
+
+    #plotFitness(model.meantop10, model.gen_num, now)
+
+    #TODO: Can a hash be saved with HDF5? That would be very useful...
+    net = prune(model.population[1].net, params)
+
+    draw4node(net, params, model.population[1].fitness, now)
+  end
 
   return model
 end
