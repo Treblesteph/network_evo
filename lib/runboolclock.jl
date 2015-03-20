@@ -18,7 +18,8 @@ function runclock(photoperiods::Int64=1, noise::Bool=false,
   tic()
   params = set_parameters()
   add_clock_params!(params, photoperiods, noise)
-  model = runga(params, EvolveClock; init_pop_size = 50, stop_after = 25000)
+  model = runga(params, EvolveClock; init_pop_size = 50,
+                stop_after = 25000, output)
   println()
   toc()
 
