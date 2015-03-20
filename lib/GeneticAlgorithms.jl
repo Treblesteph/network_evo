@@ -84,24 +84,25 @@ population(model::GAmodel = _g_model) = model.population
 
 
 function runga(params, mdl::Module; init_pop_size = 128,
-               stop_after = nothing)
+               stop_after = nothing, output::Bool = true)
   model = GAmodel()
   model.params = params
   model.ga = mdl
   model.init_pop_size = init_pop_size
 
-  runga(params, model, stop_after)
+  runga(params, model, stop_after, output)
 end
 
-function runga(params, model::GAmodel, stop_after = nothing)
+function runga(params, model::GAmodel, stop_after = nothing,
+               output::Bool = true)
   reset_model(model)
   create_initial_population(model)
   model.all_fitnesses = zeros(Float64, stop_after)
   model.meantop10 = zeros(Float64, stop_after)
   counter = 1
   while true
-    print("generation $(model.gen_num). ")
-    evaluate_population(model)
+    if output; print("generation $(model.gen_num). "); end
+    evaluate_population(model, output)
 
     grouper = @task model.ga.group_entities(model.population,
                                             model.params)
@@ -125,7 +126,7 @@ function runga(params, model::GAmodel, stop_after = nothing)
 
       crossover_population(model, groupings)
       mutate_population(model)
-      println("")
+      if output; println(""); end
       counter += 1
   end
 
@@ -152,19 +153,21 @@ function create_initial_population(model::GAmodel)
   end
 end
 
-function evaluate_population(model::GAmodel)
+function evaluate_population(model::GAmodel, output)
   scores = pmap(model.ga.fitness, [(model.population[k],
            model.params) for k in 1:length(model.population)])
-  print(" fitness: ")
+  if output; print(" fitness: "); end
   for i in 1:length(scores)
     fitness!(model.population[i], scores[i])
   end
   model.all_fitnesses[model.gen_num] = round(mean(scores), 2)
   sort!(scores; rev = true); topscores = scores[1:10]
   model.meantop10[model.gen_num] = mean(topscores)
-  print("mean fitness: $(round(mean(scores), 2)). ")
+  if output; print("mean fitness: $(round(mean(scores), 2)). "); end
   sort!(model.population; rev = true)
-  print("Best fitnesses: $([e.fitness for e in model.population[1:5]])")
+  if output
+    print("Best fitnesses: $([e.fitness for e in model.population[1:5]])")
+  end
 end
 
 function crossover_population(model::GAmodel, groupings)
