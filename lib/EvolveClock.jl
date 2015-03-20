@@ -191,9 +191,9 @@ Base.convert(::Type{Network}, T::Type{Network}) = T
 #      number, and makes crossovers of multiple element blocks (rather than
 #      each individual trait).
 
-function crossover(tup::(Array{Any}, Dict))
-  group = tup[1]; params = tup[2]
-  print("x")
+function crossover(tup::(Array{Any}, Dict, Bool))
+  group = tup[1]; params = tup[2]; output = tup[3]
+  if output; print("x"); end
   # Initialising an empty network to be the child.
   num_parents = length(group)
   # Set each path according to a random choice between parents.
@@ -237,15 +237,16 @@ function crossover(tup::(Array{Any}, Dict))
   child = EvolvableNetwork(childnet)
 end
 
-function mutate(tup::(EvolvableNetwork, Int64, Dict))
-  ent = tup[1]; generationnum = tup[2]; params = tup[3]
-  print(".")
+function mutate(tup::(EvolvableNetwork, Int64, Dict, Bool))
+  ent = tup[1]; generationnum = tup[2]; params = tup[3]; output = tup[4]
+  if output; print("."); end
   # Keep all paths on during first k generations.
   if generationnum >= params["pathson"]
     # Path sign switch mutations.
     if rand(Float64) < params["mutatepath"]
       pathind = (rand(Uint) % length(ent.net.paths)) + 1
-      ent.net.paths[pathind] = mutate_path!(ent.net.paths[pathind], params)
+      ent.net.paths[pathind] = mutate_path!(ent.net.paths[pathind],
+                                            params, output)
     end
   end
   # Transition matrix mutations.
@@ -254,29 +255,31 @@ function mutate(tup::(EvolvableNetwork, Int64, Dict))
   if rand(Float64) < params["mutateenvpath"]
     envpathind = (rand(Uint) % length(ent.net.envpath)) + 1
     ent.net.envpath[envpathind] =
-        mutate_envpath!(ent.net.envpath[envpathind], params)
+        mutate_envpath!(ent.net.envpath[envpathind], params, output)
   end
   # Lag duration mutations.
   if rand(Float64) < params["mutatelag"]
     lagind = (rand(Uint) % length(ent.net.lags)) + 1
-    ent.net.lags[lagind] = mutate_lag!(ent.net.lags[lagind], params)
+    ent.net.lags[lagind] = mutate_lag!(ent.net.lags[lagind],
+                                       params, output)
   end
   # Environmental lag mutations
   if rand(Float64) < params["mutateenvlag"]
     envlagind = (rand(Uint) % length(ent.net.envlag)) + 1
     ent.net.envlag[envlagind] =
-        mutate_envlag!(ent.net.envlag[envlagind], params)
+        mutate_envlag!(ent.net.envlag[envlagind], params, output)
   end
   # Gate type switch mutations.
   if rand(Float64) < params["mutategate"]
     gateind = (rand(Uint) % length(ent.net.gates)) + 1
-    ent.net.gates[gateind] = mutate_gate!(ent.net.gates[gateind], params)
+    ent.net.gates[gateind] = mutate_gate!(ent.net.gates[gateind],
+                                          params, output)
   end
   ent.net.concseries = runsim(ent.net, params)
   ent
 end
 
-function mutate_path!(path::Array{Int64}, params::Dict)
+function mutate_path!(path::Array{Int64}, params::Dict, output::Bool)
   # Mutation causes the path to switch according to following options:
   # activator >> repressor
   # activator >> no interaction
@@ -284,7 +287,7 @@ function mutate_path!(path::Array{Int64}, params::Dict)
   # repressor >> no interaction
   # no interaction >> activator
   # no interaction >> repressor
-  print("p")
+  if output; print("p"); end
   if sum(unique(path)) != 0
   # Activation or repression - stochastic or not
     randselect = rand()
@@ -305,19 +308,19 @@ function mutate_path!(path::Array{Int64}, params::Dict)
   path
 end
 
-function mutate_envpath!(envpath::Bool, params::Dict)
-  print("e")
+function mutate_envpath!(envpath::Bool, params::Dict, output::Bool)
+  if output; print("e"); end
   envpath = mod(envpath + 1, 2) # This will switch 0 >> 1 or 1 >> 0
 end
 
-function mutate_lag!(lag::Int64, params::Dict)
-  print("l")
+function mutate_lag!(lag::Int64, params::Dict, output::Bool)
+  if output; print("l"); end
   lag = round(cts_neighbr(lag, params["lag_std"],
                           params["minlag"], params["maxlag"]))
 end
 
-function mutate_envlag!(envlag::Int64, params::Dict)
-  print("d")
+function mutate_envlag!(envlag::Int64, params::Dict, output::Bool)
+  if output; print("d"); end
   envlag = round(cts_neighbr(envlag, params["envlag_std"],
                              params["minlag"], params["maxlag"]))
 end
@@ -327,8 +330,8 @@ function cts_neighbr(val::Number, stdev::Number, lower::Number, upper::Number)
   newval = rand(tnorm)
 end
 
-function mutate_gate!(gate::Bool, params::Dict)
-  print("g")
+function mutate_gate!(gate::Bool, params::Dict, output::Bool)
+  if output; print("g"); end
   # Mutation causes gate to switch (0 = or; 1 = and)
   # either or >> and
   # or and >> or
