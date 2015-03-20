@@ -124,8 +124,8 @@ function runga(params, model::GAmodel, stop_after = nothing,
       if fitthen - fitnow <= params["stopthreshold"]; break; end
     end
 
-      crossover_population(model, groupings)
-      mutate_population(model)
+      crossover_population(model, groupings, output)
+      mutate_population(model, ouput)
       if output; println(""); end
       counter += 1
   end
@@ -170,7 +170,7 @@ function evaluate_population(model::GAmodel, output)
   end
 end
 
-function crossover_population(model::GAmodel, groupings)
+function crossover_population(model::GAmodel, groupings, output)
   old_pop = model.population
 
   model.population = groupings[1]
@@ -186,7 +186,7 @@ function crossover_population(model::GAmodel, groupings)
   parents = {[old_pop[i] for i in group] for group in groupings}
 
   entities = pmap(model.ga.crossover, [(parents[k],
-             model.params) for k in 1:length(parents)])
+             model.params, output) for k in 1:length(parents)])
 
   for i in 1:length(entities)
     push!(model.population, entities[i])
@@ -194,9 +194,9 @@ function crossover_population(model::GAmodel, groupings)
   end
 end
 
-function mutate_population(model::GAmodel)
+function mutate_population(model::GAmodel, output)
   pmap(model.ga.mutate, [(model.population[k], model.gen_num,
-       model.params) for k in 1:length(model.population)])
+       model.params, output) for k in 1:length(model.population)])
 end
 
 end
