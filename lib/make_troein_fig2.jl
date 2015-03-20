@@ -12,7 +12,9 @@ function get_data(nruns::Int64, nphotpers::Int64, noise::Bool)
   # circclocks = Array(Int64, nruns)
   inputs = Array(Int64, nruns)
 
+  println("Running up to $(nruns)... ")
   for i in 1:nruns
+    print("i")
 
     model = runclock(nphotpers, noise, false)
     net = model.population[1].net
