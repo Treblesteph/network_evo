@@ -52,6 +52,12 @@ function add_envsignal!(params::Dict, nphotoperiod::Int64, noise::Bool)
 
   days = [Int64[] for k in 1:params["alldays"]]
 
+  dawnwindow = 3 * 60
+  duskwindow = 3 * 60
+  dawns = zeros(Int64, params["alldays"], dawnwindow)
+  dusks = zeros(Int64, params["alldays"], duskwindow)
+  nominaldusks = zeros(Int64, params["alldays"], duskwindow)
+
   for t = 1:params["alldays"]
     firstminute = 1 + 60*24*(t - 1)
 
@@ -67,12 +73,27 @@ function add_envsignal!(params::Dict, nphotoperiod::Int64, noise::Bool)
     end
 
     daytime = round(60 * lightperiod)
+    nominaldaytime = round(60 * photoperiods[pp])
 
     lastminute = convert(Int64, (daytime + 24*60*(t - 1)))
+    nominallastmin = convert(Int64, (nominaldaytime + 24*60*(t -1)))
     days[t] = firstminute:lastminute
+
+    dawnstart = firstminute
+    dawnend = dawnstart + dawnwindow - 1
+    duskend = lastminute
+    duskstart = duskend - duskwindow + 1
+    nominalduskend = nominallastmin
+    nominalduskstart = nominalduskend - duskwindow + 1
+
+    dawns[t, :] = dawnstart:dawnend
+    dusks[t, :] = duskstart:duskend
+    nominaldusks[t, :] = nominalduskstart:nominalduskend
   end
 
   params["envsignal"] = days
+  params["gene1fit"] = dawns
+  params["gene2fit"] = nominaldusks
 
   return params
 end
@@ -84,24 +105,8 @@ function add_clock_params!(params::Dict, nphotoperiod=1, noise=false)
   params["allhours"] = params["alldays"] * 24
   params["allmins"] = params["allhours"] * 60
 
-  dawnwindow = 3 * 60
-  duskwindow = 3 * 60
-  dawns = zeros(Int64, params["alldays"], dawnwindow)
-  dusks = zeros(Int64, params["alldays"], duskwindow)
-
-  for t = 1:params["alldays"] # Converting to arrays of minutes.
-    dawnstart = params["envsignal"][t][1]
-    dawnend = dawnstart + dawnwindow - 1
-    duskend = params["envsignal"][t][end]
-    duskstart = duskend - duskwindow + 1
-    dawns[t, :] = dawnstart:dawnend
-    dusks[t, :] = duskstart:duskend
-  end
-
   params["interacttypes"] = [repression, activation, noInteraction]
 
-  params["gene1fit"] = dawns
-  params["gene2fit"] = dusks
 end
 
 # function harvard_forest!(params::Dict)
