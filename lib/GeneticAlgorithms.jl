@@ -125,7 +125,7 @@ function runga(params, model::GAmodel, stop_after = nothing,
     end
 
       crossover_population(model, groupings, output)
-      mutate_population(model, ouput)
+      mutate_population(model, output)
       if output; println(""); end
       counter += 1
   end
@@ -195,8 +195,10 @@ function crossover_population(model::GAmodel, groupings, output)
 end
 
 function mutate_population(model::GAmodel, output)
-  pmap(model.ga.mutate, [(model.population[k], model.gen_num,
-       model.params, output) for k in 1:length(model.population)])
+  model.population =
+    pmap(model.ga.mutate,
+         [(model.population[k], model.gen_num,
+           model.params, output) for k in 1:length(model.population)])
 end
 
 end
