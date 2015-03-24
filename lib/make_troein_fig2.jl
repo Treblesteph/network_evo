@@ -14,7 +14,7 @@ function get_data(nruns::Int64, nphotpers::Int64, noise::Bool)
 
   println("Running up to $(nruns)... ")
   for i in 1:nruns
-    print("i")
+    print("$i")
 
     model = runclock(nphotpers, noise, false)
     net = model.population[1].net
@@ -38,8 +38,7 @@ function plot_data(data::DataFrame)
 
   data = stack(data, 2:ncol(data))
 
-  plot1 = plot(data, x = "run", y = "value",
-               Geom.subplot_grid(Geom.bar))
+  plot(data, x = "run", y = "value", Geom.subplot_grid(Geom.bar))
 
 end
 
