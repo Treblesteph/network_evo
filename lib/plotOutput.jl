@@ -92,7 +92,8 @@ function plotConcs(net::Network, params::Dict, filename::String)
                                      outer = [params["alldays"]*params["nnodes"]])),
                 Scale.color_discrete_manual(colourscheme...)))
 
-  draw(PDF("../runs/plot$(filename).pdf", 240inch, 12inch), plot1)
+  figwidth = 2 * params["alldays"]
+  draw(PDF("../runs/plot$(filename).pdf", figwidth * 1inch, 12inch), plot1)
 end
 
 function plotConcs(net::Network, params::Dict)
