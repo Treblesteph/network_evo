@@ -236,6 +236,31 @@ end
 
 #TODO: Add in extrinsic noise: a stochastic process that is common to a
 #      (sub)set of genes in the network.
+#
+# paths::Array{Array{Int64}}
+# transmats::Array{Array{Float64}}
+# envpath::Array{Bool} # Is gene activated by environment (bool.)?
+# lags::Array{Int64}
+# envlag::Array{Int64}
+# gates::Array{Bool}  # (0 = or; 1 = and)
+# generation::Int64
+# concseries::Array{Bool}
+# analysis::Dict
+
+
+function encodenet(net::Network)
+  # Paths: one column for each path
+  for p in 1:length(net.paths)
+    
+  end
+  #
+
+end
+
+function decodenet(filename::String)
+
+  return net
+end
 
 
 #---- Exporting networks to a hash.
