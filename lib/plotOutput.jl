@@ -92,7 +92,7 @@ function plotConcs(net::Network, params::Dict, filename::String)
                                      outer = [params["alldays"]*params["nnodes"]])),
                 Scale.color_discrete_manual(colourscheme...)))
 
-  draw(PDF("../runs/plot$(filename).pdf", 16inch, 6inch), plot1)
+  draw(PDF("../runs/plot$(filename).pdf", 240inch, 12inch), plot1)
 end
 
 function plotConcs(net::Network, params::Dict)
@@ -123,6 +123,6 @@ function plotFitness(fitnesses, xmax, filename::String)
   plot1 = plot(x = 1:xmax, y = fitnesses[1:xmax], Geom.line,
                Scale.x_continuous(minvalue = 0, maxvalue = xmax),
                Scale.y_continuous(minvalue = 0, maxvalue = maxfit))
-  draw(PDF("../runs/fitness$(filename).pdf", 12inch, 6inch), plot1)
+  draw(PDF("../runs/fitness$(filename).pdf", 240inch, 12inch), plot1)
 
 end
