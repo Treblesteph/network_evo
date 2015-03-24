@@ -13,18 +13,18 @@ import BoolNetwork.make_decision_mat,
        ClockParameters.add_clock_params!
 
 function runclock(photoperiods::Int64=1, noise::Bool=false,
-                  output::Bool=true)
+                  out::Bool=true)
 
   tic()
   params = set_parameters()
   add_clock_params!(params, photoperiods, noise)
   model = runga(params, EvolveClock; init_pop_size = 50,
-                stop_after = 25000, output)
+                stop_after = 25000, output=out)
   println()
   toc()
 
 
-  if output
+  if out
 
     now = strftime("%F_%H_%M", time())
     concs1 = model.population[1].net.concseries
