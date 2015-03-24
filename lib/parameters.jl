@@ -16,12 +16,12 @@ function set_parameters()
   mutatetmat = Float64[0.00]
   mutateenvpath = Float64[0.04]
   mutatelag = Float64[0.2]
-  mutateenvlag = Float64[0.2]
+  mutateenvlag = Float64[0]
   mutategate = Float64[0.04]
 
   tmat_std = Float64[0.00]
   lag_std = Int64[100]
-  envlag_std = Int64[100]
+  envlag_std = Int64[0]
 
   # Generation threshold, under which all gene-gene paths are fixed on.
   pathson = Int64[150]

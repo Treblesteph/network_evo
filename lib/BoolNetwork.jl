@@ -163,11 +163,9 @@ function Network(params::Dict, interactchoices::Array{Interaction})
   gates = Bool[gatechoices[ceil(length(gatechoices)*rand())]
                          for i in 1:params["nnodes"]]
 
-  # Setting random environmental paths.
+  # Setting fixed environmental paths.
   envpaths = Bool[round(rand()) for i in 1:params["nnodes"]]
-  envlag::Array{Int64} = [params["minlag"] + (Base.convert(Int64,
-                          floor((params["maxlag"] - params["minlag"]) *
-                          rand()))) for i = 1:params["nnodes"]]
+  envlag::Array{Int64} = [params["minlag"] for i = 1:params["nnodes"]]
   # Filling paths, lags, and transition matrices for each interaction.
   for p = 1:(params["nnodes"]^2)
     # Randomly select interaction type for each entry.
@@ -251,7 +249,7 @@ end
 function encodenet(net::Network)
   # Paths: one column for each path
   for p in 1:length(net.paths)
-    
+
   end
   #
 
