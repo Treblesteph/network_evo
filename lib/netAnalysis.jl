@@ -47,6 +47,29 @@ function count_cycles(net::Network, params::Dict)
 
 end
 
+function count_oscillators(net::Network, params::Dict)
+
+  paramsLL = copy(paramsDD) = copy(paramsLLDD) = copy(params)
+  paramsLL["envsignal"] = [1+(k-1)*24*60:k*24*60 for k in 1:params["daysperpp"]]
+  paramsDD["envsignal"] = [Int64[] for k in 1:params["daysperpp"]]
+
+  concsLL = runsim(net, paramsLL)
+  concsDD = runsim(net, paramsDD)
+
+  LL::Bool = findclock(concsLL)
+  DD::Bool = findclock(concsDD)
+  LLDD = LL && DD
+  clocks::Dict{String, Bool} = {"LL" => LL,
+                                "DD" => DD,
+                                "LLDD" => LLDD}
+end
+
+function findclock(concs::Array{Bool})
+
+
+
+end
+
 function get_cycles(net::Network, params::Dict)
 
   activepaths = get_active_paths(net, params["nnodes"])
