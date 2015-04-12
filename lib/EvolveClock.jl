@@ -285,7 +285,7 @@ function mutate(tup::(EvolvableNetwork, Int64, Dict, Bool))
   ent
 end
 
-function mutate_path!{T<:Int64}(paths::Array{Array{T, 1}, 1}, index::Uint64,
+function mutate_path!{T<:Int64}(paths::Array{Array{T, 2}, 1}, index::Uint64,
                       params::Dict, output::Bool)
   # Mutation causes the path to switch according to following options:
   # activator >> repressor
