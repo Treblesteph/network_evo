@@ -2,6 +2,7 @@
 
 ## Running simulations fewer times unnecessarily
 
+- [ ] crossover between identical networks
 - [ ] mutated field in Network
   - [ ] path effect
     - [ ] do the two genes interact with genes 1 & 2 (directly/indirectly)?
@@ -10,7 +11,7 @@
   - [ ] lag effect
     - [x] is the path active?
       - **before** ~1800 seconds for 1pp no noise
-      - **after** ~540 seconds for 1pp no noise
+      - **after** ~578 seconds for 1pp no noise (mean of three runs)
   - [ ] envlag effect
     - [x] is the envpath active?
       - **before** envlag mutations are not currently switched on
@@ -27,3 +28,4 @@
 ## Reduce RAM
 
 - [ ] store path entries as Int8 rather than Int64
+- [ ] delete concentration time series when they are no longer needed
