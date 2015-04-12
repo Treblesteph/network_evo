@@ -197,7 +197,7 @@ function crossover(tup::(Array{Any}, Dict, Bool))
   # Initialising an empty network to be the child.
   num_parents = length(group)
   # Set each path according to a random choice between parents.
-  childpaths = [Int64[] for i in 1:(params["nnodes"]^2)]
+  childpaths = [Int8[] for i in 1:(params["nnodes"]^2)]
   childtmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
   for i in 1:length(group[1].net.paths)
     parent = (rand(Uint) % num_parents) + 1
@@ -302,15 +302,15 @@ function mutate_path!{T<:Array, N}(paths::Array{T, N}, index::Uint64,
     if randselect <= 0.5
       path = -path
     elseif randselect <= 1
-      path = zeros(Int64, params["allmins"])
+      path = zeros(Int8, params["allmins"])
     end
   elseif sum(unique(path)) == 0
   # No interaction
     randselect = rand()
     if randselect <= 0.5
-      path = ones(Int64, params["allmins"])
+      path = ones(Int8, params["allmins"])
     elseif randselect <= 1
-      path = -1 * ones(Int64, params["allmins"])
+      path = -1 * ones(Int8, params["allmins"])
     end
   end
   paths[index] = path
@@ -327,7 +327,7 @@ function mutate_envpath!{T<:Bool}(envpaths::Array{T, 1}, index::Uint64,
 end
 
 function mutate_lag!{T<:Int64}(lags::Array{T, 1}, index::Uint64,
-                     paths::Array{Array{Int64}}, params::Dict, output::Bool)
+                     paths::Array{Array{Int8}}, params::Dict, output::Bool)
   lag = lags[index]
   path = paths[index]
 
@@ -356,7 +356,7 @@ function cts_neighbr(val::Number, stdev::Number, lower::Number, upper::Number)
   newval = rand(tnorm)
 end
 
-function path_effect(path::Array{Int64})
+function path_effect(path::Array{Int8})
   sum(path) != 0
 end
 
