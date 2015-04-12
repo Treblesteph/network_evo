@@ -262,7 +262,7 @@ function mutate(tup::(EvolvableNetwork, Int64, Dict, Bool))
   # Lag duration mutations.
   if rand(Float64) < params["mutatelag"]
     lagind = (rand(Uint) % length(ent.net.lags)) + 1
-    mutated = mutated || mutate_lag!(ent.net.lags, lagind, ent.net.paths
+    mutated = mutated || mutate_lag!(ent.net.lags, lagind, ent.net.paths,
                                      params, output)
   end
   # Environmental lag mutations
