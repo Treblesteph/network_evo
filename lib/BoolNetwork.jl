@@ -53,10 +53,10 @@ type Network
   #-- Inner constructor without concentration timeseries.
 
 # Network constructor 3
-  Network{T<:Int8, S<:Float64}(paths::Array{Array{T, 1}, 1},
+  Network{T1<:Int64, T2<:Int8, S<:Float64}(paths::Array{Array{T2, 1}, 1},
           transmats::Array{Array{S, 2}, 1},
-          envpath::Array{Bool, 1}, lags::Array{T, 1},
-          envlag::Array{T, 1}, gates::Array{Bool, 1}) =
+          envpath::Array{Bool, 1}, lags::Array{T1, 1},
+          envlag::Array{T1, 1}, gates::Array{Bool, 1}) =
           new(paths, transmats, envpath, lags,
               envlag, gates, 1, [], Dict())
           # Using constructor 1
@@ -64,11 +64,11 @@ type Network
   #-- Inner constructor with generation number.
 
 # Network constructor 4
-  Network{T<:Int8, S<:Float64}(paths::Array{Array{T, 1}, 1},
+  Network{T1<:Int8, T2<:Int64, S<:Float64}(paths::Array{Array{T1, 1}, 1},
           transmats::Array{Array{S, 2}, 1},
-          envpath::Array{Bool, 1}, lags::Array{T, 1},
-          envlag::Array{T, 1}, gates::Array{Bool, 1},
-          generation::T) =
+          envpath::Array{Bool, 1}, lags::Array{T2, 1},
+          envlag::Array{T2, 1}, gates::Array{Bool, 1},
+          generation::T2) =
           new(paths, transmats, envpath, lags, envlag,
               gates, generation, [], Dict())
           # Using constructor 1
