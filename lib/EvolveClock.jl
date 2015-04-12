@@ -285,7 +285,7 @@ function mutate(tup::(EvolvableNetwork, Int64, Dict, Bool))
   ent
 end
 
-function mutate_path!(paths::Array{Array{Int64}}, index::Int64,
+function mutate_path!{T<:Int64}(paths::Array{Array{T, 1}, 1}, index::Uint64,
                       params::Dict, output::Bool)
   # Mutation causes the path to switch according to following options:
   # activator >> repressor
@@ -316,7 +316,7 @@ function mutate_path!(paths::Array{Array{Int64}}, index::Int64,
   paths[index] = path
 end
 
-function mutate_envpath!(envpaths::Array{Bool}, index::Int64,
+function mutate_envpath!{T<:Bool}(envpaths::Array{T, 1}, index::Uint64,
                          params::Dict, output::Bool)
   envpath = envpaths[index]
 
@@ -326,7 +326,7 @@ function mutate_envpath!(envpaths::Array{Bool}, index::Int64,
   envpaths[index] = envpath
 end
 
-function mutate_lag!(lags::Array{Int64}, index::Int64,
+function mutate_lag!{T<:Int64}(lags::Array{T, 1}, index::Uint64,
                      paths::Array{Array{Int64}}, params::Dict, output::Bool)
   lag = lags[index]
   path = paths[index]
@@ -339,7 +339,7 @@ function mutate_lag!(lags::Array{Int64}, index::Int64,
   path_effect(path)
 end
 
-function mutate_envlag!(envlags::Array{Int64}, index::Int64,
+function mutate_envlag!{T<:Int64}(envlags::Array{T}, index::Uint64,
                         envpaths::Array{Bool}, params::Dict, output::Bool)
   envlag = envlags[index]
   envpath = envpaths[index]
@@ -364,7 +364,7 @@ function envpath_effect(envpath::Bool)
   envpath
 end
 
-function mutate_gate!(gates::Array{Bool}, index::Int64, params::Dict, output::Bool)
+function mutate_gate!{T<:Bool}(gates::Array{T}, index::Uint64, params::Dict, output::Bool)
   gate = gates[index]
   if output; print("g"); end
   # Mutation causes gate to switch (0 = or; 1 = and)
