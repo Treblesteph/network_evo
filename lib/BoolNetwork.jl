@@ -14,7 +14,7 @@ export Network
 #----- Define interactions
 
 type Interaction
-  states::Array{Int64}
+  states::Array{Int8}
 end
 
 repression = Interaction([-1])
@@ -28,7 +28,7 @@ stochasticRep = Interaction([0, -1])
 # Network constructor 1 (default)
 type Network
   # Order of paths 1->1, 1->2, 1->3 ... 2->1, 2->2, ...
-  paths::Array{Array{Int64}}
+  paths::Array{Array{Int8}}
   transmats::Array{Array{Float64}}
   envpath::Array{Bool} # Is gene activated by environment (bool.)?
   lags::Array{Int64}
@@ -41,7 +41,7 @@ type Network
   #-- Inner constructor with concentration timeseries.
 
 # Network constructor 2
-  Network{T<:Int64, S<:Float64}(paths::Array{Array{T, 1}, 1},
+  Network{T<:Int8, S<:Float64}(paths::Array{Array{T, 1}, 1},
           transmats::Array{Array{S, 2}, 1},
           envpath::Array{Bool, 1}, lags::Array{T, 1},
           envlag::Array{T, 1}, gates::Array{Bool, 1},
@@ -53,7 +53,7 @@ type Network
   #-- Inner constructor without concentration timeseries.
 
 # Network constructor 3
-  Network{T<:Int64, S<:Float64}(paths::Array{Array{T, 1}, 1},
+  Network{T<:Int8, S<:Float64}(paths::Array{Array{T, 1}, 1},
           transmats::Array{Array{S, 2}, 1},
           envpath::Array{Bool, 1}, lags::Array{T, 1},
           envlag::Array{T, 1}, gates::Array{Bool, 1}) =
@@ -64,7 +64,7 @@ type Network
   #-- Inner constructor with generation number.
 
 # Network constructor 4
-  Network{T<:Int64, S<:Float64}(paths::Array{Array{T, 1}, 1},
+  Network{T<:Int8, S<:Float64}(paths::Array{Array{T, 1}, 1},
           transmats::Array{Array{S, 2}, 1},
           envpath::Array{Bool, 1}, lags::Array{T, 1},
           envlag::Array{T, 1}, gates::Array{Bool, 1},
@@ -94,16 +94,16 @@ function Network(acts::Array{Int64}, reps::Array{Int64}, gates::Array{Bool},
     end
   end
 
-  paths = [Int64[] for i in 1:(params["nnodes"]^2)]
+  paths = [Int8[] for i in 1:(params["nnodes"]^2)]
   transmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
 
   for i in 1:(params["nnodes"]^2)
     if acts[i] > 0
-      paths[i] = ones(Int64, params["allmins"])
+      paths[i] = ones(Int8, params["allmins"])
     elseif reps[i] > 0
-      paths[i] = -1 * ones(Int64, params["allmins"])
+      paths[i] = -1 * ones(Int8, params["allmins"])
     else
-      paths[i] = zeros(Int64, params["allmins"])
+      paths[i] = zeros(Int8, params["allmins"])
     end
   end
 
@@ -130,7 +130,7 @@ end
 function Network(params::Dict)
 
   nnodes::Int64 = length(params["gates"])
-  paths = [Int64[] for i in 1:(params["nnodes"]^2)]
+  paths = [Int8[] for i in 1:(params["nnodes"]^2)]
   transmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
 
   for j in 1:(nnodes^2)
@@ -154,7 +154,7 @@ function Network(params::Dict, interactchoices::Array{Interaction})
   # This function can be used to create stochastic or deterministic models
   # by controlling the interactchoices array.
   # Initialising fields of Network.
-  paths = [Int64[] for i in 1:(params["nnodes"]^2)]
+  paths = [Int8[] for i in 1:(params["nnodes"]^2)]
   lags = zeros(Int64, params["nnodes"]^2)
   transmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
 
@@ -216,13 +216,13 @@ end
 
 function create_interaction(i::Interaction, allmins::Int64)
   if i == repression
-    chain = -1 * ones(Int64, allmins)
+    chain = -1 * ones(Int8, allmins)
     transmat = [1 0; 0 1]
   elseif i == activation
-    chain = ones(Int64, allmins)
+    chain = ones(Int8, allmins)
     transmat = [1 0; 0 1]
   elseif i == noInteraction
-    chain = zeros(Int64, allmins)
+    chain = zeros(Int8, allmins)
     transmat = [1 0; 0 1]
   else
     transmat::Array{Float64} = create_transmat(i.states)
@@ -235,7 +235,7 @@ end
 #TODO: Add in extrinsic noise: a stochastic process that is common to a
 #      (sub)set of genes in the network.
 #
-# paths::Array{Array{Int64}}
+# paths::Array{Array{Int8}}
 # transmats::Array{Array{Float64}}
 # envpath::Array{Bool} # Is gene activated by environment (bool.)?
 # lags::Array{Int64}
