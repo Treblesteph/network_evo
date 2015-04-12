@@ -17,7 +17,7 @@ function make_decision_mat(nnodes::Int64, defaulton::Bool)
   init_i = 4+2*nnodes           # Column index for initial value.
   # Range of values that each column can take.
   genechoices = [Bool[0, 1] for i in 1:nnodes]
-  pathchoices = [Int64[0, 1, -1] for i in 1:nnodes]
+  pathchoices = [Int8[0, 1, -1] for i in 1:nnodes]
   inputchoices = Array[Bool[0, 1]]
   envpathchoices = Array[Bool[0, 1]]
   gatechoices = Array[Bool[0, 1]] # 0 = or; 1 = and.
