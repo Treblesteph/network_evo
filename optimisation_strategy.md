@@ -10,7 +10,7 @@
     - [ ] does the gene interact with genes 1 & 2 (directly/indirectly)?
   - [ ] lag effect
     - [x] is the path active?
-      - **before** ~1800 seconds for 1pp no noise
+      - **before** ~1901 seconds for 1pp no noise (mean of three runs)
       - **after** ~578 seconds for 1pp no noise (mean of three runs)
   - [ ] envlag effect
     - [x] is the envpath active?
