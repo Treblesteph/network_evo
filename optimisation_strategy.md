@@ -19,8 +19,10 @@
       - **before** envlag mutations are not currently switched on
       - **after** envlag mutations are not currently switched on
   - [ ] gate effect
-    - [ ] is there more than one incoming path?
-    - [ ] does the gene interact with genes 1 & 2 (directly/indirectly)?
+    - [x] is there more than one incoming path?
+    - [x] does the gene interact with genes 1 & 2 (directly/indirectly)?
+    - **before** ~721 seconds for 1pp no noise (mean of three runs)
+    - **after** ~641 seconds for 1pp no noise (mean of three runs)
 
 ## Speeding up current simulation
 
@@ -29,5 +31,5 @@
 
 ## Reduce RAM
 
-- [ ] store path entries as Int8 rather than Int64
+- [x] store path entries as Int8 rather than Int64
 - [ ] delete concentration time series when they are no longer needed
