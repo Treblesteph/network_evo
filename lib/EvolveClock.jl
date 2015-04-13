@@ -161,11 +161,6 @@ function troeinfit(net::Network, params::Dict)
   score = fitnessExp + (fitnessG1 + fitnessG2) / 2
 end
 
-function isless(lhs::EvolvableNetwork, rhs::EvolvableNetwork)
-  println("calling isless method...")
-  abs(lhs.fitness) > abs(rhs.fitness)
-end
-
 function group_entities(pop, params)
   threshold = floor(params["percentkilled"] * length(pop))
   pop = pop[1:end-threshold]
@@ -189,16 +184,29 @@ end
 
 Base.convert(::Type{Network}, T::Type{Network}) = T
 
-#TODO: Make a more sophisticated crossover function that sets a switchpoint
-#      number, and makes crossovers of multiple element blocks (rather than
-#      each individual trait).
+function isequal(net1::Network, net2::Network)
+
+  aredifferent = false
+
+  aredifferent = aredifferent || net1.paths != net2.paths
+  aredifferent = aredifferent || net1.transmats != net2.transmats
+  aredifferent = aredifferent || net1.envpath != net2.envpath
+  aredifferent = aredifferent || net1.lags != net2.lags
+  aredifferent = aredifferent || net1.envlag != net2.envlag
+  aredifferent = aredifferent || net1.gates != net2.gates
+
+  areequal = !aredifferent
+end
 
 function crossover(tup::(Array{Any}, Dict, Bool))
   group = tup[1]; params = tup[2]; output = tup[3]
 
   # Do not perform crossover if parents are identical
 
-  if (length(group) == 2) && group[1].net == group[2].net
+  parent1 = group[1].net
+  parent2 = group[2].net
+
+  if (length(group) == 2) && isequal(parent1, parent2)
 
     return group[1]
 
@@ -254,20 +262,6 @@ function crossover(tup::(Array{Any}, Dict, Bool))
     childnet.concseries = runsim(childnet, params)
     child = EvolvableNetwork(childnet)
   end
-end
-
-function isequal(net1::Network, net2::Network)
-
-  aredifferent = false
-
-  aredifferent = aredifferent || net1.paths != net2.paths
-  aredifferent = aredifferent || net1.transmats != net2.transmats
-  aredifferent = aredifferent || net1.envpath != net2.envpath
-  aredifferent = aredifferent || net1.lags != net2.lags
-  aredifferent = aredifferent || net1.envlag != net2.envlag
-  aredifferent = aredifferent || net1.gates != net2.gates
-
-  areequal = !aredifferent
 end
 
 function mutate(tup::(EvolvableNetwork, Int64, Dict, Bool))
