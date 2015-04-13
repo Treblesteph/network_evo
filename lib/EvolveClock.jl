@@ -301,9 +301,8 @@ function mutate(tup::(EvolvableNetwork, Int64, Dict, Bool))
   # Gate type switch mutations.
   if rand(Float64) < params["mutategate"]
     gateind = (rand(Uint) % length(ent.net.gates)) + 1
-    ent.net.gates[gateind] = mutate_gate!(ent.net.gates, gateind,
-                                          params, output)
-    mutated = true
+    mutated = mutated || mutate_gate!(ent.net.gates, gateind,
+                                      params, ent.net.paths, output)
   end
 
   if mutated
@@ -391,7 +390,8 @@ function envpath_effect(envpath::Bool)
   envpath
 end
 
-function mutate_gate!{T<:Bool}(gates::Array{T}, index::Uint64, params::Dict, output::Bool)
+function mutate_gate!{T<:Bool}(gates::Array{T}, index::Uint64, params::Dict,
+                               paths, output::Bool)
   gate = gates[index]
   if output; print("g"); end
   # Mutation causes gate to switch (0 = or; 1 = and)
@@ -399,6 +399,53 @@ function mutate_gate!{T<:Bool}(gates::Array{T}, index::Uint64, params::Dict, out
   # or and >> or
   gate = mod(gate + 1, 2) # This will switch 0 >> 1 or 1 >> 0
   gates[index] = gate
+
+  gate_effect(index, paths, params["nnodes"])
+end
+
+function gate_effect(gateindex::Uint64, paths::Array{Array{Int8}}, nnode)
+  effect = false
+  # Effect if gene has more than one input
+    # Input path indices: gene 1: 1:4
+    #                     gene 2: 5:8
+    #                     gene 3: 9:12
+    #                     gene 4: 13:16
+  inputindices = 1 + ((gateindex - 1) * nnode) : gateindex * nnode
+
+  incomingpaths = 0
+
+  for n in 1:nnode
+    if sum(paths[inputindices[n]]) != 0
+      incomingpaths += 1
+    end
+  end
+
+  if incomingpaths > 1
+    effect = true
+  end
+
+  # Effect if gene is 1 or 2
+
+  if (gateindex == 1) || (gateindex == 2)
+    effect = true
+  end
+
+  # Effect if gene is not 1 or 2 but has outgoing paths
+
+    # Output path indices: gene 1: 1, 5, 9, 13
+    #                      gene 2: 2, 6, 10, 14
+    #                      gene 3: 3, 7, 11, 15
+    #                      gene 4: 4, 8, 12, 16
+
+  outputindices = gateindex : nnode : gateindex + ((nnode - 1) * nnode)
+
+  for n in 1:nnode
+    if sum(paths[outputindices[n]]) != 0
+      effect = true
+    end
+  end
+
+  return effect
 end
 
 end # EvolveClock
