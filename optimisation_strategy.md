@@ -2,7 +2,9 @@
 
 ## Running simulations fewer times unnecessarily
 
-- [ ] crossover between identical networks
+- [x] crossover between identical networks
+  - **before** ~721 seconds for 1pp no noise (mean of three runs)
+  - **after** ~1260 seconds for 1pp no noise (mean of three runs)
 - [ ] mutated field in Network
   - [ ] path effect
     - [ ] do the two genes interact with genes 1 & 2 (directly/indirectly)?
