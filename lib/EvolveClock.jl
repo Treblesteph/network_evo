@@ -184,7 +184,7 @@ end
 
 Base.convert(::Type{Network}, T::Type{Network}) = T
 
-function isequal(net1::Network, net2::Network)
+function isidentical(net1::Network, net2::Network)
 
   aredifferent = false
 
@@ -206,7 +206,7 @@ function crossover(tup::(Array{Any}, Dict, Bool))
   parent1 = group[1].net
   parent2 = group[2].net
 
-  if (length(group) == 2) && isequal(parent1, parent2)
+  if (length(group) == 2) && isidentical(parent1, parent2)
 
     return group[1]
 
