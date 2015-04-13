@@ -1,5 +1,7 @@
 module EvolveClock
 
+importall Base
+
 import BoolNetwork.runsim,
        BoolNetwork.Network,
        GeneticAlgorithms.Entity
@@ -193,48 +195,79 @@ Base.convert(::Type{Network}, T::Type{Network}) = T
 
 function crossover(tup::(Array{Any}, Dict, Bool))
   group = tup[1]; params = tup[2]; output = tup[3]
-  if output; print("x"); end
-  # Initialising an empty network to be the child.
-  num_parents = length(group)
-  # Set each path according to a random choice between parents.
-  childpaths = [Int8[] for i in 1:(params["nnodes"]^2)]
-  childtmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
-  for i in 1:length(group[1].net.paths)
-    parent = (rand(Uint) % num_parents) + 1
-    childpaths[i] = group[parent].net.paths[i]
-    childtmats[i] = group[parent].net.transmats[i]
-  end
-  # Set each environmental path according to a random choice between parents.
-  childenvpath = zeros(Bool, params["nnodes"])
-  for i in 1:length(group[1].net.envpath)
-    parent = (rand(Uint) % num_parents) + 1
-    childenvpath[i] = group[parent].net.envpath[i]
-  end
-  # Set each environmental lag according to a random choice between parents.
-  childenvlag = zeros(Int64, params["nnodes"])
-  for i in 1:length(group[1].net.envlag)
-    parent = (rand(Uint) % num_parents) + 1
-    childenvlag[i] = group[parent].net.envlag[i]
-  end
-  # Set each lag according to a random choice between parents.
-  childlags = zeros(Int64, (params["nnodes"])^2)
-  for i in 1:length(group[1].net.lags)
-    parent = (rand(Uint) % num_parents) + 1
-    childlags[i] = group[parent].net.lags[i]
-  end
-  # Set each gate according to a random choice between parents.
-  childgates = zeros(Bool, params["nnodes"])
-  for i in 1:length(group[1].net.gates)
-    parent = (rand(Uint) % num_parents) + 1
-    childgates[i] = group[parent].net.gates[i]
-  end
-  childgen = 1 + group[1].net.generation
 
-  childnet = Network(childpaths, childtmats, childenvpath, childlags,
-                     childenvlag, childgates, childgen)
-  # Using constructor 4
-  childnet.concseries = runsim(childnet, params)
-  child = EvolvableNetwork(childnet)
+  # Do not perform crossover if parents are identical
+
+  if (length(group) == 2) && group[1].net == group[2].net
+
+    return group[1]
+
+  else
+    if output; print("x"); end
+
+    # Initialising an empty network to be the child.
+    num_parents = length(group)
+
+    # Set each path according to a random choice between parents.
+    childpaths = [Int8[] for i in 1:(params["nnodes"]^2)]
+    childtmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
+
+    for i in 1:length(group[1].net.paths)
+      parent = (rand(Uint) % num_parents) + 1
+      childpaths[i] = group[parent].net.paths[i]
+      childtmats[i] = group[parent].net.transmats[i]
+    end
+
+    # Set each environmental path according to a random choice between parents.
+    childenvpath = zeros(Bool, params["nnodes"])
+    for i in 1:length(group[1].net.envpath)
+      parent = (rand(Uint) % num_parents) + 1
+      childenvpath[i] = group[parent].net.envpath[i]
+    end
+
+    # Set each environmental lag according to a random choice between parents.
+    childenvlag = zeros(Int64, params["nnodes"])
+    for i in 1:length(group[1].net.envlag)
+      parent = (rand(Uint) % num_parents) + 1
+      childenvlag[i] = group[parent].net.envlag[i]
+    end
+
+    # Set each lag according to a random choice between parents.
+    childlags = zeros(Int64, (params["nnodes"])^2)
+    for i in 1:length(group[1].net.lags)
+      parent = (rand(Uint) % num_parents) + 1
+      childlags[i] = group[parent].net.lags[i]
+    end
+
+    # Set each gate according to a random choice between parents.
+    childgates = zeros(Bool, params["nnodes"])
+    for i in 1:length(group[1].net.gates)
+      parent = (rand(Uint) % num_parents) + 1
+      childgates[i] = group[parent].net.gates[i]
+    end
+    childgen = 1 + group[1].net.generation
+
+    childnet = Network(childpaths, childtmats, childenvpath, childlags,
+                       childenvlag, childgates, childgen)
+
+    # Using constructor 4
+    childnet.concseries = runsim(childnet, params)
+    child = EvolvableNetwork(childnet)
+  end
+end
+
+function isequal(net1::Network, net2::Network)
+
+  aredifferent = false
+
+  aredifferent = aredifferent || net1.paths != net2.paths
+  aredifferent = aredifferent || net1.transmats != net2.transmats
+  aredifferent = aredifferent || net1.envpath != net2.envpath
+  aredifferent = aredifferent || net1.lags != net2.lags
+  aredifferent = aredifferent || net1.envlag != net2.envlag
+  aredifferent = aredifferent || net1.gates != net2.gates
+
+  areequal = !aredifferent
 end
 
 function mutate(tup::(EvolvableNetwork, Int64, Dict, Bool))
