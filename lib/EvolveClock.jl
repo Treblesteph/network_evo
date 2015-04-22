@@ -43,7 +43,13 @@ end
 
 function fitness(tup::(EvolvableNetwork, Dict))
   ent = tup[1]; params = tup[2]
-  fitness(ent.net, params)
+
+  if ent.net.mutated
+    return fitness(ent.net, params)
+  else
+    return ent.net.lastfitness
+  end
+
 end
 
 #TODO: Make an additional fitness cost to clustering (niching), so that
@@ -108,7 +114,13 @@ function fitness(net::Network, params::Dict)
     allG1fitness = [allG1fitness, thisG1fitness]
     allG2fitness = [allG2fitness, thisG2fitness]
   end
-  score = mean([allG1fitness, allG2fitness]) + n_paths/params["pathcostweight"]
+
+  score = mean([allG1fitness, allG2fitness]) +
+          n_paths / params["pathcostweight"]
+
+  net.lastfitness = score
+
+  return score
 
 end
 
@@ -304,6 +316,8 @@ function mutate(tup::(EvolvableNetwork, Int64, Dict, Bool))
     mutated = mutated || mutate_gate!(ent.net.gates, gateind,
                                       params, ent.net.paths, output)
   end
+
+  ent.net.mutated = mutated
 
   if mutated
     ent.net.concseries = runsim(ent.net, params)
