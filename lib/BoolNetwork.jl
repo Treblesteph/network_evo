@@ -37,6 +37,8 @@ type Network
   generation::Int64
   concseries::Array{Bool}
   analysis::Dict
+  mutated::Bool
+  lastfitness::Float64
 
   #-- Inner constructor with concentration timeseries.
 
@@ -47,7 +49,7 @@ type Network
           envlag::Array{T, 1}, gates::Array{Bool, 1},
           concseries::Array{T}) =
           new(paths, transmats, envpath, lags, envlag,
-              gates, 1, concseries, Dict())
+              gates, 1, concseries, Dict(), false, 1.0)
           # Using constructor 1
 
   #-- Inner constructor without concentration timeseries.
@@ -58,7 +60,7 @@ type Network
           envpath::Array{Bool, 1}, lags::Array{T1, 1},
           envlag::Array{T1, 1}, gates::Array{Bool, 1}) =
           new(paths, transmats, envpath, lags,
-              envlag, gates, 1, [], Dict())
+              envlag, gates, 1, [], Dict(), false, 1.0)
           # Using constructor 1
 
   #-- Inner constructor with generation number.
@@ -70,7 +72,7 @@ type Network
           envlag::Array{T2, 1}, gates::Array{Bool, 1},
           generation::T2) =
           new(paths, transmats, envpath, lags, envlag,
-              gates, generation, [], Dict())
+              gates, generation, [], Dict(), false, 1.0)
           # Using constructor 1
 end
 
