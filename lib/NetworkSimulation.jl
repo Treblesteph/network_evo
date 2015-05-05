@@ -227,32 +227,140 @@ function runsim(net::Network, params::Dict)
 
   decisionrow = Array(Int64, nnodes * 2 + 4)
 
-  for t in 1:(allmins - 1) # First row is initial condition.
+  # Sampling time according to lag intervals.
+  sampletimes = get_sample_times(allmins, lags, envlag, params["envsignal"])
 
-    # Take all current and previous concentrations, all incoming paths and
-    # their lags, and the gate type, to determine the next concentration.
+  if sampletimes[1] == 1
+    sampletimes = sampletimes[2:end]
+  end
 
-    ncount = 0 # Determines what path/lag index to use from the 1D arrays.
+  samplecount = 1
 
-    for nd in 1:nnodes
+  for t in 2:allmins # Initial condition (at t = 1) is already set.
 
-      for k in 1:nnodes
-        twithlag::Int64 = maxlag + t - lags[ncount + k]
-        decisionrow[k] = concs[twithlag, k] # Genes
-        decisionrow[k + nnodes] = paths[ncount + k][twithlag] # Paths
+    # If the time point is not in sampletimes, don't change anything.
+    if samplecount > length(sampletimes)
+      concs[t + maxlag, :] = concs[t + maxlag - 1, :]
+    else
+      if (t != sampletimes[samplecount])
+        concs[t + maxlag, :] = concs[t + maxlag - 1, :]
+
+      # If the time point is in sampletimes, update according to decisionrow.
+      else
+
+        samplecount += 1
+
+        # Take all current and previous concentrations, all incoming paths and
+        # their lags, and the gate type, to determine the next concentration.
+
+        ncount = 0 # Determines what path/lag index to use from the 1D arrays.
+
+        # Loop through nodes to fill their concentrations in turn.
+        for nd in 1:nnodes
+
+          # Loop through all nodes to determine how they affect node nd.
+          for k in 1:nnodes
+
+            # Previous time point (taking lag into account too).
+            twithlag::Int64 = maxlag + t - 1 - lags[ncount + k]
+
+            # Fill all gene values from previous time point into decisionrow.
+            decisionrow[k] = concs[twithlag, k]
+
+            # Fill all path values from previous time point into decisionrow.
+            decisionrow[k + nnodes] = paths[ncount + k][twithlag]
+
+          end
+
+          # Increment ncount by nnodes to start on genes/paths for next node.
+          ncount += nnodes
+
+          # Buffer is the space filled in decisionrow by gene and paths values.
+          buffer = nnodes * 2
+
+          # Fill envpath value (time invariable) into decisionrow.
+          decisionrow[buffer + 1] = envpaths[nd]
+
+          # Fill env signal value from previous time point into decisionrow.
+          decisionrow[buffer + 2] = environ_signal[allmins + t - 1 - envlag[nd]]
+
+          # Fill gate value (time invariable) into decisionrow.
+          decisionrow[buffer + 3] = gates[nd]
+
+          # Fill value for this gene at previous time point into decisionrow.
+          decisionrow[buffer + 4] = concs[maxlag + t - 1, nd]
+
+          # Compare this row to the rows in decision matrix to determine
+          # the next state of gene nd.
+          concs[t + maxlag, nd] = decisionhash[decisionrow]
+        end
       end
-      ncount += nnodes
-
-      buffer = nnodes * 2
-      decisionrow[buffer + 1] = envpaths[nd] # Environmental paths
-      decisionrow[buffer + 2] = environ_signal[allmins + t - envlag[nd]]
-      decisionrow[buffer + 3] = gates[nd]
-      decisionrow[buffer + 4] = concs[maxlag + t, nd] # This gene init.
-
-      # Next will compare this row to the rows in decision matrix to determine
-      # the next state of gene nd.
-      concs[t + maxlag + 1, nd] = decisionhash[decisionrow]
     end
   end
+
+  # Delete history from the beginning of concs matrix.
   concs = concs[maxlag+1:end, :]
+
+end
+
+function get_sample_times(allmins, lags, envlag, envsignal)
+
+  sampletimes = Int64[]
+
+  # Add 1 to the array so the initial state is always calculated.
+  push!(sampletimes, 1)
+
+  uniquelags = unique(lags)
+
+  # Discard any lags that are multiples of others.
+  sortedlags = sort(uniquelags, rev=true)
+  keeplags = [sortedlags[end]] # smallest lag can't be a multiple
+
+  for i in (length(sortedlags) - 1)
+    lag = sortedlags[i]
+    smallerlags = sortedlags[(i + 1):end]
+    push!(keeplags, smallerlags[find(x -> lag % x != 0, smallerlags)]...)
+  end
+
+  # For each remaining lag add all multiples up to allmins to sampletimes.
+  for lag in keeplags
+    i = 1
+    while i <= allmins
+      next = lag * i
+      if next < allmins
+        push!(sampletimes, next)
+      end
+      i += 1
+    end
+  end
+
+  # For every time when envsignal changes, add it to the sample time array
+  # and add envlag so it corresponds to when the change has an effect.
+  changepoints = detect_changepoints(envsignal)
+
+  push!(sampletimes, map(x -> x + envlag[1], changepoints)...)
+
+  # Sort the sample times and return the unique ordered values.
+  return unique(sort(sampletimes))
+end
+
+function detect_changepoints(envsignal)
+
+  changepoints = Int64[]
+
+  # Flatten and iterate through envsignal (an array of arrays).
+  # Whenever two entries, A and B, are non-consecutive,
+  # A+1 and B are changepoints
+
+  last = 0
+  for t in vcat(envsignal...)
+    if t - last > 1
+      # Non-consecutive entries
+      push!(changepoints, last + 1)
+      push!(changepoints, t)
+    end
+    last = t
+  end
+
+  return unique(changepoints)
 end
