@@ -25,10 +25,10 @@ function create_entity(tup::(Int64, Int64, Dict))
 
   # Fixing gene-gene paths on for the first k generations.
   if gen < params["pathson"]
-    netw = Network(params["interacttypes"][1:2], 100, fitness, params)
+    netw = Network(params["interacttypes"][1:2], 2, fitness, params)
     # Using constructor 8
   else
-    netw = Network(params["interacttypes"], 100, fitness, params)
+    netw = Network(params["interacttypes"], 2, fitness, params)
     # Using constructor 8
   end
 
@@ -45,7 +45,8 @@ function fitness(tup::(EvolvableNetwork, Dict))
   ent = tup[1]; params = tup[2]
 
   if ent.net.mutated
-    return fitness(ent.net, params)
+    score = fitness(ent.net, params)
+    return score
   else
     return ent.net.lastfitness
   end
@@ -181,6 +182,10 @@ function group_entities(pop, params)
           params["stopconverged"]))]) < params["stopthreshold"]
     return
   end
+  # Setting current population to be unmutated for next generation.
+  for i in 1:length(pop)
+    pop[i].net.mutated = false
+  end
   # Keeping population that didn't get killed off.
   produce(pop)
   # Selecting groupings that will become parents.
@@ -219,61 +224,58 @@ function crossover(tup::(Array{Any}, Dict, Bool))
   parent2 = group[2].net
 
   if (length(group) == 2) && isidentical(parent1, parent2)
-
-    return group[1]
-
-  else
-    if output; print("x"); end
-
-    # Initialising an empty network to be the child.
-    num_parents = length(group)
-
-    # Set each path according to a random choice between parents.
-    childpaths = [Int8[] for i in 1:(params["nnodes"]^2)]
-    childtmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
-
-    for i in 1:length(group[1].net.paths)
-      parent = (rand(Uint) % num_parents) + 1
-      childpaths[i] = group[parent].net.paths[i]
-      childtmats[i] = group[parent].net.transmats[i]
-    end
-
-    # Set each environmental path according to a random choice between parents.
-    childenvpath = zeros(Bool, params["nnodes"])
-    for i in 1:length(group[1].net.envpath)
-      parent = (rand(Uint) % num_parents) + 1
-      childenvpath[i] = group[parent].net.envpath[i]
-    end
-
-    # Set each environmental lag according to a random choice between parents.
-    childenvlag = zeros(Int64, params["nnodes"])
-    for i in 1:length(group[1].net.envlag)
-      parent = (rand(Uint) % num_parents) + 1
-      childenvlag[i] = group[parent].net.envlag[i]
-    end
-
-    # Set each lag according to a random choice between parents.
-    childlags = zeros(Int64, (params["nnodes"])^2)
-    for i in 1:length(group[1].net.lags)
-      parent = (rand(Uint) % num_parents) + 1
-      childlags[i] = group[parent].net.lags[i]
-    end
-
-    # Set each gate according to a random choice between parents.
-    childgates = zeros(Bool, params["nnodes"])
-    for i in 1:length(group[1].net.gates)
-      parent = (rand(Uint) % num_parents) + 1
-      childgates[i] = group[parent].net.gates[i]
-    end
-    childgen = 1 + group[1].net.generation
-
-    childnet = Network(childpaths, childtmats, childenvpath, childlags,
-                       childenvlag, childgates, childgen)
-
-    # Using constructor 4
-    childnet.concseries = runsim(childnet, params)
-    child = EvolvableNetwork(childnet)
+    return EvolvableNetwork(copy(group[1].net))
   end
+
+  if output; print("x"); end
+
+  num_parents = length(group)
+
+  # Set each path according to a random choice between parents.
+  childpaths = [Int8[] for i in 1:(params["nnodes"]^2)]
+  childtmats = [zeros(Float64, 2, 2) for i in 1:(params["nnodes"]^2)]
+
+  for i in 1:length(group[1].net.paths)
+    parent = (rand(Uint) % num_parents) + 1
+    childpaths[i] = group[parent].net.paths[i]
+    childtmats[i] = group[parent].net.transmats[i]
+  end
+
+  # Set each environmental path according to a random choice between parents.
+  childenvpath = zeros(Bool, params["nnodes"])
+  for i in 1:length(group[1].net.envpath)
+    parent = (rand(Uint) % num_parents) + 1
+    childenvpath[i] = group[parent].net.envpath[i]
+  end
+
+  # Set each environmental lag according to a random choice between parents.
+  childenvlag = zeros(Int64, params["nnodes"])
+  for i in 1:length(group[1].net.envlag)
+    parent = (rand(Uint) % num_parents) + 1
+    childenvlag[i] = group[parent].net.envlag[i]
+  end
+
+  # Set each lag according to a random choice between parents.
+  childlags = zeros(Int64, (params["nnodes"])^2)
+  for i in 1:length(group[1].net.lags)
+    parent = (rand(Uint) % num_parents) + 1
+    childlags[i] = group[parent].net.lags[i]
+  end
+
+  # Set each gate according to a random choice between parents.
+  childgates = zeros(Bool, params["nnodes"])
+  for i in 1:length(group[1].net.gates)
+    parent = (rand(Uint) % num_parents) + 1
+    childgates[i] = group[parent].net.gates[i]
+  end
+  childgen = 1 + group[1].net.generation
+
+  # Using constructor 4
+  childnet = Network(childpaths, childtmats, childenvpath, childlags,
+                     childenvlag, childgates, childgen)
+
+  childnet.concseries = runsim(childnet, params)
+  child = EvolvableNetwork(childnet)
 end
 
 function mutate(tup::(EvolvableNetwork, Int64, Dict, Bool))
@@ -325,7 +327,7 @@ function mutate(tup::(EvolvableNetwork, Int64, Dict, Bool))
   ent
 end
 
-function mutate_path!{T<:Array, N}(paths::Array{T, N}, index::Uint64,
+function mutate_path!(paths, index::Uint64,
                       params::Dict, output::Bool)
   # Mutation causes the path to switch according to following options:
   # activator >> repressor
@@ -356,8 +358,7 @@ function mutate_path!{T<:Array, N}(paths::Array{T, N}, index::Uint64,
   paths[index] = path
 end
 
-function mutate_envpath!{T<:Bool}(envpaths::Array{T, 1}, index::Uint64,
-                         params::Dict, output::Bool)
+function mutate_envpath!(envpaths, index::Uint64, params::Dict, output::Bool)
   envpath = envpaths[index]
 
   if output; print("e"); end
@@ -366,8 +367,7 @@ function mutate_envpath!{T<:Bool}(envpaths::Array{T, 1}, index::Uint64,
   envpaths[index] = envpath
 end
 
-function mutate_lag!{T<:Int64}(lags::Array{T, 1}, index::Uint64,
-                     paths::Array{Array{Int8}}, params::Dict, output::Bool)
+function mutate_lag!(lags, index, paths, params, output)
   lag = lags[index]
   path = paths[index]
 
@@ -379,8 +379,7 @@ function mutate_lag!{T<:Int64}(lags::Array{T, 1}, index::Uint64,
   path_effect(path)
 end
 
-function mutate_envlag!{T<:Int64}(envlags::Array{T}, index::Uint64,
-                        envpaths::Array{Bool}, params::Dict, output::Bool)
+function mutate_envlag!(envlags, index, envpaths, params, output)
   envlag = envlags[index]
   envpath = envpaths[index]
 
@@ -404,8 +403,7 @@ function envpath_effect(envpath::Bool)
   envpath
 end
 
-function mutate_gate!{T<:Bool}(gates::Array{T}, index::Uint64, params::Dict,
-                               paths, output::Bool)
+function mutate_gate!(gates, index, params::Dict, paths, output::Bool)
   gate = gates[index]
   if output; print("g"); end
   # Mutation causes gate to switch (0 = or; 1 = and)
@@ -417,7 +415,7 @@ function mutate_gate!{T<:Bool}(gates::Array{T}, index::Uint64, params::Dict,
   gate_effect(index, paths, params["nnodes"])
 end
 
-function gate_effect(gateindex::Uint64, paths::Array{Array{Int8}}, nnode)
+function gate_effect(gateindex, paths, nnode)
   effect = false
   # Effect if gene has more than one input
     # Input path indices: gene 1: 1:4
