@@ -4,6 +4,8 @@ using Markov
 
 export Network
 
+import Base.copy
+
 # Generating a population of random boolean networks that are defined by their
 # interactions. A path of value 1 indicates an activation, 0 indicates no path,
 # and -1 indicates a repression. A path can also be defined as a stochastic
@@ -28,20 +30,24 @@ stochasticRep = Interaction([0, -1])
 # Network constructor 1 (default)
 type Network
   # Order of paths 1->1, 1->2, 1->3 ... 2->1, 2->2, ...
-  paths::Array{Array{Int8}}
-  transmats::Array{Array{Float64}}
-  envpath::Array{Bool} # Is gene activated by environment (bool.)?
-  lags::Array{Int64}
-  envlag::Array{Int64}
-  gates::Array{Bool}  # (0 = or; 1 = and)
+  paths
+  transmats
+  envpath # Is gene activated by environment (bool.)?
+  lags
+  envlag
+  gates  # (0 = or; 1 = and)
   generation::Int64
-  concseries::Array{Bool}
-  analysis::Dict
+  concseries
+  analysis
   mutated::Bool
   lastfitness::Float64
 
-  #-- Inner constructor with concentration timeseries.
+  Network(paths, transmats, envpath, lags, envlag, gates,
+          generation, concseries, analysis, mutated, lastfitness) =
+    new(paths, transmats, envpath, lags, envlag, gates,
+        generation, concseries, analysis, mutated, lastfitness) 
 
+  #-- Inner constructor with concentration timeseries.
 # Network constructor 2
   Network{T<:Int8, S<:Float64}(paths::Array{Array{T, 1}, 1},
           transmats::Array{Array{S, 2}, 1},
@@ -49,7 +55,7 @@ type Network
           envlag::Array{T, 1}, gates::Array{Bool, 1},
           concseries::Array{T}) =
           new(paths, transmats, envpath, lags, envlag,
-              gates, 1, concseries, Dict(), false, 1.0)
+              gates, 1, concseries, Dict(), true, 1.0)
           # Using constructor 1
 
   #-- Inner constructor without concentration timeseries.
@@ -60,7 +66,7 @@ type Network
           envpath::Array{Bool, 1}, lags::Array{T1, 1},
           envlag::Array{T1, 1}, gates::Array{Bool, 1}) =
           new(paths, transmats, envpath, lags,
-              envlag, gates, 1, [], Dict(), false, 1.0)
+              envlag, gates, 1, Array(Bool, 0, 0), Dict(), true, 1.0)
           # Using constructor 1
 
   #-- Inner constructor with generation number.
@@ -72,7 +78,7 @@ type Network
           envlag::Array{T2, 1}, gates::Array{Bool, 1},
           generation::T2) =
           new(paths, transmats, envpath, lags, envlag,
-              gates, generation, [], Dict(), false, 1.0)
+              gates, generation, Array(Bool, 0, 0), Dict(), true, 1.0)
           # Using constructor 1
 end
 
@@ -287,6 +293,24 @@ end
 
 function net2df(net::Network)
   netframe = DataFrame()
+end
+
+function copy(net::Network)
+
+  Network(
+    copy(net.paths),
+    copy(net.transmats),
+    copy(net.envpath),
+    copy(net.lags),
+    copy(net.envlag),
+    copy(net.gates),
+    net.generation,
+    copy(net.concseries),
+    copy(net.analysis),
+    net.mutated,
+    net.lastfitness
+  )
+
 end
 
 
