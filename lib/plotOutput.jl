@@ -119,7 +119,7 @@ function plotConcs(net::Network, params::Dict)
 end
 
 function plotFitness(topfitness, meanfitness, xmax, filename::String)
-  maxfit = max(topfitness...)
+  ymax = max(meanfitness...)
 
   fitnessframe = DataFrame()
   fitnessframe[:timepoint] = 1:xmax
@@ -131,7 +131,7 @@ function plotFitness(topfitness, meanfitness, xmax, filename::String)
   plot1 = plot(fitnessframe, x = "timepoint", y = "value",
                color = "variable", Geom.line,
                Scale.x_continuous(minvalue = 0, maxvalue = xmax),
-               Scale.y_continuous(minvalue = 0, maxvalue = maxfit))
+               Scale.y_continuous(minvalue = 0, maxvalue = ymax))
   draw(PDF("../runs/fitness$(filename).pdf", 24inch, 12inch), plot1)
 
 end
