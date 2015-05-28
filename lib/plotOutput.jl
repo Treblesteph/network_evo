@@ -132,6 +132,6 @@ function plotFitness(topfitness, meanfitness, xmax, filename::String)
                color = "variable", Geom.line,
                Scale.x_continuous(minvalue = 0, maxvalue = xmax),
                Scale.y_continuous(minvalue = 0, maxvalue = ymax))
-  draw(PDF("../runs/fitness$(filename).pdf", 24inch, 12inch), plot1)
+  draw(PDF("../runs/fitness$(filename).pdf", 12inch, 6inch), plot1)
 
 end
