@@ -42,7 +42,7 @@ function runclock(photoperiods::Int64=1, noise::Bool=false,
 
     plotConcs(model.population[1].net, params, now)
 
-    #plotFitness(model.meantop10, model.gen_num, now)
+    plotFitness(model.population[1].fitness, model.gen_num, now)
 
     #TODO: Can a hash be saved with HDF5? That would be very useful...
     net = prune(model.population[1].net, params)
