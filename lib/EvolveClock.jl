@@ -25,10 +25,10 @@ function create_entity(tup::(Int64, Int64, Dict))
 
   # Fixing gene-gene paths on for the first k generations.
   if gen < params["pathson"]
-    netw = Network(params["interacttypes"][1:2], 2, fitness, params)
+    netw = Network(params["interacttypes"][1:2], 50, fitness, params)
     # Using constructor 8
   else
-    netw = Network(params["interacttypes"], 2, fitness, params)
+    netw = Network(params["interacttypes"], 50, fitness, params)
     # Using constructor 8
   end
 
