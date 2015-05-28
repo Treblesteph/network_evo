@@ -32,17 +32,17 @@ function runclock(photoperiods::Int64=1, noise::Bool=false,
     concs3 = model.population[3].net.concseries
     concs4 = model.population[4].net.concseries
     concs5 = model.population[5].net.concseries
-    all_fitnesses = model.all_fitnesses
+    meanfitness = model.meanfitness
 
     save("../runs/out_$(now).jld", "concs1", concs1, "concs2", concs2,
     "concs3", concs3, "concs4", concs4, "concs5", concs5,
-    "all_fitnesses", all_fitnesses)
+    "meanfitness", meanfitness)
 
     h1 = net2hash(model.population[1].net)
 
     plotConcs(model.population[1].net, params, now)
 
-    plotFitness(model.population[1].fitness, model.gen_num, now)
+    plotFitness(model.topfitness, model.meanfitness, model.gen_num, now)
 
     #TODO: Can a hash be saved with HDF5? That would be very useful...
     net = prune(model.population[1].net, params)
