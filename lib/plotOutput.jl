@@ -128,10 +128,10 @@ function plotFitness(topfitness, meanfitness, xmax, filename::String)
 
   fitnessframe = stack(fitnessframe, 2:ncol(fitnessframe))
 
-  plot1 = plot(Scale.x_continuous(minvalue = 0, maxvalue = xmax),
-               Scale.y_continuous(minvalue = 0, maxvalue = maxfit),
-               fitnessframe, x = "timepoint", y = "value",
-               color = "variable", Geom.line)
+  plot1 = plot(fitnessframe, x = "timepoint", y = "value",
+               color = "variable", Geom.line,
+               Scale.x_continuous(minvalue = 0, maxvalue = xmax),
+               Scale.y_continuous(minvalue = 0, maxvalue = maxfit))
   draw(PDF("../runs/fitness$(filename).pdf", 240inch, 12inch), plot1)
 
 end
