@@ -163,7 +163,7 @@ function evaluate_population(model::GAmodel, output)
   end
 
   sort!(scores; rev = true); topscores = scores[1:10]
-  model.topfitness[model.gen_num] = max(scores)
+  model.topfitness[model.gen_num] = max(scores...)
   model.meanfitness[model.gen_num] = mean(scores)
 
   if output; print("mean fitness: $(round(mean(scores), 2)). "); end
