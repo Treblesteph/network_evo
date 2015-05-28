@@ -119,7 +119,7 @@ function plotConcs(net::Network, params::Dict)
 end
 
 function plotFitness(topfitness, meanfitness, xmax, filename::String)
-                     maxfit = max(topfitness...)
+  maxfit = max(topfitness...)
 
   fitnessframe = DataFrame()
   fitnessframe[:timepoint] = 1:xmax
