@@ -35,12 +35,6 @@ function create_entity(tup::(Int64, Int64, Dict))
   EvolvableNetwork(netw)
 end
 
-# function create_entity(tup::(Int64, Dict))
-#   num = tup[1]; params = tup[2]
-#   netw = should_be_a_clock(params)
-#   EvolvableNetwork(netw)
-# end
-
 function fitness(tup::(EvolvableNetwork, Dict))
   ent = tup[1]; params = tup[2]
 
@@ -52,9 +46,6 @@ function fitness(tup::(EvolvableNetwork, Dict))
   end
 
 end
-
-#TODO: Make an additional fitness cost to clustering (niching), so that
-#      the population remains more diverse.
 
 function fitness(net::Network, params::Dict)
   n_genepaths = length(find(x -> sum(x) != 0, net.paths))
