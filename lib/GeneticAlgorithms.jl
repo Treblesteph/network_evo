@@ -36,8 +36,8 @@ type GAmodel
   params::Dict
   init_pop_size::Int
   gen_num::Int
-  all_fitnesses
-  meantop10
+  meanfitness
+  topfitness
 
   population::Array
   pop_data::Array{EntityData}
@@ -97,8 +97,8 @@ function runga(params, model::GAmodel, stop_after = nothing,
                output::Bool = true)
   reset_model(model)
   create_initial_population(model)
-  model.all_fitnesses = zeros(Float64, stop_after)
-  model.meantop10 = zeros(Float64, stop_after)
+  model.meanfitness = zeros(Float64, stop_after)
+  model.topfitness = zeros(Float64, stop_after)
   counter = 1
   while true
     if output; print("generation $(model.gen_num). "); end
@@ -119,15 +119,15 @@ function runga(params, model::GAmodel, stop_after = nothing,
     if stop_after == counter
       break
     elseif (counter >= params["stopruns"])
-      fitnow = model.meantop10[counter]
-      fitthen = model.meantop10[counter - params["stopconsec"]]
+      fitnow = model.topfitness[counter]
+      fitthen = model.topfitness[counter - params["stopconsec"]]
       if fitthen - fitnow <= params["stopthreshold"]; break; end
     end
 
-      crossover_population(model, groupings, output)
-      mutate_population(model, output)
-      if output; println(""); end
-      counter += 1
+    crossover_population(model, groupings, output)
+    mutate_population(model, output)
+    if output; println(""); end
+    counter += 1
   end
 
   model
@@ -154,20 +154,26 @@ function create_initial_population(model::GAmodel)
 end
 
 function evaluate_population(model::GAmodel, output)
+
   scores = pmap(model.ga.fitness, [(model.population[k],
-           model.params) for k in 1:length(model.population)])
-  if output; print(" fitness: "); end
+                model.params) for k in 1:length(model.population)])
+
   for i in 1:length(scores)
     fitness!(model.population[i], scores[i])
   end
-  model.all_fitnesses[model.gen_num] = round(mean(scores), 2)
+
   sort!(scores; rev = true); topscores = scores[1:10]
-  model.meantop10[model.gen_num] = mean(topscores)
+  model.topfitness[model.gen_num] = min(scores...)
+  model.meanfitness[model.gen_num] = mean(scores)
+
   if output; print("mean fitness: $(round(mean(scores), 2)). "); end
+
   sort!(model.population; rev = true)
+
   if output
     print("Best fitnesses: $([e.fitness for e in model.population[1:5]])")
   end
+
 end
 
 function crossover_population(model::GAmodel, groupings, output)

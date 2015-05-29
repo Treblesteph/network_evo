@@ -10,7 +10,7 @@ function prune(net::Network, params::Dict, counter=1)
   if counter <= length(net.paths)
     println("counter:$(counter). Paths:")
 
-    paths::Array{Array{Int64, 1}, 1} = copy(net.paths)
+    paths::Array{Array{Int8, 1}, 1} = copy(net.paths)
     transmats::Array{Array{Float64, 2}, 1} = copy(net.transmats)
     envpath::Array{Bool, 1} = copy(net.envpath)
     lags::Array{Int64, 1} = copy(net.lags)
