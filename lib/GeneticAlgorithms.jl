@@ -172,6 +172,8 @@ function evaluate_population(model::GAmodel, output)
 
   if output
     print("Best fitnesses: $([e.fitness for e in model.population[1:5]])")
+    println("Mutated: $([e.net.mutated for e in model.population[1:5]])")
+    println("Last fitnesses: $([e.net.lastfitness for e in model.population[1:5]])")
   end
 
 end
