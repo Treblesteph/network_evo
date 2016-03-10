@@ -1,4 +1,12 @@
-# Network evolution methods
+# Network evolution
+
+Biological gene regulation can be modeled using abstract networks called gene regulatory networks (GRNs). There are often a large number of complex interactions between genetic components in a living cell, however they can be simplified into network models by looking at the overall effect of one gene on another, whether it is positive (activation) or negative (repression), and the strength of the interaction (giving the response curve). These simple networks, although being far from the complex, and essentially random environment found in living cells, can give rise to functional behaviours which we see in living systems. A notable example is the biological clock network. Many organisms have evolved a natural rhythm (the circadian rhythm) which allows them to anticipate environmental changes over a 24 hour period. The GRN underpinning the clock has been resolved, and we are able to understand how organisms perform this essential function at the genetic level. 
+
+## Aims
+
+
+
+## Methods
 
 ### 1. Structure of modular code base
 
