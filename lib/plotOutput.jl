@@ -122,7 +122,7 @@ function plotFitness(topfitness, meanfitness, xmax, filename::String)
   ymax = max(meanfitness...)
 
   fitnessframe = DataFrame()
-  fitnessframe[:timepoint] = 1:xmax
+  fitnessframe[:timepoint] = (1:xmax)/60
   fitnessframe[:topfit] = topfitness[1:xmax]
   fitnessframe[:meanfit] = meanfitness[1:xmax]
 
@@ -130,7 +130,7 @@ function plotFitness(topfitness, meanfitness, xmax, filename::String)
 
   plot1 = plot(fitnessframe, x = "timepoint", y = "value",
                color = "variable", Geom.line,
-               Scale.x_continuous(minvalue = 0, maxvalue = xmax),
+               Scale.x_continuous(minvalue = 0, maxvalue = xmax/60),
                Scale.y_continuous(minvalue = 0, maxvalue = ymax))
   draw(PDF("../runs/fitness$(filename).pdf", 12inch, 6inch), plot1)
 
